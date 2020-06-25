@@ -93,6 +93,5 @@ namespace MySocNet.Controllers
 
             await _userService.GetUsersAsync();
         }
-
     }
 }

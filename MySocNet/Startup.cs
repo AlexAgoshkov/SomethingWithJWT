@@ -78,7 +78,6 @@ namespace MySocNet
                                 }
                             },
                             new string[] {}
-
                     }
                 });
             });

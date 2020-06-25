@@ -21,7 +21,6 @@ namespace MySocNet.Models
         [Column(TypeName = "varchar(25)")]
         public string UserName { get; set; }
 
-       
         [MaxLength(25)]
         [Column(TypeName = "varchar(25)")]
         public string FirstName { get; set;}
@@ -30,7 +29,6 @@ namespace MySocNet.Models
         [Column(TypeName = "varchar(25)")]
         public string SurName { get; set; }
 
-        
         [MaxLength(50)]
         [Column(TypeName = "varchar(50)")]
         public string Email { get; set; }
