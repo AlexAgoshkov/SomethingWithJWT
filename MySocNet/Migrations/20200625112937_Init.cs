@@ -34,7 +34,7 @@ namespace MySocNet.Migrations
                     SurName = table.Column<string>(type: "varchar(25)", maxLength: 25, nullable: true),
                     Email = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     Password = table.Column<string>(type: "nvarchar(max)", maxLength: 50, nullable: false),
-                    UserRole = table.Column<string>(nullable: true),
+                    UserRole = table.Column<int>(nullable: false),
                     AuthenticationId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -71,7 +71,7 @@ namespace MySocNet.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "UserId", "AuthenticationId", "Email", "FirstName", "Password", "SurName", "UserName", "UserRole" },
-                values: new object[] { 1, null, "example@mail.hock", "Larry", "$MYHASH$V1$100$88rhIb3mtZN/YqguXRmq+UGDqEdZod08fsAusiJmBBZYqtp1", "Richi", "ggg", "Admin" });
+                values: new object[] { 1, null, "example@mail.hock", "Larry", "$MYHASH$V1$100$SowAdCVsFrqZz8O+z7+iDzR0g/PDY4WK1ZCAXTGeEUWBO0ko", "Richi", "ggg", 2 });
 
             migrationBuilder.InsertData(
                 table: "Friends",

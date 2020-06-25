@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Enums
 {
-    public enum UserRoles
+    public enum UserRole
     {
         None,
         User,

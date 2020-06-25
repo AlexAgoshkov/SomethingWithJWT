@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using MySocNet.Enums;
 using MySocNet.Models;
 using MySocNet.OutPutData;
 using System;
@@ -27,7 +28,7 @@ namespace MySocNet.Services
 
         public async Task<IList<User>> GetUsersAsync()
         {
-            return await _myDbContext.Users.Include(x => x.Friends).ToListAsync();
+            return await _myDbContext.Users.Include(x => x.Friends).Include(x => x.Authentication).ToListAsync();
         }
 
         public async Task<User> GetUserByIdAsync(int id)
@@ -45,7 +46,7 @@ namespace MySocNet.Services
                 }
             }
             user.Password = HashService.Hash(user.Password);
-            user.UserRole = "User";
+            user.UserRole = UserRole.User;
             await _myDbContext.Users.AddAsync(user);
             await _myDbContext.SaveChangesAsync();
         }
@@ -75,6 +76,12 @@ namespace MySocNet.Services
             }
 
             return list;
+        }
+
+        public async Task UpdateUserAsync(User input)
+        {
+            _myDbContext.Users.Update(input);
+            await _myDbContext.SaveChangesAsync();
         }
 
         public async Task AddTokenToUserAsync(User userInfo, Authentication auth)

@@ -10,7 +10,7 @@ using MySocNet.Models;
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20200625084622_Init")]
+    [Migration("20200625112937_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,8 +105,8 @@ namespace MySocNet.Migrations
                         .HasColumnType("varchar(25)")
                         .HasMaxLength(25);
 
-                    b.Property<string>("UserRole")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserRole")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
@@ -120,10 +120,10 @@ namespace MySocNet.Migrations
                             UserId = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$88rhIb3mtZN/YqguXRmq+UGDqEdZod08fsAusiJmBBZYqtp1",
+                            Password = "$MYHASH$V1$100$SowAdCVsFrqZz8O+z7+iDzR0g/PDY4WK1ZCAXTGeEUWBO0ko",
                             SurName = "Richi",
                             UserName = "ggg",
-                            UserRole = "Admin"
+                            UserRole = 2
                         });
                 });
 

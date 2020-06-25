@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
+using MySocNet.Enums;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Models.Email;
@@ -39,7 +40,7 @@ namespace MySocNet.Controllers
 
         [HttpGet]
         [Route("GetUserData")]
-        [Authorize(Policy = "User")]
+        [AuthorizeRoles(UserRole.User)]
         public IActionResult GetUserData()
         {
             return Ok("You are USER");
@@ -47,12 +48,25 @@ namespace MySocNet.Controllers
 
         [HttpGet]
         [Route("GetAdminData")]
-        [Authorize(Policy = "Admin")]
+        [AuthorizeRoles(UserRole.Admin)]
         public IActionResult GetAdminData()
         {
             return Ok("You are ADMIN");
         }
 
+        [HttpPost]
+        [Route("UpdateUser")]
+        [AuthorizeRoles(UserRole.User)]
+        public async Task UpdateUserAsync(int id,UserUpdate input)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            user.FirstName = input.FirstName;
+            user.SurName = input.SurName;
+            user.Email = input.Email;
+            
+            await _userService.UpdateUserAsync(user);
+        }
+        
         [HttpGet("GetUserById")]
         public async Task<User> GetUserByIdAsync(int userId)
         {

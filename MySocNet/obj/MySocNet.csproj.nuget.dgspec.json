@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects\\MySocNet\\MySocNet\\MySocNet.csproj": {}
+    "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\MySocNet\\MySocNet\\MySocNet.csproj": {
+    "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\MySocNet\\MySocNet\\MySocNet.csproj",
+        "projectUniqueName": "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
         "projectName": "MySocNet",
-        "projectPath": "D:\\Projects\\MySocNet\\MySocNet\\MySocNet.csproj",
+        "projectPath": "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
         "packagesPath": "C:\\Users\\Chudo\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\MySocNet\\MySocNet\\obj\\",
+        "outputPath": "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Chudo\\AppData\\Roaming\\NuGet\\NuGet.Config",

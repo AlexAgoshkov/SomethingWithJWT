@@ -85,6 +85,7 @@ namespace MySocNet.Services
 
             var claims = new[]
             {
+                new Claim("role", user.UserRole.ToString()),
                 new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 

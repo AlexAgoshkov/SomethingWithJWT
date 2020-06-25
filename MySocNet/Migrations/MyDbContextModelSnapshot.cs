@@ -103,8 +103,8 @@ namespace MySocNet.Migrations
                         .HasColumnType("varchar(25)")
                         .HasMaxLength(25);
 
-                    b.Property<string>("UserRole")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserRole")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
@@ -118,10 +118,10 @@ namespace MySocNet.Migrations
                             UserId = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$88rhIb3mtZN/YqguXRmq+UGDqEdZod08fsAusiJmBBZYqtp1",
+                            Password = "$MYHASH$V1$100$SowAdCVsFrqZz8O+z7+iDzR0g/PDY4WK1ZCAXTGeEUWBO0ko",
                             SurName = "Richi",
                             UserName = "ggg",
-                            UserRole = "Admin"
+                            UserRole = 2
                         });
                 });
 

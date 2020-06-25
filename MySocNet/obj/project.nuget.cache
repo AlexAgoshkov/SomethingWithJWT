@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fyxu+w+C29tYRvbZvCi1QYBhmp0qjD0FJAgxIXSWbVnnVkqXXNGAvkscm0C7CtCK7/1x9JvJ34/ciAE/TLQ/Ug==",
+  "dgSpecHash": "MO8LuWkQ0pTk1F3dhWoIBrEnjUCuLNBkUN0DN8MjymXO6OrlK0iPIckNdq4FQbvaUqzMcwI2PuE2zi1Ss1484g==",
   "success": true,
-  "projectFilePath": "D:\\Projects\\MySocNet\\MySocNet\\MySocNet.csproj",
+  "projectFilePath": "D:\\Git\\SomethingWithJWT\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Chudo\\.nuget\\packages\\automapper\\9.0.0\\automapper.9.0.0.nupkg.sha512",
     "C:\\Users\\Chudo\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\7.0.0\\automapper.extensions.microsoft.dependencyinjection.7.0.0.nupkg.sha512",

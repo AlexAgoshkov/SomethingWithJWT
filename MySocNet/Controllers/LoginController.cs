@@ -80,7 +80,8 @@ namespace MySocNet.Controllers
 
 
         [HttpPost("Registration")]
-        public async Task RegistrationAsync(UserInput input)
+        [AllowAnonymous]
+        public async Task RegistrationAsync(UserLogin input)
         {
             var user = _mapper.Map<User>(input);
 

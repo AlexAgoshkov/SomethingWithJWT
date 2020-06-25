@@ -38,9 +38,10 @@ namespace MySocNet.Models
         [Required]
         [MaxLength(50)]
         [Column(TypeName = "nvarchar(max)")]
+        [JsonIgnore]
         public string Password { get; set; }
 
-        public string UserRole { get; set; }
+        public UserRole UserRole { get; set; }
 
         [JsonIgnore]
         public int? AuthenticationId { get; set; }

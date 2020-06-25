@@ -26,5 +26,7 @@ namespace MySocNet.Services
         Task<User> GetUserByRefreshTokenAsync(string refreshToken);
 
         Task<User> GetUserByUserNameAsync(string username);
+
+        Task UpdateUserAsync(User input);
     }
 }

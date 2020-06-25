@@ -111,12 +111,6 @@ namespace MySocNet
               };
           });
 
-            services.AddAuthorization(config =>
-            {
-                config.AddPolicy(Policies.Admin, Policies.AdminPolicy());
-                config.AddPolicy(Policies.User, Policies.UserPolicy());
-            });
-
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
         }

@@ -29,7 +29,7 @@ namespace MySocNet.Models
                                                            SurName = "Richi", 
                                                            Email = "example@mail.hock", 
                                                            Password = HashService.Hash("666"), 
-                                                           UserRole = "Admin" });
+                                                           UserRole = UserRole.Admin });
 
             modelBuilder.Entity<Friend>().HasData(new Friend {  FriendID = 1,
                                                                 UserAddedId = 1,
