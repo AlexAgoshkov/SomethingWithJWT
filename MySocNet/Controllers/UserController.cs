@@ -32,6 +32,7 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet("GetAllUsers")]
+        [Authorize(Policy = Policies.Admin)]
         public async Task<IEnumerable<User>> GetAsync()
         {
             return await _userService.GetUsersAsync();
@@ -67,24 +68,28 @@ namespace MySocNet.Controllers
         }
         
         [HttpGet("GetUserById")]
+        [Authorize(Policy = Policies.Admin)]
         public async Task<User> GetUserByIdAsync(int userId)
         {
             return await _userService.GetUserByIdAsync(userId);
         }
 
         [HttpGet("GetFriendList")]
+        [Authorize(Policy = Policies.User)]
         public async Task<IEnumerable<UserOutPut>> GetFriendListAsync(int userId)
         {
             return await _userService.GetFriendListAsync(userId);
         }
 
         [HttpPut("AddNewFriend")]
+        [Authorize(Policy = Policies.User)]
         public async Task AddFriendToUserAsync(int userId, int userAddedId)
         {
             await _userService.AddFriendToUserAsync(userId, userAddedId);
         }
 
         [HttpPost("SendEmail")]
+        [Authorize(Policy = Policies.User)]
         public async Task Get(string email, string subject, string message)
         {
             var sender = new Message(new string[] { email }, subject, message);
