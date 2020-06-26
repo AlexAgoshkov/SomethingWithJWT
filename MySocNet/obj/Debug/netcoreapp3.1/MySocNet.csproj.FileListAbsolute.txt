@@ -231,9 +231,6 @@ D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.Properties.Resourc
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csproj.GenerateResource.cache
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.AssemblyInfoInputs.cache
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.AssemblyInfo.cs
-D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csproj.CoreCompileInputs.cache
-D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cs
-D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cache
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorTargetAssemblyInfo.cache
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csproj.CopyComplete
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\staticwebassets\MySocNet.StaticWebAssets.Manifest.cache
@@ -241,3 +238,13 @@ D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\staticwebassets\MySocNet.St
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.dll
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.pdb
 D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.genruntimeconfig.cache
+D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csproj.CoreCompileInputs.cache
+D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cs
+D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cache
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.Mvc.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.Razor.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.Helpers.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.WebPages.Deployment.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.WebPages.Razor.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\System.Web.WebPages.dll
+D:\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\Microsoft.Web.Infrastructure.dll

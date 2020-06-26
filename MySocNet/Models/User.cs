@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using MySocNet.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -39,8 +38,8 @@ namespace MySocNet.Models
         [JsonIgnore]
         public string Password { get; set; }
 
-        public UserRole UserRole { get; set; }
-
+        public string UserRole { get; set; }
+       
         [JsonIgnore]
         public int? AuthenticationId { get; set; }
 

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
-using MySocNet.Enums;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Models.Email;
@@ -40,7 +39,7 @@ namespace MySocNet.Controllers
 
         [HttpGet]
         [Route("GetUserData")]
-        [AuthorizeRoles(UserRole.User)]
+        [Authorize(Policy = Policies.User)]
         public IActionResult GetUserData()
         {
             return Ok("You are USER");
@@ -48,7 +47,7 @@ namespace MySocNet.Controllers
 
         [HttpGet]
         [Route("GetAdminData")]
-        [AuthorizeRoles(UserRole.Admin)]
+        [Authorize(Policy = Policies.Admin)]
         public IActionResult GetAdminData()
         {
             return Ok("You are ADMIN");
@@ -56,7 +55,7 @@ namespace MySocNet.Controllers
 
         [HttpPost]
         [Route("UpdateUser")]
-        [AuthorizeRoles(UserRole.User)]
+        [Authorize(Policy = Policies.User)]
         public async Task UpdateUserAsync(int id,UserUpdate input)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -92,6 +91,13 @@ namespace MySocNet.Controllers
             await _emailService.SendEmail(sender);
 
             await _userService.GetUsersAsync();
+        }
+
+        [HttpDelete("RemoveUser")]
+        [Authorize(Policy = Policies.Admin)]
+        public async Task RemoveUserByIdAsync(int id)
+        {
+           await _userService.RemoveUserByIdAsync(id);
         }
     }
 }

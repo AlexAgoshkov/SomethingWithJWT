@@ -18,7 +18,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using MySocNet.Enums;
 using MySocNet.Mapper;
 using MySocNet.Models;
 using MySocNet.Models.Email;
@@ -112,6 +111,12 @@ namespace MySocNet
 
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+            services.AddAuthorization(config =>
+            {
+                config.AddPolicy(Policies.Admin, Policies.AdminPolicy());
+                config.AddPolicy(Policies.User, Policies.UserPolicy());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

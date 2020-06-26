@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using MySocNet.Enums;
 using MySocNet.Models;
 using MySocNet.OutPutData;
 using System;
@@ -46,7 +45,7 @@ namespace MySocNet.Services
                 }
             }
             user.Password = HashService.Hash(user.Password);
-            user.UserRole = UserRole.User;
+            user.UserRole = "User";
             await _myDbContext.Users.AddAsync(user);
             await _myDbContext.SaveChangesAsync();
         }
@@ -117,6 +116,13 @@ namespace MySocNet.Services
         public async Task<User> GetUserByUserNameAsync(string username)
         {
             return await _myDbContext.Users.FirstOrDefaultAsync(x => x.UserName == username);
+        }
+
+        public async Task RemoveUserByIdAsync(int id)
+        {
+            var user = await GetUserByIdAsync(id);
+            _myDbContext.Remove(user);
+            await _myDbContext.SaveChangesAsync();
         }
     }
 }

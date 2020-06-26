@@ -28,5 +28,7 @@ namespace MySocNet.Services
         Task<User> GetUserByUserNameAsync(string username);
 
         Task UpdateUserAsync(User input);
+
+        Task RemoveUserByIdAsync(int id);
     }
 }

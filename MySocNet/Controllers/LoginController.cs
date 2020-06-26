@@ -40,7 +40,7 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("RefreshToken")]
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = Policies.User)]
         public async Task<IActionResult> UpdateAccess(string refreshToken)
         {
             var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
@@ -66,7 +66,7 @@ namespace MySocNet.Controllers
                 return BadRequest();
             }
 
-            var tokenString = await _authenticationService.GenerateJWTToken(user, _config["Jwt:SecretKey"], DateTime.Now.AddMinutes(2));
+            var tokenString = await _authenticationService.GenerateJWTToken(user, _config["Jwt:SecretKey"], DateTime.Now.AddMinutes(30));
             var tokenRefresh = await _authenticationService.GenerateJWTToken(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
             await _authenticationService.CreateTokenPairAsync(user, DateTime.Now, DateTime.Now.AddMinutes(2), tokenString, tokenRefresh);
 
@@ -78,7 +78,6 @@ namespace MySocNet.Controllers
             });
         }
 
-
         [HttpPost("Registration")]
         [AllowAnonymous]
         public async Task RegistrationAsync(UserLogin input)
@@ -87,15 +86,5 @@ namespace MySocNet.Controllers
 
             await _userService.CreateUserAsync(user);
         }
-
-        //private void setTokenCookie(string token)
-        //{
-        //    var cookieOptions = new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Expires = DateTime.UtcNow.AddDays(7)
-        //    };
-        //    Response.Cookies.Append("refreshToken", token, cookieOptions);
-        //}
     }
 }
