@@ -27,12 +27,17 @@ namespace MySocNet.Services
 
         public async Task<IList<User>> GetUsersAsync()
         {
-            return await _myDbContext.Users.Include(x => x.Friends).Include(x => x.Authentication).ToListAsync();
+            return await _myDbContext.Users.Include(x => x.Friends).
+                                            Include(x => x.Authentication).
+                                            Include(x => x.ActiveKey).ToListAsync();
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _myDbContext.Users.Include(x => x.Friends).Include(x => x.Authentication).FirstOrDefaultAsync(x => x.UserId == id);
+            return await _myDbContext.Users.Include(x => x.Friends).
+                                            Include(x => x.Authentication).
+                                            Include(x => x.ActiveKey).
+                                            FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task CreateUserAsync(User user)
@@ -44,6 +49,7 @@ namespace MySocNet.Services
                     return;
                 }
             }
+
             user.Password = HashService.Hash(user.Password);
             user.UserRole = "User";
             await _myDbContext.Users.AddAsync(user);
@@ -65,7 +71,7 @@ namespace MySocNet.Services
         {
             var user = await _myDbContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(x => x.UserId == userId);
             var list = new List<UserOutPut>();
-            var a = user.Friends;
+            var friends = user.Friends;
 
             foreach (var item in user.Friends)
             {
@@ -75,6 +81,12 @@ namespace MySocNet.Services
             }
 
             return list;
+        }
+
+        public async Task<IList<UserOutPut>> GetPaddingList(int userId, int skip, int take)
+        {
+            var friends = await GetFriendListAsync(userId);
+            return friends.Skip(skip).Take(take).ToList();
         }
 
         public async Task UpdateUserAsync(User input)
@@ -110,12 +122,43 @@ namespace MySocNet.Services
 
         public async Task<User> GetUserByRefreshTokenAsync(string refreshToken)
         {
-          return await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.Authentication.RefreshToken == refreshToken);
+            return await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.Authentication.RefreshToken == refreshToken);
         }
 
         public async Task<User> GetUserByUserNameAsync(string username)
         {
-            return await _myDbContext.Users.FirstOrDefaultAsync(x => x.UserName == username);
+            return await _myDbContext.Users.Include(x => x.ActiveKey).
+                                            Include(x => x.Authentication).
+                                            Include(x => x.Friends).
+                                            FirstOrDefaultAsync(x => x.UserName == username);
+        }
+
+        public async Task<User> GetUserByEmail(string email)
+        {
+            return await _myDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
+        }
+
+        public async Task<IList<User>> GetUsersBySurname(string surname)
+        {
+            return await _myDbContext.Users.Where(x => x.SurName == surname).ToListAsync();
+        }
+
+        public async Task<IList<User>> GetUsersByName(string name)
+        {
+            return await _myDbContext.Users.Where(x => x.FirstName == name).ToListAsync();
+        }
+
+        public async Task ConfirmEmailAsync(string Key)
+        {
+            var user = await _myDbContext.Users.Include(x => x.ActiveKey).FirstOrDefaultAsync(x => x.ActiveKey.Key == Key);
+            var time = DateTime.Now - user.ActiveKey.Created;
+
+            if (!user.ActiveKey.IsActive && time.Hours < 1)
+            {
+                user.ActiveKey.IsActive = true;
+                _myDbContext.Update(user);
+                await _myDbContext.SaveChangesAsync();
+            }
         }
 
         public async Task RemoveUserByIdAsync(int id)
@@ -123,6 +166,11 @@ namespace MySocNet.Services
             var user = await GetUserByIdAsync(id);
             _myDbContext.Remove(user);
             await _myDbContext.SaveChangesAsync();
+        }
+
+        public async Task<int> GetTotalUserCount(User user, int take)
+        {
+            return user.Friends.Count - take;
         }
     }
 }

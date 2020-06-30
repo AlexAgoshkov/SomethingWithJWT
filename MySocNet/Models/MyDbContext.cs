@@ -14,6 +14,8 @@ namespace MySocNet.Models
 
         public DbSet<Authentication> Authentications { get; set; }
 
+        public DbSet<ActiveKey> ActiveKeys { get; set; }
+
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
             Database.Migrate();
@@ -22,17 +24,23 @@ namespace MySocNet.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<User>().HasData(new User { UserId = 1,
-                                                           UserName = "ggg",
-                                                           FirstName = "Larry", 
-                                                           SurName = "Richi", 
-                                                           Email = "example@mail.hock", 
-                                                           Password = HashService.Hash("666"), 
-                                                           UserRole = "Admin"});
+            modelBuilder.Entity<User>().HasData(new User
+            {
+                UserId = 1,
+                UserName = "ggg",
+                FirstName = "Larry",
+                SurName = "Richi",
+                Email = "example@mail.hock",
+                Password = HashService.Hash("666"),
+                UserRole = "Admin",
+            }); 
 
-            modelBuilder.Entity<Friend>().HasData(new Friend {  FriendID = 1,
-                                                                UserAddedId = 1,
-                                                                UserID = 1 });
+            modelBuilder.Entity<Friend>().HasData(new Friend 
+            {
+                FriendID = 1,                               
+                UserAddedId = 1,                                      
+                UserID = 1 
+            });
         }
     }
 }

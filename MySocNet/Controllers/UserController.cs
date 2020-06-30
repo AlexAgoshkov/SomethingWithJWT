@@ -13,6 +13,7 @@ using MySocNet.Models;
 using MySocNet.Models.Email;
 using MySocNet.OutPutData;
 using MySocNet.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace MySocNet.Controllers
 {
@@ -68,10 +69,33 @@ namespace MySocNet.Controllers
         }
         
         [HttpGet("GetUserById")]
-        [Authorize(Policy = Policies.Admin)]
         public async Task<User> GetUserByIdAsync(int userId)
         {
             return await _userService.GetUserByIdAsync(userId);
+        }
+
+        [HttpGet("GetUsersByName")]
+        public async Task<IEnumerable<User>> GetUsersByName(string name, bool? isSort)
+        {
+            if (isSort.Value)
+            {
+                var users = await _userService.GetUsersBySurname(name);
+                return users.OrderBy(x => x.FirstName);
+            }
+
+            return await _userService.GetUsersByName(name);
+        }
+
+        [HttpGet("GetUsersBySurName")]
+        public async Task<IEnumerable<User>> GetUsersBySurname(string surname, bool? isSort)
+        {
+            if (isSort.Value)
+            {
+                var users = await _userService.GetUsersBySurname(surname);
+                return users.OrderBy(x => x.SurName);
+            }
+
+            return await _userService.GetUsersBySurname(surname);
         }
 
         [HttpGet("GetFriendList")]
@@ -104,5 +128,20 @@ namespace MySocNet.Controllers
         {
            await _userService.RemoveUserByIdAsync(id);
         }
+
+        [HttpGet("GetFriendLists")]
+        public async Task<IActionResult> GetFriendLists(int userId, int skip, int take)
+        {
+            if (userId != 0)
+            {
+                var user = await _userService.GetUserByIdAsync(userId);
+                var friendList = await _userService.GetPaddingList(userId, skip, take);
+                var totalCount = await _userService.GetTotalUserCount(user, take);
+                return Ok(new { friendList, totalCount });
+            }
+          
+            return BadRequest();
+        }
     }
 }
+    

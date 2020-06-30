@@ -10,7 +10,7 @@ using MySocNet.Models;
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20200626105059_Init")]
+    [Migration("20200630084428_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,28 @@ namespace MySocNet.Migrations
                 .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("MySocNet.Models.ActiveKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ActiveKeys");
+                });
 
             modelBuilder.Entity("MySocNet.Models.Authentication", b =>
                 {
@@ -80,6 +102,9 @@ namespace MySocNet.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("ActiveKeyId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("AuthenticationId")
                         .HasColumnType("int");
 
@@ -110,6 +135,8 @@ namespace MySocNet.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("ActiveKeyId");
+
                     b.HasIndex("AuthenticationId");
 
                     b.ToTable("Users");
@@ -120,7 +147,7 @@ namespace MySocNet.Migrations
                             UserId = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$sGVkb6hkpdFKbAi2668KUsVG1yrFJGRFIW6601R4mFFZe+Ts",
+                            Password = "$MYHASH$V1$100$C/1ULVxocoopzUFe1GmPkzCoQLtEOyyNwfRPH5YOIfDXtDmd",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"
@@ -138,6 +165,10 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.User", b =>
                 {
+                    b.HasOne("MySocNet.Models.ActiveKey", "ActiveKey")
+                        .WithMany()
+                        .HasForeignKey("ActiveKeyId");
+
                     b.HasOne("MySocNet.Models.Authentication", "Authentication")
                         .WithMany()
                         .HasForeignKey("AuthenticationId");

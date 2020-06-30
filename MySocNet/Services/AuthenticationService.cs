@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -37,7 +38,7 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
-        public async Task<User> AuthenticateUser(UserLogin loginCredentials)
+        public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
         {
             var userByLogin = await _userService.GetUserByUserNameAsync(loginCredentials.UserName);
             User result = null;
@@ -78,7 +79,26 @@ namespace MySocNet.Services
             await _myDbContext.SaveChangesAsync();
         }
 
-        public async Task<string> GenerateJWTToken(User user, string secretWord, DateTime expire)
+        public async Task CreateActiveKeyAsync(string key)
+        {
+            var activeKey = new ActiveKey { Key = key, Created = DateTime.Now, IsActive = false };
+            _myDbContext.ActiveKeys.Add(activeKey);
+            await _myDbContext.SaveChangesAsync();
+        }
+        public async Task<ActiveKey> GetActiveKeyByNameAsync(string key)
+        {
+            return await _myDbContext.ActiveKeys.FirstOrDefaultAsync(x => x.Key == key);
+        }
+
+        public async Task AddActiveKeyToUserAsync(int userId, int keyId)
+        {
+            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            user.ActiveKeyId = keyId;
+            _myDbContext.Users.Update(user);
+            await _myDbContext.SaveChangesAsync();
+        }
+
+        public async Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretWord));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -97,6 +117,13 @@ namespace MySocNet.Services
                 signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GetRandomString()
+        {
+            string path = Path.GetRandomFileName();
+            path = path.Replace(".", ""); 
+            return path.Substring(0, 8); 
         }
     }
 }

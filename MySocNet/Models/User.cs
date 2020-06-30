@@ -39,7 +39,11 @@ namespace MySocNet.Models
         public string Password { get; set; }
 
         public string UserRole { get; set; }
-       
+
+        public int? ActiveKeyId { get; set; }
+
+        public virtual ActiveKey ActiveKey { get; set; }
+
         [JsonIgnore]
         public int? AuthenticationId { get; set; }
 

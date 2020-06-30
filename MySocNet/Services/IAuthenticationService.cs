@@ -9,10 +9,18 @@ namespace MySocNet.Services
 {
     public interface IAuthenticationService
     {
-        Task<User> AuthenticateUser(UserLogin loginCredentials);
+        Task<User> AuthenticateUserAsync(UserLogin loginCredentials);
 
-        Task<string> GenerateJWTToken(User user, string secretWord, DateTime expire);
+        Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire);
 
         Task CreateTokenPairAsync(User userInfo, DateTime created, DateTime expires, string accessToken, string refreshToken);
+
+        Task CreateActiveKeyAsync(string key);
+
+        Task<ActiveKey> GetActiveKeyByNameAsync(string key);
+
+        Task AddActiveKeyToUserAsync(int userId, int keyId);
+
+        string GetRandomString();
     }
 }

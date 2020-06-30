@@ -41,12 +41,14 @@ namespace MySocNet
             var emailConfig = Configuration
             .GetSection("EmailConfiguration")
             .Get<EmailConfiguration>();
+
             services.AddSingleton(emailConfig);
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
 
             services.AddControllersWithViews();
