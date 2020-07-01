@@ -15,7 +15,7 @@ namespace MySocNet.Services
 
         Task AddFriendToUserAsync(int userId, int friendId);
 
-        Task<IList<UserOutPut>> GetPaddingList(int userId, int skip, int take);
+     //   Task<IList<UserOutPut>> GetPaddingList(int userId, int skip, int take);
 
         Task<IList<UserOutPut>> GetFriendListAsync(int userId);
 

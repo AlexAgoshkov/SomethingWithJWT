@@ -23,6 +23,7 @@ using MySocNet.Models;
 using MySocNet.Models.Email;
 using MySocNet.Services;
 using System.Text.Json;
+using MySocNet.Hubs;
 
 namespace MySocNet
 {
@@ -43,13 +44,14 @@ namespace MySocNet
             .Get<EmailConfiguration>();
 
             services.AddSingleton(emailConfig);
-
+            services.AddSignalR();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+          //  services.AddRazorPages();
 
             services.AddControllersWithViews();
 
@@ -155,7 +157,9 @@ namespace MySocNet
 
             app.UseEndpoints(endpoints =>
             {
+              //  endpoints.MapRazorPages();
                 endpoints.MapControllers();
+              //  endpoints.MapHub<ChatHub>("/chathub");
             });
         }
     }

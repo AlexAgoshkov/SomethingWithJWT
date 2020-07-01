@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -83,11 +84,11 @@ namespace MySocNet.Services
             return list;
         }
 
-        public async Task<IList<UserOutPut>> GetPaddingList(int userId, int skip, int take)
-        {
-            var friends = await GetFriendListAsync(userId);
-            return friends.Skip(skip).Take(take).ToList();
-        }
+        //public async Task<IList<UserOutPut>> GetPaddingList(List<User> users, int skip, int take)
+        //{
+        //    var friends = await GetFriendListAsync(userId);
+        //    return friends.Skip(skip).Take(take).ToList();
+        //}
 
         public async Task UpdateUserAsync(User input)
         {

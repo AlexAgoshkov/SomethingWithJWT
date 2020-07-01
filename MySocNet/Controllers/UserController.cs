@@ -14,6 +14,9 @@ using MySocNet.Models.Email;
 using MySocNet.OutPutData;
 using MySocNet.Services;
 using Microsoft.AspNetCore.Identity;
+using Org.BouncyCastle.Crypto.Engines;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Reflection;
 
 namespace MySocNet.Controllers
 {
@@ -30,6 +33,42 @@ namespace MySocNet.Controllers
             _userService = userService;
             _emailService = emailService;
             _mapper = mapper;
+        }
+
+        private object GetProperty(string propertyName)
+        {
+            Type type = Type.GetType("MySocNet.Models.User", false, true);
+            PropertyInfo property = type.GetProperty(propertyName);
+
+            return property.Name;
+        }
+
+        [HttpGet("MYTEST")]
+        public async Task<IActionResult> GetTestUsers(string name, int? skip, int? take, bool? isSort, string property)
+        {
+            var users = await _userService.GetUsersAsync();
+            int totalCount = 0;
+            List<User> list = null;
+
+            if (skip.HasValue && take.HasValue)
+            {
+                list = users.Where(x => x.FirstName == name || x.SurName == name).Skip(skip.Value).Take(take.Value).ToList();
+                totalCount = list.Count - take.Value;
+            }
+            else
+            {
+                list = users.Where(x => x.FirstName == name || x.SurName == name).ToList();
+            }
+            if (isSort.HasValue && isSort.Value)
+            {
+              // list
+            }
+            
+            return Ok(new
+            {
+                list,
+                totalCount,
+            });
         }
 
         [HttpGet("GetAllUsers")]
@@ -69,8 +108,10 @@ namespace MySocNet.Controllers
         }
         
         [HttpGet("GetUserById")]
+        [Authorize(Policy = Policies.User)]
         public async Task<User> GetUserByIdAsync(int userId)
         {
+           
             return await _userService.GetUserByIdAsync(userId);
         }
 
@@ -102,6 +143,7 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task<IEnumerable<UserOutPut>> GetFriendListAsync(int userId)
         {
+            //Request.Headers["key"]
             return await _userService.GetFriendListAsync(userId);
         }
 
@@ -127,20 +169,6 @@ namespace MySocNet.Controllers
         public async Task RemoveUserByIdAsync(int id)
         {
            await _userService.RemoveUserByIdAsync(id);
-        }
-
-        [HttpGet("GetFriendLists")]
-        public async Task<IActionResult> GetFriendLists(int userId, int skip, int take)
-        {
-            if (userId != 0)
-            {
-                var user = await _userService.GetUserByIdAsync(userId);
-                var friendList = await _userService.GetPaddingList(userId, skip, take);
-                var totalCount = await _userService.GetTotalUserCount(user, take);
-                return Ok(new { friendList, totalCount });
-            }
-          
-            return BadRequest();
         }
     }
 }
