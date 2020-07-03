@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {}
+    "D:\\Projects\\MySocNet\\MySocNet.csproj": {}
   },
   "projects": {
-    "D:\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {
+    "D:\\Projects\\MySocNet\\MySocNet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
+        "projectUniqueName": "D:\\Projects\\MySocNet\\MySocNet.csproj",
         "projectName": "MySocNet",
-        "projectPath": "D:\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
-        "packagesPath": "C:\\Users\\Chudo\\.nuget\\packages\\",
-        "outputPath": "D:\\SomethingWithJWT\\MySocNet\\obj\\",
+        "projectPath": "D:\\Projects\\MySocNet\\MySocNet.csproj",
+        "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\MySocNet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Chudo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -50,6 +50,10 @@
               "target": "Package",
               "version": "[2.7.0, )"
             },
+            "Microsoft.AspNet.Identity.Core": {
+              "target": "Package",
+              "version": "[2.2.3, )"
+            },
             "Microsoft.AspNet.Mvc": {
               "target": "Package",
               "version": "[5.2.7, )"
@@ -83,6 +87,10 @@
             "Microsoft.EntityFrameworkCore.Tools": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.1.5, )"
+            },
+            "Microsoft.Extensions.Identity.Core": {
               "target": "Package",
               "version": "[3.1.5, )"
             },

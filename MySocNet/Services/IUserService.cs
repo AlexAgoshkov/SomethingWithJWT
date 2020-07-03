@@ -1,15 +1,16 @@
-﻿    using MySocNet.Models;
+﻿using MySocNet.Models;
 using MySocNet.OutPutData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace MySocNet.Services
 {
     public interface IUserService
     {
-        Task<IList<User>> GetUsersAsync();
+        IQueryable<User> GetUsersAsync(Expression<Func<User, bool>> filter);
 
         Task CreateUserAsync(User user);
 

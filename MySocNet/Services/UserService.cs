@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using MySocNet.Models;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -26,19 +28,18 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
-        public async Task<IList<User>> GetUsersAsync()
+        public IQueryable<User> GetUsersAsync(Expression<Func<User, bool>> filter)
         {
-            return await _myDbContext.Users.Include(x => x.Friends).
-                                            Include(x => x.Authentication).
-                                            Include(x => x.ActiveKey).ToListAsync();
+            return _myDbContext.Users.Where(filter);
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _myDbContext.Users.Include(x => x.Friends).
-                                            Include(x => x.Authentication).
-                                            Include(x => x.ActiveKey).
-                                            FirstOrDefaultAsync(x => x.UserId == id);
+            return await _myDbContext.Users
+                .Include(x => x.Friends)
+                .Include(x => x.Authentication)
+                .Include(x => x.ActiveKey)
+                .FirstOrDefaultAsync(x => x.UserId == id);
         }
 
         public async Task CreateUserAsync(User user)
@@ -83,12 +84,6 @@ namespace MySocNet.Services
 
             return list;
         }
-
-        //public async Task<IList<UserOutPut>> GetPaddingList(List<User> users, int skip, int take)
-        //{
-        //    var friends = await GetFriendListAsync(userId);
-        //    return friends.Skip(skip).Take(take).ToList();
-        //}
 
         public async Task UpdateUserAsync(User input)
         {
@@ -175,3 +170,4 @@ namespace MySocNet.Services
         }
     }
 }
+

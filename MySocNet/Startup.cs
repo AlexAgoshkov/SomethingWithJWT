@@ -51,7 +51,6 @@ namespace MySocNet
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
-          //  services.AddRazorPages();
 
             services.AddControllersWithViews();
 
