@@ -10,12 +10,12 @@ namespace MySocNet.Models
     public class Friend
     {
         [Key]
-        public int FriendID { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public int UserAddedId { get; set; }
 
         [Required]
-        public int UserID { get; set; }
+        public int UserId { get; set; }
     }
 }

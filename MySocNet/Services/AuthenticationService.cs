@@ -67,13 +67,13 @@ namespace MySocNet.Services
             }
             else
             {
-                var auth = await _myDbContext.Authentications.FirstOrDefaultAsync(x => x.AuthenticationId == userInfo.AuthenticationId);
+                var auth = await _myDbContext.Authentications.FirstOrDefaultAsync(x => x.Id == userInfo.AuthenticationId);
                 auth.AccessToken = accessToken;
                 auth.RefreshToken = refreshToken;
                 auth.Created = created;
                 auth.Expires = expires;
                 _myDbContext.Authentications.Update(auth);
-                userInfo.AuthenticationId = auth.AuthenticationId;
+                userInfo.AuthenticationId = auth.Id;
             }
             _myDbContext.Users.Update(userInfo);
             await _myDbContext.SaveChangesAsync();
@@ -92,7 +92,7 @@ namespace MySocNet.Services
 
         public async Task AddActiveKeyToUserAsync(int userId, int keyId)
         {
-            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
             user.ActiveKeyId = keyId;
             _myDbContext.Users.Update(user);
             await _myDbContext.SaveChangesAsync();

@@ -26,20 +26,20 @@ namespace MySocNet.Models
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<User>().HasData(new User
             {
-                UserId = 1,
+                Id = 1,
                 UserName = "ggg",
                 FirstName = "Larry",
                 SurName = "Richi",
                 Email = "example@mail.hock",
                 Password = HashService.Hash("666"),
                 UserRole = "Admin",
-            }); 
+            });
 
-            modelBuilder.Entity<Friend>().HasData(new Friend 
+            modelBuilder.Entity<Friend>().HasData(new Friend
             {
-                FriendID = 1,                               
-                UserAddedId = 1,                                      
-                UserID = 1 
+                Id = 1,
+                UserAddedId = 1,
+                UserId = 1
             });
         }
     }

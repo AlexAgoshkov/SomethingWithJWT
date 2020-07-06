@@ -1,4 +1,5 @@
-﻿using MySocNet.Models;
+﻿using MySocNet.InputData;
+using MySocNet.Models;
 using MySocNet.OutPutData;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,15 @@ namespace MySocNet.Services
     {
         IQueryable<User> GetUsersAsync(Expression<Func<User, bool>> filter);
 
+        Task<IQueryable<User>> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query);
+
+        IQueryable<User> GetAll();
+
         Task CreateUserAsync(User user);
 
         Task AddFriendToUserAsync(int userId, int friendId);
 
-     //   Task<IList<UserOutPut>> GetPaddingList(int userId, int skip, int take);
-
-        Task<IList<UserOutPut>> GetFriendListAsync(int userId);
+        Task<IList<User>> GetFriendListAsync(int userId);
 
         Task<User> GetUserByIdAsync(int id);
 
@@ -32,16 +35,10 @@ namespace MySocNet.Services
 
         Task<User> GetUserByEmail(string email);
 
-        Task<IList<User>> GetUsersBySurname(string surname);
-
-        Task<IList<User>> GetUsersByName(string name);
-
         Task UpdateUserAsync(User input);
 
         Task RemoveUserByIdAsync(int id);
 
         Task ConfirmEmailAsync(string Key);
-
-        Task<int> GetTotalUserCount(User user, int take);
     }
 }

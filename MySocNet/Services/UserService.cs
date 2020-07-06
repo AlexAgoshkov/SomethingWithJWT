@@ -2,6 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.IdentityModel.Tokens;
+using MimeKit.Encodings;
+using MySocNet.Enums;
+using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.OutPutData;
 using System;
@@ -32,6 +36,25 @@ namespace MySocNet.Services
         {
             return _myDbContext.Users.Where(filter);
         }
+        public IQueryable<User> GetAll()
+        {
+            return _myDbContext.Users.AsQueryable();
+        }
+
+        public async Task<IQueryable<User>> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query)
+        {
+            switch (userInput.OrderKey)
+            {
+                case SearchUserOrderKey.FirstName:
+                    query = userInput.IsAscending ? query.OrderBy(x => x.FirstName) : query.OrderByDescending(x => x.FirstName);
+                    break;
+                case SearchUserOrderKey.LastName:
+                    query = userInput.IsAscending ? query.OrderBy(x => x.SurName) : query.OrderByDescending(x => x.SurName);
+                    break;
+            }
+
+            return query;
+        }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
@@ -39,7 +62,7 @@ namespace MySocNet.Services
                 .Include(x => x.Friends)
                 .Include(x => x.Authentication)
                 .Include(x => x.ActiveKey)
-                .FirstOrDefaultAsync(x => x.UserId == id);
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task CreateUserAsync(User user)
@@ -60,29 +83,27 @@ namespace MySocNet.Services
 
         public async Task AddFriendToUserAsync(int userId, int friendId)
         {
-            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.UserId == userId);
+            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
 
-            var friend = new Friend { UserAddedId = friendId, UserID = userId };
+            var friend = new Friend { UserAddedId = friendId, UserId = userId };
 
             user.Friends.Add(friend);
             _myDbContext.Users.Update(user);
             await _myDbContext.SaveChangesAsync();
         }
 
-        public async Task<IList<UserOutPut>> GetFriendListAsync(int userId)
+        public async Task<IList<User>> GetFriendListAsync(int userId)
         {
-            var user = await _myDbContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(x => x.UserId == userId);
-            var list = new List<UserOutPut>();
-            var friends = user.Friends;
+            var friendIds = await _myDbContext.Friends
+            .Where(x => x.UserId == userId || x.Id == userId)
+            .Select(x => x.UserId == userId ? x.Id : x.UserId)
+            .ToListAsync();
 
-            foreach (var item in user.Friends)
-            {
-                var friend = await GetUserByIdAsync(item.UserAddedId);
-                var outPut = _mapper.Map<UserOutPut>(friend);
-                list.Add(outPut);
-            }
+            var friends = await _myDbContext.Users
+                .Where(x => friendIds.Contains(x.Id))
+                .ToListAsync();
 
-            return list;
+            return friends;
         }
 
         public async Task UpdateUserAsync(User input)
@@ -93,10 +114,10 @@ namespace MySocNet.Services
 
         public async Task AddTokenToUserAsync(User userInfo, Authentication auth)
         {
-            var user = await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.UserId == userInfo.UserId);
+            var user = await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.Id == userInfo.Id);
 
             if (userInfo.AuthenticationId.HasValue)
-            {
+            { 
                 user.Authentication = auth;
             }
             _myDbContext.Users.Update(user);
@@ -105,7 +126,7 @@ namespace MySocNet.Services
 
         public async Task RefreshTokenAsync(User userInfo, string token)
         {
-            var user = await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.UserId == userInfo.UserId);
+            var user = await _myDbContext.Users.Include(x => x.Authentication).FirstOrDefaultAsync(x => x.Id == userInfo.Id);
 
             if (userInfo.AuthenticationId.HasValue)
             {
@@ -134,16 +155,6 @@ namespace MySocNet.Services
             return await _myDbContext.Users.FirstOrDefaultAsync(x => x.Email == email);
         }
 
-        public async Task<IList<User>> GetUsersBySurname(string surname)
-        {
-            return await _myDbContext.Users.Where(x => x.SurName == surname).ToListAsync();
-        }
-
-        public async Task<IList<User>> GetUsersByName(string name)
-        {
-            return await _myDbContext.Users.Where(x => x.FirstName == name).ToListAsync();
-        }
-
         public async Task ConfirmEmailAsync(string Key)
         {
             var user = await _myDbContext.Users.Include(x => x.ActiveKey).FirstOrDefaultAsync(x => x.ActiveKey.Key == Key);
@@ -162,11 +173,6 @@ namespace MySocNet.Services
             var user = await GetUserByIdAsync(id);
             _myDbContext.Remove(user);
             await _myDbContext.SaveChangesAsync();
-        }
-
-        public async Task<int> GetTotalUserCount(User user, int take)
-        {
-            return user.Friends.Count - take;
         }
     }
 }

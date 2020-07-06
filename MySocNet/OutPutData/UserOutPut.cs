@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.OutPutData
 {
-    public class UserOutPut
+    public class UserOutput
     {
         public string FirstName { get; set; }
 

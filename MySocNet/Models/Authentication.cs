@@ -11,7 +11,7 @@ namespace MySocNet.Models
     public class Authentication
     {
         [Key]
-        public int AuthenticationId { get; set; }
+        public int Id { get; set; }
 
         public string AccessToken { get; set; }
 

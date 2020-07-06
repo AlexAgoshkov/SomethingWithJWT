@@ -13,7 +13,7 @@ namespace MySocNet.Models
     public class User
     {
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [MaxLength(25)]
@@ -45,8 +45,7 @@ namespace MySocNet.Models
         public virtual ActiveKey ActiveKey { get; set; }
 
         [JsonIgnore]
-        public int? AuthenticationId { get; set; }
-
+        public int? AuthenticationId { get; set; } 
         [JsonIgnore]
         public virtual Authentication Authentication { get; set; }
 

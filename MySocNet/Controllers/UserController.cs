@@ -20,6 +20,12 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Ocsp;
 using Microsoft.AspNetCore.Authentication;
+using System.Data;
+using System.Globalization;
+using Microsoft.VisualBasic;
+using MySocNet.OutputData;
+using MySocNet.Enums;
+using MySocNet.Extensions;
 
 namespace MySocNet.Controllers
 {
@@ -38,57 +44,41 @@ namespace MySocNet.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("GetUserList")]
+        private async Task<User> GetUserByAccessToken()
+        {
+            var accessToken = await HttpContext.GetAccessToken();
+
+            var user = await _userService.GetUsersAsync(x => x.Authentication.AccessToken == accessToken)
+                .FirstOrDefaultAsync();
+            return user;
+        }
+
+        [HttpPost("GetSortedUserList")]
         public async Task<IActionResult> GetUsers(SearchUserInput userInput)
         {
-            var custumerOb = new User();
-            var isAllPropertiesNull = custumerOb.GetType().GetProperty(userInput.OrderKey).GetValue(custumerOb);
-                                               
-                                                
-            List<User> result = null;
+            IQueryable<User> query = null;
 
-            if (string.IsNullOrWhiteSpace(userInput.Name))
+            if (!string.IsNullOrWhiteSpace(userInput.Search))
             {
-                result = await _userService.GetUsersAsync(x => true).ToListAsync();
-            }
-            else
-            {
-                
-
-                if (userInput.IsSort)
-                {
-                    result = await _userService.GetUsersAsync(x => x.FirstName == userInput.Name || x.SurName == userInput.Name)
-                    .OrderBy(x => isAllPropertiesNull)
-                    .ToListAsync();
-                    //result = await _userService.GetUsersAsync(x => x.FirstName == userInput.Name || x.SurName == userInput.Name)
-                    //    .ToListAsync();
-                    //result = result.OrderBy(x => typeof(User).GetProperty(userInput.OrderKey).GetValue(x)).ToList();
-                }
-                else
-                {
-                    //result = await _userService.GetUsersAsync(x => x.FirstName == userInput.Name || x.SurName == userInput.Name)
-                    //    .ToListAsync();
-                    //result = result.OrderByDescending(x => typeof(User).GetProperty(userInput.OrderKey).GetValue(x)).ToList();
-                }
+                query = _userService.GetUsersAsync(x =>
+                    x.FirstName.ToUpper().Contains(userInput.Search) ||
+                    x.SurName.ToUpper().Contains(userInput.Search));
             }
 
-            result = result.Skip(userInput.Skip).Take(userInput.Take).ToList();
-          
-            int totalCount = result.Count;
+            query = await _userService.GetSortedQuery(userInput, query);
 
-            return Ok(new
-            {
-                result,
-                totalCount
-            });
+            int totalCount = await query.CountAsync();
+
+            var result = await query.Skip(userInput.Skip).Take(userInput.Take).ToListAsync();
+
+            return Ok(new PaginatedOutput<User>(totalCount, result));
         }
 
         [HttpGet("GetAllUsers")]
-        [Authorize(Policy = Policies.Admin)]
         public async Task<IActionResult> GetAsync()
         {
-            var users = await _userService.GetUsersAsync(x => true).ToListAsync();
-            return Ok(new { users }); 
+            var users = await _userService.GetUsersAsync(x => true).Include(x => x.Friends).ToListAsync();
+            return Ok(users); 
         }
 
         [HttpGet]
@@ -96,30 +86,29 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task<IActionResult> GetUserData()
         {
-            var accessToken = await HttpContext.GetAccessTokenOne();
+            User user = await GetUserByAccessToken();
 
-            var name = _userService.GetUsersAsync(x => x.Authentication.AccessToken == accessToken);
-
-            return Ok(new { accessToken, name});
+            return Ok(user);
         }
 
         [HttpGet]
         [Route("GetAdminData")]
         [Authorize(Policy = Policies.Admin)]
-        public IActionResult GetAdminData()
+        public async Task<IActionResult> GetAdminData()
         {
-            return Ok("You are ADMIN");
+            User user = await GetUserByAccessToken();
+
+            return Ok(user);
         }
 
         [HttpPost]
         [Route("UpdateUser")]
         [Authorize(Policy = Policies.User)]
-        public async Task UpdateUserAsync(int id,UserUpdate input)
+        public async Task UpdateUserAsync(UserUpdate input)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var user = await GetUserByAccessToken();
             user.FirstName = input.FirstName;
             user.SurName = input.SurName;
-           
             await _userService.UpdateUserAsync(user);
         }
         
@@ -130,53 +119,32 @@ namespace MySocNet.Controllers
             return await _userService.GetUserByIdAsync(userId);
         }
 
-        [HttpGet("GetUsersByName")]
-        public async Task<IEnumerable<User>> GetUsersByName(string name, bool? isSort)
-        {
-            if (isSort.Value)
-            {
-                var users = await _userService.GetUsersBySurname(name);
-                return users.OrderBy(x => x.FirstName);
-            }
-
-            return await _userService.GetUsersByName(name);
-        }
-
-        [HttpGet("GetUsersBySurName")]
-        public async Task<IEnumerable<User>> GetUsersBySurname(string surname, bool? isSort)
-        {
-            if (isSort.Value)
-            {
-                var users = await _userService.GetUsersBySurname(surname);
-                return users.OrderBy(x => x.SurName);
-            }
-
-            return await _userService.GetUsersBySurname(surname);
-        }
-        
         [HttpGet("GetFriendList")]
         [Authorize(Policy = Policies.User)]
-        public async Task<IEnumerable<UserOutPut>> GetFriendListAsync(int userId)
+        public async Task<IActionResult> GetFriendListAsync()
         {
-            //Request.Headers["key"]
-            return await _userService.GetFriendListAsync(userId);
+            var user = await GetUserByAccessToken();
+
+            var friendList = await _userService.GetFriendListAsync(user.Id);
+
+            return Ok(friendList);
         }
 
         [HttpPut("AddNewFriend")]
         [Authorize(Policy = Policies.User)]
-        public async Task AddFriendToUserAsync(int userId, int userAddedId)
+        public async Task AddFriendToUserAsync(int userAddedId)
         {
-            await _userService.AddFriendToUserAsync(userId, userAddedId);
+            var user = await GetUserByAccessToken();
+
+            await _userService.AddFriendToUserAsync(user.Id, userAddedId);
         }
 
         [HttpPost("SendEmail")]
         [Authorize(Policy = Policies.User)]
-        public async Task Get(string email, string subject, string message)
+        public async Task SendMail(string email, string subject, string message)
         {
             var sender = new Message(new string[] { email }, subject, message);
             await _emailService.SendEmail(sender);
-
-            await _userService.GetUsersAsync(x => true).ToListAsync();
         }
 
         [HttpDelete("RemoveUser")]
@@ -187,11 +155,3 @@ namespace MySocNet.Controllers
         }
     }
 }
-
-public static class HttpContextExtension 
-{
-    public async static Task<string> GetAccessTokenOne(this HttpContext httpContext)
-    {
-        return await httpContext.GetTokenAsync("access_token");
-    }
-} 
