@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MySocNet.InputData;
 using MySocNet.Models;
-using MySocNet.OutPutData;
+using MySocNet.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;

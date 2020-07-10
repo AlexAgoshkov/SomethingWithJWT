@@ -16,6 +16,10 @@ namespace MySocNet.Models
 
         public DbSet<ActiveKey> ActiveKeys { get; set; }
 
+        public DbSet<Chat> Chats { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
+
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
             Database.Migrate();

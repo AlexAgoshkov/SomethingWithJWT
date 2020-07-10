@@ -51,9 +51,12 @@ namespace MySocNet.Models
 
         public virtual ICollection<Friend> Friends { get; set; }
 
+        public virtual ICollection<Chat> Chats { get; set; }
+
         public User()
         {
             Friends = new List<Friend>();
+            Chats = new List<Chat>();
         }
     }
 }

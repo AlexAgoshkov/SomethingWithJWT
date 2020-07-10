@@ -19,6 +19,7 @@ using Microsoft.IdentityModel.Tokens;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Services;
+using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace MySocNet.Services
@@ -27,21 +28,52 @@ namespace MySocNet.Services
     {
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
+        private readonly IRepository<User> _userRepository;
         private readonly IMapper _mapper;
         private readonly MyDbContext _myDbContext;
 
-        public AuthenticationService(MyDbContext myDbContext, IConfiguration config, IUserService userService, IMapper mapper)
+        public AuthenticationService(
+            MyDbContext myDbContext, 
+            IConfiguration config, 
+            IUserService userService, 
+            IRepository<User> userRepository,
+            IMapper mapper)
         {
             _config = config;
             _userService = userService;
+            _userRepository = userRepository;
             _myDbContext = myDbContext;
             _mapper = mapper;
         }
 
+        public async Task CreateAuthTokenAsync(string userName)
+        {
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.UserName == userName);
+
+            DateTime created = DateTime.Now;
+            DateTime expires = DateTime.Now.AddMinutes(1);
+
+            string accessToken = await GenerateJWTTokenAsync(user, _config["Jwt:SecretKey"], expires);
+            string refreshToken = await GenerateJWTTokenAsync(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
+
+            if (!user.AuthenticationId.HasValue)
+            {
+                await CreateNewTokens(user, created, expires, accessToken, refreshToken);
+            }
+            else
+            {
+                await UpdateTokens(user, created, expires, accessToken, refreshToken);
+            }
+            _myDbContext.Users.Update(user);
+            await _myDbContext.SaveChangesAsync();
+        }
+
         public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
         {
-            var userByLogin = await _userService.GetUserByUserNameAsync(loginCredentials.UserName);
-            User result = null;
+            var userByLogin = await _userRepository.GetWhereAsync(x => x.UserName == loginCredentials.UserName)
+                .Include(x => x.Authentication).Include(x => x.ActiveKey).FirstOrDefaultAsync();
+
+            User result = null;//TOdo
 
             if (HashService.Verify(loginCredentials.Password, userByLogin.Password))
             {
@@ -51,54 +83,31 @@ namespace MySocNet.Services
             return result;
         }
 
-        public async Task CreateTokenAsync(Authentication authentication)
+        private async Task CreateNewTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)
+        {
+            var jwtToken = new Authentication { Created = created, Expires = expires, AccessToken = accessToken, RefreshToken = refreshToken };
+            await CreateTokenAsync(jwtToken);
+            user.Authentication = jwtToken;
+        }
+
+        private async Task UpdateTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)
+        {
+            var auth = await _myDbContext.Authentications.FirstOrDefaultAsync(x => x.Id == user.AuthenticationId);
+            auth.AccessToken = accessToken;
+            auth.RefreshToken = refreshToken;
+            auth.Created = created;
+            auth.Expires = expires;
+            _myDbContext.Authentications.Update(auth);
+            user.AuthenticationId = auth.Id;
+        }
+
+        private async Task CreateTokenAsync(Authentication authentication)
         {
             await _myDbContext.Authentications.AddAsync(authentication);
             await _myDbContext.SaveChangesAsync();
         }
 
-        public async Task CreateTokenPairAsync(User userInfo, DateTime created, DateTime expires, string accessToken, string refreshToken)
-        {
-            if (!userInfo.AuthenticationId.HasValue)
-            {
-                var jwtToken = new Authentication { Created = created, Expires = expires, AccessToken = accessToken, RefreshToken = refreshToken };
-                await CreateTokenAsync(jwtToken);
-                userInfo.Authentication = jwtToken;
-            }
-            else
-            {
-                var auth = await _myDbContext.Authentications.FirstOrDefaultAsync(x => x.Id == userInfo.AuthenticationId);
-                auth.AccessToken = accessToken;
-                auth.RefreshToken = refreshToken;
-                auth.Created = created;
-                auth.Expires = expires;
-                _myDbContext.Authentications.Update(auth);
-                userInfo.AuthenticationId = auth.Id;
-            }
-            _myDbContext.Users.Update(userInfo);
-            await _myDbContext.SaveChangesAsync();
-        }
-
-        public async Task CreateActiveKeyAsync(string key)
-        {
-            var activeKey = new ActiveKey { Key = key, Created = DateTime.Now, IsActive = false };
-            _myDbContext.ActiveKeys.Add(activeKey);
-            await _myDbContext.SaveChangesAsync();
-        }
-        public async Task<ActiveKey> GetActiveKeyByNameAsync(string key)
-        {
-            return await _myDbContext.ActiveKeys.FirstOrDefaultAsync(x => x.Key == key);
-        }
-
-        public async Task AddActiveKeyToUserAsync(int userId, int keyId)
-        {
-            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            user.ActiveKeyId = keyId;
-            _myDbContext.Users.Update(user);
-            await _myDbContext.SaveChangesAsync();
-        }
-
-        public async Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire)
+        private async Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretWord));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -117,13 +126,6 @@ namespace MySocNet.Services
                 signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public string GetRandomString()
-        {
-            string path = Path.GetRandomFileName();
-            path = path.Replace(".", ""); 
-            return path.Substring(0, 8); 
         }
     }
 }

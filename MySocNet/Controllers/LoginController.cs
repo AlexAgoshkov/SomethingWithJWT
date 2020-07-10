@@ -13,12 +13,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MySocNet.InputData;
 using MySocNet.Models;
+using MySocNet.Response;
 using MySocNet.Services;
+using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 
 namespace MySocNet.Controllers
@@ -29,31 +32,41 @@ namespace MySocNet.Controllers
     {
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
+        private readonly IRepository<User> _userRepository;
         private readonly IEmailSender _emailSender;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IAccountActivationService _accountActiveService;
         private readonly IMapper _mapper;
 
-        public LoginController(IConfiguration config, IUserService userService,IEmailSender emailSender, IAuthenticationService authenticationService, IMapper mapper)
+        public LoginController(
+            IConfiguration config, 
+            IUserService userService,
+            IEmailSender emailSender, 
+            IAuthenticationService authenticationService,
+            IAccountActivationService accountActiveService,
+            IRepository<User> userRepository,
+            IMapper mapper)
         {
             _config = config;
             _userService = userService;
+            _userRepository = userRepository;
             _emailSender = emailSender;
             _authenticationService = authenticationService;
+            _accountActiveService = accountActiveService;
             _mapper = mapper;
         }
 
         [HttpPost("RefreshToken")]
-        [Authorize(Policy = Policies.User)]
         public async Task<IActionResult> UpdateAccess(string refreshToken)
         {
+            var response = new RefreshTokenResponse();
             var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
             if (user != null)
             {
-                var newToken = await _authenticationService.GenerateJWTTokenAsync(user, _config["Jwt:SecretKey"], DateTime.Now.AddMinutes(2));
-                var newRefreshToken = await _authenticationService.GenerateJWTTokenAsync(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
-                await _authenticationService.CreateTokenPairAsync(user, DateTime.Now, DateTime.Now.AddMinutes(2), newToken, newRefreshToken);
-
-                return Ok(new { newToken, newRefreshToken });
+                await _authenticationService.CreateAuthTokenAsync(user.UserName);
+                response.AccessToken = user.Authentication.AccessToken;
+                response.RefreshToken = user.Authentication.RefreshToken;
+                return Ok(response);
             }
             return BadRequest();
         }
@@ -62,37 +75,31 @@ namespace MySocNet.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] UserLogin login)
         {
-            var user = await _authenticationService.AuthenticateUserAsync(login);
+            var response = new LoginResponse();
 
-            if (user == null || user.ActiveKey == null || !user.ActiveKey.IsActive)
+            response.User = await _authenticationService.AuthenticateUserAsync(login);
+
+            if (response.User == null || response.User.ActiveKey == null || !response.User.ActiveKey.IsActive)
             {
                 return BadRequest();
             }
 
-            var tokenString = await _authenticationService.GenerateJWTTokenAsync(user, _config["Jwt:SecretKey"], DateTime.Now.AddMinutes(30));
-            var tokenRefresh = await _authenticationService.GenerateJWTTokenAsync(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
-            await _authenticationService.CreateTokenPairAsync(user, DateTime.Now, DateTime.Now.AddMinutes(2), tokenString, tokenRefresh);
+            await _authenticationService.CreateAuthTokenAsync(login.UserName);
 
-            return Ok(new
-            {
-                tokenString,
-                tokenRefresh,
-                user,
-            });
+            response.AccessToken = response.User.Authentication.AccessToken;
+            response.RefreshToken = response.User.Authentication.RefreshToken;
+
+            return Ok(response);
         }
 
         [HttpPost("Registration")]
         [AllowAnonymous]
         public async Task RegistrationAsync(UserRegistration input)
         {
-            var user = _mapper.Map<User>(input);
-            var key = _authenticationService.GetRandomString();
-        
-            await _authenticationService.CreateActiveKeyAsync(key);
-            var userKey = await _authenticationService.GetActiveKeyByNameAsync(key);
-           
-            user.ActiveKeyId = userKey.Id;
-            await _userService.CreateUserAsync(user);
+            await _accountActiveService.CreateActiveKeyAsync(input);
+
+            var user = await _userRepository.GetWhereAsync(x => x.UserName == input.UserName)
+                .Include(x => x.ActiveKey).FirstOrDefaultAsync();
 
             var confirmationLink = Url.Action(nameof(ConfirmEmail),
                                  "Login",
@@ -105,7 +112,7 @@ namespace MySocNet.Controllers
         [HttpGet("ConfirmEmail")]
         public async Task ConfirmEmail(string Key)
         {
-            await _userService.ConfirmEmailAsync(Key);
+            await _accountActiveService.ConfirmEmailAsync(Key);
         }
     }
 }

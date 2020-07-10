@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using MySocNet.InputData;
 using MySocNet.Models;
-using MySocNet.Models.Email;
-using MySocNet.OutPutData;
+using MySocNet.Response;
 using MySocNet.Services;
 using Microsoft.AspNetCore.Identity;
 using Org.BouncyCastle.Crypto.Engines;
@@ -23,9 +22,13 @@ using Microsoft.AspNetCore.Authentication;
 using System.Data;
 using System.Globalization;
 using Microsoft.VisualBasic;
-using MySocNet.OutputData;
+using MySocNet.Response;
 using MySocNet.Enums;
 using MySocNet.Extensions;
+using MySocNet.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.SignalR;
+using MySocNet.Hubs;
 
 namespace MySocNet.Controllers
 {
@@ -34,22 +37,30 @@ namespace MySocNet.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IEmailService _emailService;
-        private readonly IMapper _mapper;
-
-        public UserController(IUserService userService,IEmailService emailService, IMapper mapper)
+        private readonly IFriendService _friendService;
+        private readonly IEmailSender _emailSender;
+        private readonly IRepository<User> _userRepository;
+        private readonly IChatService _chatService;
+      
+        public UserController(
+            IUserService userService,
+            IFriendService friendService,
+            IRepository<User> repository,
+            IEmailSender emailSender,
+            IChatService chatService
+                             )
         {
             _userService = userService;
-            _emailService = emailService;
-            _mapper = mapper;
+            _chatService = chatService;
+            _friendService = friendService;
+            _userRepository = repository;
+            _emailSender = emailSender;
         }
 
         private async Task<User> GetUserByAccessToken()
         {
             var accessToken = await HttpContext.GetAccessToken();
-
-            var user = await _userService.GetUsersAsync(x => x.Authentication.AccessToken == accessToken)
-                .FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken);
             return user;
         }
 
@@ -60,12 +71,12 @@ namespace MySocNet.Controllers
 
             if (!string.IsNullOrWhiteSpace(userInput.Search))
             {
-                query = _userService.GetUsersAsync(x =>
+                query = _userRepository.GetWhereAsync(x =>
                     x.FirstName.ToUpper().Contains(userInput.Search) ||
                     x.SurName.ToUpper().Contains(userInput.Search));
             }
 
-            query = await _userService.GetSortedQuery(userInput, query);
+            query = _userService.GetSortedQuery(userInput, query);
 
             int totalCount = await query.CountAsync();
 
@@ -74,11 +85,11 @@ namespace MySocNet.Controllers
             return Ok(new PaginatedOutput<User>(totalCount, result));
         }
 
-        [HttpGet("GetAllUsers")]
-        public async Task<IActionResult> GetAsync()
+        [HttpPost("SendToChat")]
+        public async Task SendToChat(int reciveId, string message)
         {
-            var users = await _userService.GetUsersAsync(x => true).Include(x => x.Friends).ToListAsync();
-            return Ok(users); 
+            var user = await GetUserByAccessToken();
+            await _chatService.SendMessage(user.Id, reciveId, message);
         }
 
         [HttpGet]
@@ -87,7 +98,6 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetUserData()
         {
             User user = await GetUserByAccessToken();
-
             return Ok(user);
         }
 
@@ -97,7 +107,6 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetAdminData()
         {
             User user = await GetUserByAccessToken();
-
             return Ok(user);
         }
 
@@ -109,14 +118,14 @@ namespace MySocNet.Controllers
             var user = await GetUserByAccessToken();
             user.FirstName = input.FirstName;
             user.SurName = input.SurName;
-            await _userService.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
         }
         
         [HttpGet("GetUserById")]
         [Authorize(Policy = Policies.User)]
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            return await _userService.GetUserByIdAsync(userId);
+            return await _userRepository.GetByIdAsync(userId);
         }
 
         [HttpGet("GetFriendList")]
@@ -124,9 +133,7 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetFriendListAsync()
         {
             var user = await GetUserByAccessToken();
-
-            var friendList = await _userService.GetFriendListAsync(user.Id);
-
+            var friendList = await _friendService.GetFriendListAsync(user.Id);
             return Ok(friendList);
         }
 
@@ -135,23 +142,21 @@ namespace MySocNet.Controllers
         public async Task AddFriendToUserAsync(int userAddedId)
         {
             var user = await GetUserByAccessToken();
-
-            await _userService.AddFriendToUserAsync(user.Id, userAddedId);
+            await _friendService.AddFriendToUserAsync(user.Id, userAddedId);
         }
 
         [HttpPost("SendEmail")]
         [Authorize(Policy = Policies.User)]
         public async Task SendMail(string email, string subject, string message)
         {
-            var sender = new Message(new string[] { email }, subject, message);
-            await _emailService.SendEmail(sender);
+            await _emailSender.SendEmailAsync(email, subject, message);
         }
 
         [HttpDelete("RemoveUser")]
         [Authorize(Policy = Policies.Admin)]
         public async Task RemoveUserByIdAsync(int id)
         {
-           await _userService.RemoveUserByIdAsync(id);
+           await _userRepository.RemoveAsyncById(id);
         }
     }
 }

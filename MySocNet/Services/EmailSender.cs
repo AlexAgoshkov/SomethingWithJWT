@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Net.Mail;
+using MySocNet.Services.Interfaces;
 
 namespace MySocNet.Services
 {

@@ -20,15 +20,18 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using MySocNet.Mapper;
 using MySocNet.Models;
-using MySocNet.Models.Email;
 using MySocNet.Services;
 using System.Text.Json;
+using MySocNet.Services.Interfaces;
+using Org.BouncyCastle.Asn1.X509.Qualified;
 using MySocNet.Hubs;
 
 namespace MySocNet
 {
     public class Startup
     {
+        readonly string VueCorsPolicy = "_vueCorsPolicy";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -39,18 +42,27 @@ namespace MySocNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var emailConfig = Configuration
-            .GetSection("EmailConfiguration")
-            .Get<EmailConfiguration>();
-
-            services.AddSingleton(emailConfig);
             services.AddSignalR();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: VueCorsPolicy,
+                                  builder =>
+                                  {
+                                      builder
+                                        .WithOrigins("http://localhost:57377");
+                                  });
+            });
+
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IAccountActivationService, AccountActiveService>();
+            services.AddScoped<IFriendService, FriendService>();
+            services.AddScoped<IChatService, ChatService>();
+            services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
 
             services.AddControllersWithViews();
 
@@ -104,11 +116,6 @@ namespace MySocNet
                   ValidAudience = Configuration["Jwt:Audience"],
                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])),
                   ClockSkew = TimeSpan.Zero
-                  //LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) =>
-                  //{
-                  //    var jwt = securityToken as JwtSecurityToken;
-                 
-                  //}
               };
           });
 
@@ -128,6 +135,7 @@ namespace MySocNet
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+               
             }
 
             app.UseSwagger();
@@ -144,6 +152,7 @@ namespace MySocNet
             }
 
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -156,9 +165,8 @@ namespace MySocNet
 
             app.UseEndpoints(endpoints =>
             {
-              //  endpoints.MapRazorPages();
                 endpoints.MapControllers();
-              //  endpoints.MapHub<ChatHub>("/chathub");
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }

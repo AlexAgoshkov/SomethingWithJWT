@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using MySocNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,9 @@ namespace MySocNet.Hubs
 {
     public class ChatHub : Hub
     {
-        public async Task SendMessage(string user, string message)
+        public async Task Send(string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
+            await this.Clients.All.SendAsync("Send", message);
         }
     }
 }

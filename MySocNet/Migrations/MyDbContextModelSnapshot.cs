@@ -43,7 +43,7 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.Authentication", b =>
                 {
-                    b.Property<int>("AuthenticationId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -60,14 +60,34 @@ namespace MySocNet.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("AuthenticationId");
+                    b.HasKey("Id");
 
                     b.ToTable("Authentications");
                 });
 
+            modelBuilder.Entity("MySocNet.Models.Chat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ChatName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Chats");
+                });
+
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
                 {
-                    b.Property<int>("FriendID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -75,27 +95,53 @@ namespace MySocNet.Migrations
                     b.Property<int>("UserAddedId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserID")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("FriendID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Friends");
 
                     b.HasData(
                         new
                         {
-                            FriendID = 1,
+                            Id = 1,
                             UserAddedId = 1,
-                            UserID = 1
+                            UserId = 1
                         });
+                });
+
+            modelBuilder.Entity("MySocNet.Models.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("ChatId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReciveId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SendId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("MySocNet.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
@@ -131,7 +177,7 @@ namespace MySocNet.Migrations
                     b.Property<string>("UserRole")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ActiveKeyId");
 
@@ -142,23 +188,37 @@ namespace MySocNet.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = 1,
+                            Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$C/1ULVxocoopzUFe1GmPkzCoQLtEOyyNwfRPH5YOIfDXtDmd",
+                            Password = "$MYHASH$V1$100$5biiQ/rtV0DQ6ySDEcX24HheGGwsVZGNTNzT4wfJ0Pcd5Bru",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"
                         });
                 });
 
+            modelBuilder.Entity("MySocNet.Models.Chat", b =>
+                {
+                    b.HasOne("MySocNet.Models.User", null)
+                        .WithMany("Chats")
+                        .HasForeignKey("UserId");
+                });
+
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
                 {
                     b.HasOne("MySocNet.Models.User", null)
                         .WithMany("Friends")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MySocNet.Models.Message", b =>
+                {
+                    b.HasOne("MySocNet.Models.Chat", "Chat")
+                        .WithMany()
+                        .HasForeignKey("ChatId");
                 });
 
             modelBuilder.Entity("MySocNet.Models.User", b =>
