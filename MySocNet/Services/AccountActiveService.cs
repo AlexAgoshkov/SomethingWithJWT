@@ -13,17 +13,17 @@ namespace MySocNet.Services
 {
     public class AccountActiveService : IAccountActivationService
     {
-        private readonly MyDbContext _myDbContext;
         private readonly IRepository<User> _userRepository;
+        private readonly IRepository<ActiveKey> _activeKeyRepository;
         private readonly IMapper _mapper;
 
         public AccountActiveService(
-            MyDbContext myDbContext, 
             IRepository<User> userRepository,
+            IRepository<ActiveKey> activeKeyRepository,
             IMapper mapper)
         {
-            _myDbContext = myDbContext;
             _userRepository = userRepository;
+            _activeKeyRepository = activeKeyRepository;
             _mapper = mapper;
         }
 
@@ -39,14 +39,13 @@ namespace MySocNet.Services
 
         public async Task ConfirmEmailAsync(string key)
         {
-            var activeKey = await _myDbContext.ActiveKeys.FirstOrDefaultAsync(x => x.Key == key);
+            var activeKey = await _activeKeyRepository.FirstOrDefaultAsync(x => x.Key == key);
             var time = DateTime.Now - activeKey.Created;
 
             if (!activeKey.IsActive && time.Hours < 1)
             {
                 activeKey.IsActive = true;
-                _myDbContext.ActiveKeys.Update(activeKey);
-                await _myDbContext.SaveChangesAsync();
+                await _activeKeyRepository.UpdateAsync(activeKey);
             }
         }
 
@@ -61,17 +60,15 @@ namespace MySocNet.Services
         private async Task<ActiveKey> GenerateActiveKeyAsync()
         {
             var activeKey = new ActiveKey { Key = GetRandomString(), Created = DateTime.Now, IsActive = false };
-            _myDbContext.ActiveKeys.Add(activeKey);
-            await _myDbContext.SaveChangesAsync();
+            await _activeKeyRepository.AddAsync(activeKey);
             return activeKey;
         }
 
         private async Task AddActiveKeyToUserAsync(int userId, int keyId)
         {
-            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
             user.ActiveKeyId = keyId;
-            _myDbContext.Users.Update(user);
-            await _myDbContext.SaveChangesAsync();
+            await _userRepository.UpdateAsync(user);
         }
 
         private string GetRandomString()

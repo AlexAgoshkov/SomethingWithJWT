@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Response
 {
-    public class UserOutput
+    public class UserResponse
     {
         public string FirstName { get; set; }
 

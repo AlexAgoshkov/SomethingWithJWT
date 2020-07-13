@@ -53,10 +53,11 @@ namespace MySocNet.Models
 
         public virtual ICollection<Chat> Chats { get; set; }
 
+        public virtual ICollection<UserChat> UserChats { get; set; }
+
         public User()
         {
             Friends = new List<Friend>();
-            Chats = new List<Chat>();
         }
     }
 }

@@ -11,7 +11,9 @@ namespace MySocNet.Models
         [Key]
         public int Id { get; set; }
 
-        public ICollection<Message> Messages;
+        public virtual ICollection<Message> Messages { get; set; }
+
+        public virtual ICollection<UserChat> UserChats { get; set; }
 
         public string ChatName { get; set; }
 

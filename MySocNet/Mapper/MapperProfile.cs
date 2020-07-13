@@ -13,7 +13,7 @@ namespace MySocNet.Mapper
     {
         public MapperProfile()
         {
-            CreateMap<User, UserOutput>();
+            CreateMap<User, UserResponse>();
             CreateMap<UserLogin, User>();
             CreateMap<UserUpdate, User>();
             CreateMap<User, UserUpdate>();

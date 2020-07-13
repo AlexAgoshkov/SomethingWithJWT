@@ -5,40 +5,58 @@ using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace MySocNet.Services
 {
-    public class ChatService :IChatService
+    public class ChatService : IChatService
     {
-        private MyDbContext _myDbContext;
+        private IRepository<Chat> _chatRepository;
+        private IRepository<UserChat> _userChatRepository;
         private IRepository<User> _userRepository;
 
-        public ChatService(MyDbContext myDbContext, IRepository<User> userRepository)
+        public ChatService(IRepository<User> userRepository, IRepository<UserChat> userChatRepository, IRepository<Chat> chatRepository)
         {
-            _myDbContext = myDbContext;
             _userRepository = userRepository;
+            _userChatRepository = userChatRepository;
+            _chatRepository = chatRepository;
         }
 
-        public async Task SendMessage(int senderId, int reciverId, string message)
+        public async Task<Chat> CreateChat(string chatName, User user1, User user2)
         {
-            var sender = await _userRepository.GetWhereAsync(x => x.Id == senderId).FirstOrDefaultAsync();
-            var revicer = await _userRepository.GetByIdAsync(reciverId);
+            var chat = new Chat { ChatName = chatName };
 
-            //var msg = await GetNewMessage(senderId, reciverId, message);
-            //var chat = new Chat{ChatName = "Super" };
-            //chat.Messages.Add(msg);
-            //sender.Chat = chat;
-            //await _myDbContext.AddAsync(chat); 
-            //await _myDbContext.SaveChangesAsync();
+            try
+            {
+                await _chatRepository.AddAsync(chat);
+
+                await _userChatRepository.AddAsync(new UserChat
+                {
+                    Chat = chat,
+                    User = user1
+                });
+
+                await _userChatRepository.AddAsync(new UserChat
+                {
+                    Chat = chat,
+                    User = user2
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return chat;
         }
 
-        private async Task<Message> GetNewMessage(int senderId, int reciverId, string message)
+        public async Task<string> SendMessage(int chatId, string message)
         {
-            var msg = new Message { SendId = senderId, ReciveId = reciverId, Text = message };
-            _myDbContext.Messages.Add(msg);
-            await _myDbContext.SaveChangesAsync();
-            return msg;
+            var chat = await _chatRepository.GetByIdAsync(chatId);
+            chat.Messages.Add(new Message { ChatId = chatId, Text = message });
+            await _chatRepository.UpdateAsync(chat);
+            return message;
         }
     }
 }

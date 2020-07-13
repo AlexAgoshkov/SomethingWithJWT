@@ -29,20 +29,20 @@ namespace MySocNet.Services
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IRepository<User> _userRepository;
+        private readonly IRepository<Authentication> _authRepository;
         private readonly IMapper _mapper;
-        private readonly MyDbContext _myDbContext;
-
+        
         public AuthenticationService(
-            MyDbContext myDbContext, 
             IConfiguration config, 
             IUserService userService, 
             IRepository<User> userRepository,
+            IRepository<Authentication> authRepository,
             IMapper mapper)
         {
             _config = config;
             _userService = userService;
+            _authRepository = authRepository;
             _userRepository = userRepository;
-            _myDbContext = myDbContext;
             _mapper = mapper;
         }
 
@@ -51,7 +51,7 @@ namespace MySocNet.Services
             var user = await _userRepository.FirstOrDefaultAsync(x => x.UserName == userName);
 
             DateTime created = DateTime.Now;
-            DateTime expires = DateTime.Now.AddMinutes(1);
+            DateTime expires = DateTime.Now.AddMinutes(30);
 
             string accessToken = await GenerateJWTTokenAsync(user, _config["Jwt:SecretKey"], expires);
             string refreshToken = await GenerateJWTTokenAsync(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
@@ -64,8 +64,7 @@ namespace MySocNet.Services
             {
                 await UpdateTokens(user, created, expires, accessToken, refreshToken);
             }
-            _myDbContext.Users.Update(user);
-            await _myDbContext.SaveChangesAsync();
+            await _userRepository.UpdateAsync(user);
         }
 
         public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
@@ -92,19 +91,18 @@ namespace MySocNet.Services
 
         private async Task UpdateTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)
         {
-            var auth = await _myDbContext.Authentications.FirstOrDefaultAsync(x => x.Id == user.AuthenticationId);
+            var auth = await _authRepository.FirstOrDefaultAsync(x => x.Id == user.AuthenticationId);
             auth.AccessToken = accessToken;
             auth.RefreshToken = refreshToken;
             auth.Created = created;
             auth.Expires = expires;
-            _myDbContext.Authentications.Update(auth);
+            await _authRepository.UpdateAsync(auth);
             user.AuthenticationId = auth.Id;
         }
 
         private async Task CreateTokenAsync(Authentication authentication)
         {
-            await _myDbContext.Authentications.AddAsync(authentication);
-            await _myDbContext.SaveChangesAsync();
+            await _authRepository.AddAsync(authentication);
         }
 
         private async Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire)

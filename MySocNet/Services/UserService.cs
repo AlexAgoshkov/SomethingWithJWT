@@ -23,13 +23,11 @@ namespace MySocNet.Services
 {
     public class UserService : IUserService
     {
-        private readonly MyDbContext _myDbContext;
         private readonly IRepository<User> _userRepository;
         private readonly IMapper _mapper;
         
-        public UserService(MyDbContext myDbContext, IMapper mapper, IRepository<User> userRepository)
+        public UserService(IMapper mapper, IRepository<User> userRepository)
         {
-            _myDbContext = myDbContext;
             _userRepository = userRepository;
             _mapper = mapper;
         }

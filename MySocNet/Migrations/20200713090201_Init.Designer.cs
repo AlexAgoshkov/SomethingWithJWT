@@ -10,7 +10,7 @@ using MySocNet.Models;
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20200710142535_Init")]
+    [Migration("20200713090201_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,12 +77,7 @@ namespace MySocNet.Migrations
                     b.Property<string>("ChatName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Chats");
                 });
@@ -125,18 +120,17 @@ namespace MySocNet.Migrations
                     b.Property<int?>("ChatId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReciveId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SendId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -193,18 +187,26 @@ namespace MySocNet.Migrations
                             Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$5biiQ/rtV0DQ6ySDEcX24HheGGwsVZGNTNzT4wfJ0Pcd5Bru",
+                            Password = "$MYHASH$V1$100$Mi0udo8tAaC0/LJjHV8JazZ4EJNlBqFKteUJBtgs6+/aVhkG",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"
                         });
                 });
 
-            modelBuilder.Entity("MySocNet.Models.Chat", b =>
+            modelBuilder.Entity("MySocNet.Models.UserChat", b =>
                 {
-                    b.HasOne("MySocNet.Models.User", null)
-                        .WithMany("Chats")
-                        .HasForeignKey("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "ChatId");
+
+                    b.HasIndex("ChatId");
+
+                    b.ToTable("UserChats");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -219,8 +221,12 @@ namespace MySocNet.Migrations
             modelBuilder.Entity("MySocNet.Models.Message", b =>
                 {
                     b.HasOne("MySocNet.Models.Chat", "Chat")
-                        .WithMany()
+                        .WithMany("Messages")
                         .HasForeignKey("ChatId");
+
+                    b.HasOne("MySocNet.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("MySocNet.Models.User", b =>
@@ -232,6 +238,21 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Authentication", "Authentication")
                         .WithMany()
                         .HasForeignKey("AuthenticationId");
+                });
+
+            modelBuilder.Entity("MySocNet.Models.UserChat", b =>
+                {
+                    b.HasOne("MySocNet.Models.Chat", "Chat")
+                        .WithMany("UserChats")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MySocNet.Models.User", "User")
+                        .WithMany("UserChats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

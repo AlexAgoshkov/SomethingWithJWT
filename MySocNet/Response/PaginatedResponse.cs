@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Response
 {
-    public class PaginatedOutput<T>
+    public class PaginatedResponse<T>
     {
         public int TotalCount { get; set; }
 
         public List<T> Data { get; set; }
 
-        public PaginatedOutput(int totalCount, List<T> data)
+        public PaginatedResponse(int totalCount, List<T> data)
         {
             TotalCount = totalCount;
             Data = data;

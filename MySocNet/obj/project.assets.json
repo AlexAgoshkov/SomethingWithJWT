@@ -29,10 +29,10 @@
           "lib/netstandard2.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll": {}
         }
       },
-      "MailKit/2.7.0": {
+      "MailKit/2.8.0": {
         "type": "package",
         "dependencies": {
-          "MimeKit": "2.8.0",
+          "MimeKit": "2.9.1",
           "System.Net.NameResolution": "4.3.0",
           "System.Net.Security": "4.3.2",
           "System.Runtime.Serialization.Primitives": "4.3.0"
@@ -1128,12 +1128,11 @@
           }
         }
       },
-      "MimeKit/2.8.0": {
+      "MimeKit/2.9.1": {
         "type": "package",
         "dependencies": {
           "Portable.BouncyCastle": "1.8.5",
           "System.Reflection.TypeExtensions": "4.4.0",
-          "System.Security.Cryptography.Cng": "4.4.0",
           "System.Text.Encoding.CodePages": "4.4.0"
         },
         "compile": {
@@ -3140,10 +3139,10 @@
         "lib/netstandard2.0/AutoMapper.Extensions.Microsoft.DependencyInjection.dll"
       ]
     },
-    "MailKit/2.7.0": {
-      "sha512": "AaUb45NBpKSjl1bTOAwB7nGQm2cLg6yjz4L+2KgU9dhTN3VTmXnJo+enKTjN0LHX3PV4k7DE12IhZqmXnP3v6w==",
+    "MailKit/2.8.0": {
+      "sha512": "oAbRyAfzymGSxOZRyDAeYwjZubWgj9b9e2CUp2bzMDMQ/2DRdvWkzSXIuVxLpR6QKA5MMixYkowyo1RSV16Atw==",
       "type": "package",
-      "path": "mailkit/2.7.0",
+      "path": "mailkit/2.8.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3169,7 +3168,7 @@
         "lib/netstandard2.0/MailKit.dll",
         "lib/netstandard2.0/MailKit.pdb",
         "lib/netstandard2.0/MailKit.xml",
-        "mailkit.2.7.0.nupkg.sha512",
+        "mailkit.2.8.0.nupkg.sha512",
         "mailkit.nuspec"
       ]
     },
@@ -4884,10 +4883,10 @@
         "version.txt"
       ]
     },
-    "MimeKit/2.8.0": {
-      "sha512": "XUWdwag5dcdwJAzMpBLNx+24xgpigk/bhIJBs/sITciX8CIYS2cfc4VkGwQjtuTsrbaJEBl3ZSOtGSOOc2k/pg==",
+    "MimeKit/2.9.1": {
+      "sha512": "0XUFf9DEZiLROC7cWvCOqn2uXekNIWztZdpBsaJcvPrndqWpap32jLgQ2kribNj+rhRqK8vpDy9Uvg714v6KBg==",
       "type": "package",
-      "path": "mimekit/2.8.0",
+      "path": "mimekit/2.9.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4913,7 +4912,7 @@
         "lib/netstandard2.0/MimeKit.dll",
         "lib/netstandard2.0/MimeKit.pdb",
         "lib/netstandard2.0/MimeKit.xml",
-        "mimekit.2.8.0.nupkg.sha512",
+        "mimekit.2.9.1.nupkg.sha512",
         "mimekit.nuspec"
       ]
     },
@@ -9813,14 +9812,13 @@
     ".NETCoreApp,Version=v3.1": [
       "AutoMapper >= 10.0.0",
       "AutoMapper.Extensions.Microsoft.DependencyInjection >= 8.0.0",
-      "MailKit >= 2.7.0",
+      "MailKit >= 2.8.0",
       "Microsoft.AspNet.Identity.Core >= 2.2.3",
       "Microsoft.AspNet.Mvc >= 5.2.7",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 3.1.5",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 3.1.5",
       "Microsoft.AspNetCore.SignalR.Client.Core >= 3.1.5",
       "Microsoft.AspNetCore.SignalR.Core >= 1.1.0",
-      "Microsoft.EntityFrameworkCore >= 3.1.5",
       "Microsoft.EntityFrameworkCore.Design >= 3.1.5",
       "Microsoft.EntityFrameworkCore.SqlServer >= 3.1.5",
       "Microsoft.EntityFrameworkCore.Tools >= 3.1.5",
@@ -9881,7 +9879,7 @@
           },
           "MailKit": {
             "target": "Package",
-            "version": "[2.7.0, )"
+            "version": "[2.8.0, )"
           },
           "Microsoft.AspNet.Identity.Core": {
             "target": "Package",
@@ -9906,10 +9904,6 @@
           "Microsoft.AspNetCore.SignalR.Core": {
             "target": "Package",
             "version": "[1.1.0, )"
-          },
-          "Microsoft.EntityFrameworkCore": {
-            "target": "Package",
-            "version": "[3.1.5, )"
           },
           "Microsoft.EntityFrameworkCore.Design": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",

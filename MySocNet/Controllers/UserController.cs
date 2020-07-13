@@ -29,6 +29,9 @@ using MySocNet.Services.Interfaces;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.SignalR;
 using MySocNet.Hubs;
+using Microsoft.AspNetCore.Razor.Language;
+using Newtonsoft.Json;
+using MySocNet.Input;
 
 namespace MySocNet.Controllers
 {
@@ -40,18 +43,15 @@ namespace MySocNet.Controllers
         private readonly IFriendService _friendService;
         private readonly IEmailSender _emailSender;
         private readonly IRepository<User> _userRepository;
-        private readonly IChatService _chatService;
-      
+        
         public UserController(
             IUserService userService,
             IFriendService friendService,
             IRepository<User> repository,
-            IEmailSender emailSender,
-            IChatService chatService
+            IEmailSender emailSender
                              )
         {
             _userService = userService;
-            _chatService = chatService;
             _friendService = friendService;
             _userRepository = repository;
             _emailSender = emailSender;
@@ -60,7 +60,8 @@ namespace MySocNet.Controllers
         private async Task<User> GetUserByAccessToken()
         {
             var accessToken = await HttpContext.GetAccessToken();
-            var user = await _userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken);
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken)
+                ?? throw new UnauthorizedAccessException();
             return user;
         }
 
@@ -82,14 +83,7 @@ namespace MySocNet.Controllers
 
             var result = await query.Skip(userInput.Skip).Take(userInput.Take).ToListAsync();
 
-            return Ok(new PaginatedOutput<User>(totalCount, result));
-        }
-
-        [HttpPost("SendToChat")]
-        public async Task SendToChat(int reciveId, string message)
-        {
-            var user = await GetUserByAccessToken();
-            await _chatService.SendMessage(user.Id, reciveId, message);
+            return Ok(new PaginatedResponse<User>(totalCount, result));
         }
 
         [HttpGet]

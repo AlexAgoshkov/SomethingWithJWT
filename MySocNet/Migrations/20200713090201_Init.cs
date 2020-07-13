@@ -39,6 +39,19 @@ namespace MySocNet.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Chats",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChatName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Chats", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -71,26 +84,6 @@ namespace MySocNet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Chats",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ChatName = table.Column<string>(nullable: true),
-                    UserId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Chats", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Chats_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Friends",
                 columns: table => new
                 {
@@ -116,10 +109,9 @@ namespace MySocNet.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SendId = table.Column<int>(nullable: false),
-                    ReciveId = table.Column<int>(nullable: false),
                     Text = table.Column<string>(nullable: true),
-                    ChatId = table.Column<int>(nullable: true)
+                    ChatId = table.Column<int>(nullable: true),
+                    UserId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -130,22 +122,47 @@ namespace MySocNet.Migrations
                         principalTable: "Chats",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserChats",
+                columns: table => new
+                {
+                    ChatId = table.Column<int>(nullable: false),
+                    UserId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserChats", x => new { x.UserId, x.ChatId });
+                    table.ForeignKey(
+                        name: "FK_UserChats_Chats_ChatId",
+                        column: x => x.ChatId,
+                        principalTable: "Chats",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserChats_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "ActiveKeyId", "AuthenticationId", "Email", "FirstName", "Password", "SurName", "UserName", "UserRole" },
-                values: new object[] { 1, null, null, "example@mail.hock", "Larry", "$MYHASH$V1$100$5biiQ/rtV0DQ6ySDEcX24HheGGwsVZGNTNzT4wfJ0Pcd5Bru", "Richi", "ggg", "Admin" });
+                values: new object[] { 1, null, null, "example@mail.hock", "Larry", "$MYHASH$V1$100$Mi0udo8tAaC0/LJjHV8JazZ4EJNlBqFKteUJBtgs6+/aVhkG", "Richi", "ggg", "Admin" });
 
             migrationBuilder.InsertData(
                 table: "Friends",
                 columns: new[] { "Id", "UserAddedId", "UserId" },
                 values: new object[] { 1, 1, 1 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Chats_UserId",
-                table: "Chats",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Friends_UserId",
@@ -155,6 +172,16 @@ namespace MySocNet.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ChatId",
                 table: "Messages",
+                column: "ChatId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_UserId",
+                table: "Messages",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserChats_ChatId",
+                table: "UserChats",
                 column: "ChatId");
 
             migrationBuilder.CreateIndex(
@@ -175,6 +202,9 @@ namespace MySocNet.Migrations
 
             migrationBuilder.DropTable(
                 name: "Messages");
+
+            migrationBuilder.DropTable(
+                name: "UserChats");
 
             migrationBuilder.DropTable(
                 name: "Chats");

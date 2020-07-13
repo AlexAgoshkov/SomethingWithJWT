@@ -25,6 +25,10 @@ using System.Text.Json;
 using MySocNet.Services.Interfaces;
 using Org.BouncyCastle.Asn1.X509.Qualified;
 using MySocNet.Hubs;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using System.Net;
 
 namespace MySocNet
 {
@@ -135,9 +139,8 @@ namespace MySocNet
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-               
             }
-
+           
             app.UseSwagger();
 
             app.UseSwaggerUI(c => 

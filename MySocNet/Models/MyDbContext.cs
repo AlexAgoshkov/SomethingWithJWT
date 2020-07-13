@@ -20,6 +20,8 @@ namespace MySocNet.Models
 
         public DbSet<Message> Messages { get; set; }
 
+        public DbSet<UserChat> UserChats { get; set; }
+
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
             Database.Migrate();
@@ -27,6 +29,18 @@ namespace MySocNet.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<UserChat>()
+                .HasKey(uc => new { uc.UserId, uc.ChatId });
+            modelBuilder.Entity<UserChat>()
+                .HasOne(uc => uc.User)
+                .WithMany(c => c.UserChats)
+                .HasForeignKey(uc => uc.UserId);
+            modelBuilder.Entity<UserChat>()
+                .HasOne(uc => uc.Chat)
+                .WithMany(c => c.UserChats)
+                .HasForeignKey(uc => uc.ChatId);
+
+
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<User>().HasData(new User
             {

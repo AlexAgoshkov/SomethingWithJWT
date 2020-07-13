@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Connections.Features;
+using Microsoft.EntityFrameworkCore;
 using MySocNet.Models;
+using MySocNet.Response;
 using MySocNet.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,33 +12,38 @@ namespace MySocNet.Services
 {
     public class FriendService : IFriendService
     {
-        private readonly MyDbContext _myDbContext;
-        
-        public FriendService(MyDbContext myDbContext)
+        private readonly IRepository<Friend> _friendRepository;
+        private readonly IRepository<User> _userRepository;
+
+        public FriendService(
+            IRepository<Friend> friendRepository, 
+            IRepository<User> userRepository)
         {
-            _myDbContext = myDbContext;
+            _userRepository = userRepository;
+            _friendRepository = friendRepository;
         }
 
         public async Task AddFriendToUserAsync(int userId, int friendId)
         {
-            var user = await _myDbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
+            if (user != null)
+            {
+                var friend = new Friend { UserAddedId = friendId, UserId = userId };
 
-            var friend = new Friend { UserAddedId = friendId, UserId = userId };
-
-            user.Friends.Add(friend);
-            _myDbContext.Users.Update(user);
-            await _myDbContext.SaveChangesAsync();
+                user.Friends.Add(friend);
+                await _userRepository.UpdateAsync(user);
+            }
         }
 
         public async Task<IList<User>> GetFriendListAsync(int userId)
         {
-            var friendIds = await _myDbContext.Friends
-                .Where(x => x.UserId == userId || x.Id == userId)
-                .Select(x => x.UserId == userId ? x.Id : x.UserId)
-                .ToListAsync();
+            var friendIds = await _friendRepository.GetWhereAsync(
+                  x => x.UserId == userId || x.Id == userId)
+                 .Select(x => x.UserId == userId ? x.Id : x.UserId)
+                 .ToListAsync();
 
-            var friends = await _myDbContext.Users
-                .Where(x => friendIds.Contains(x.Id))
+            var friends = await _userRepository.GetWhereAsync(
+                x => friendIds.Contains(x.Id))
                 .ToListAsync();
 
             return friends;
