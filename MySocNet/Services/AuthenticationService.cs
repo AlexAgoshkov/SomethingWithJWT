@@ -27,20 +27,17 @@ namespace MySocNet.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IConfiguration _config;
-        private readonly IUserService _userService;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Authentication> _authRepository;
         private readonly IMapper _mapper;
         
         public AuthenticationService(
             IConfiguration config, 
-            IUserService userService, 
             IRepository<User> userRepository,
             IRepository<Authentication> authRepository,
             IMapper mapper)
         {
             _config = config;
-            _userService = userService;
             _authRepository = authRepository;
             _userRepository = userRepository;
             _mapper = mapper;

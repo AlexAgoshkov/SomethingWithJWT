@@ -48,8 +48,7 @@ namespace MySocNet.Controllers
             IUserService userService,
             IFriendService friendService,
             IRepository<User> repository,
-            IEmailSender emailSender
-                             )
+            IEmailSender emailSender)
         {
             _userService = userService;
             _friendService = friendService;
@@ -141,9 +140,9 @@ namespace MySocNet.Controllers
 
         [HttpPost("SendEmail")]
         [Authorize(Policy = Policies.User)]
-        public async Task SendMail(string email, string subject, string message)
+        public async Task SendMail(SendMailInput input)
         {
-            await _emailSender.SendEmailAsync(email, subject, message);
+            await _emailSender.SendEmailAsync(input.To, input.Subject, input.Message);
         }
 
         [HttpDelete("RemoveUser")]

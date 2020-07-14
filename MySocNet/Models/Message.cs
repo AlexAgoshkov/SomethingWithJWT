@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,10 +17,11 @@ namespace MySocNet.Models
 
        public int? ChatId { get; set; }
 
-       public int? UserId { get; set; }
+       public int? SenderId { get; set; }
+        [JsonIgnore]
+        public virtual User Sender { get; set; }
 
-       public virtual User User { get; set; }
-
+       [JsonIgnore]
        public virtual Chat Chat { get; set; }
     }
 }

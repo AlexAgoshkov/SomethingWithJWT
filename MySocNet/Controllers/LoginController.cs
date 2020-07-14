@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using MySocNet.Input;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Response;
@@ -57,10 +58,10 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("RefreshToken")]
-        public async Task<IActionResult> UpdateAccess(string refreshToken)
+        public async Task<IActionResult> UpdateAccess(UpdateAccessTokenInput input)
         {
             var response = new RefreshTokenResponse();
-            var user = await _userService.GetUserByRefreshTokenAsync(refreshToken);
+            var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
             if (user != null)
             {
                 await _authenticationService.CreateAuthTokenAsync(user.UserName);

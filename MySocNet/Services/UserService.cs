@@ -26,7 +26,9 @@ namespace MySocNet.Services
         private readonly IRepository<User> _userRepository;
         private readonly IMapper _mapper;
         
-        public UserService(IMapper mapper, IRepository<User> userRepository)
+        public UserService(
+            IMapper mapper, 
+            IRepository<User> userRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;

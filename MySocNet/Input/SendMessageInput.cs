@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Input
 {
-    public class InputChatCreate
+    public class SendMessageInput
     {
-        public string ChatName { get; set; } 
+        public int ChatId { get; set; }
 
-        public int[] Ids { get; set; }
+        public string Message { get; set; }
     }
 }

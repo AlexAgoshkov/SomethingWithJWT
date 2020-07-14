@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MySocNet.Extensions;
 using MySocNet.Input;
+using MySocNet.InputData;
 using MySocNet.Models;
+using MySocNet.Response;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 
@@ -23,32 +25,45 @@ namespace MySocNet.Controllers
 
         public ChatController(
             IRepository<User> repository,
-            IChatService chatService
-            )
+            IChatService chatService)
         {
             _chatService = chatService;
             _userRepository = repository;
         }
-       
+
+        [HttpGet("ShowChats")]
+        public async Task<IEnumerable<ChatResponse>> GetChats(PaginatedInput input)
+        {
+            var user = await HttpContext.GetAccessTokenByUserRepository(_userRepository);
+            return await _chatService.GetChats(user.Id, input.Skip, input.Take);
+        }
+
         [HttpPost("CreateChat")]
         public async Task<IActionResult> CreateChat(InputChatCreate input)
         {
-            var user1 = await HttpContext.GetAccessTokenByUserRepository(_userRepository);
-            var user2 = await _userRepository.GetWhereAsync(x => x.Id == input.ReceiverId).Include(x => x.UserChats).FirstOrDefaultAsync();
-            var chat = await _chatService.CreateChat(input.ChatName, user1, user2);
+            var chatOwner = await HttpContext.GetAccessTokenByUserRepository(_userRepository); //chat owner
+            await _chatService.CreateChat(input.ChatName, chatOwner, input.Ids);
 
             return new ContentResult
             {
                 StatusCode = 200,
                 ContentType = "application/json",
-                Content = JsonConvert.SerializeObject(chat.ChatName)
+                Content = JsonConvert.SerializeObject(input)
             };
         }
 
-        [HttpPost("SendMessageToChat")]
-        public async Task<IActionResult> SendMessage(int chatId, string message)
+        [HttpPost("ShowMessages")]
+        public async Task<IEnumerable<Message>> GetChatMessages(GetMessagesInput input)
         {
-            var msg = await _chatService.SendMessage(chatId, message);
+            return await _chatService.GetMessages(input.ChatId, input.Skip, input.Take);
+        }
+
+        [HttpPost("SendMessageToChat")]
+        public async Task<IActionResult> SendMessage(SendMessageInput input)
+        {
+            var messageSender = await HttpContext.GetAccessTokenByUserRepository(_userRepository);
+          
+            var msg = await _chatService.SendMessage(input.ChatId, messageSender, input.Message);
 
             return new ContentResult
             {

@@ -1,4 +1,5 @@
 ﻿using MySocNet.Models;
+using MySocNet.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,12 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<Chat> CreateChat(string chatName, User user1, User user2);
+        Task<Chat> CreateChat(string chatName, User owner, int[] ids);
 
-        Task<string> SendMessage(int chatId, string message);
+        Task<string> SendMessage(int chatId, User sender, string message);
+
+        Task<IList<ChatResponse>> GetChats(int userId, int skip, int take);
+
+        Task<IList<Message>> GetMessages(int chatId, int skip, int take);
     }
 }
