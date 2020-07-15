@@ -8,3 +8,5 @@ MySocNet/obj/Debug/netcoreapp3.1/MySocNet.csproj.CoreCompileInputs.cache
 MySocNet/obj/Debug/netcoreapp3.1/MySocNet.csprojAssemblyReference.cache
 MySocNet/obj/Debug/netcoreapp3.1/MySocNet.dll
 MySocNet/obj/Debug/netcoreapp3.1/MySocNet.pdb
+.vs/MySocNet/DesignTimeBuild/.dtbcache.v2
+*.v2
