@@ -66,7 +66,7 @@ namespace MySocNet.Services
 
         public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
         {
-            var userByLogin = await _userRepository.GetWhereAsync(x => x.UserName == loginCredentials.UserName)
+            var userByLogin = await _userRepository.GetWhere(x => x.UserName == loginCredentials.UserName)
                 .Include(x => x.Authentication).Include(x => x.ActiveKey).FirstOrDefaultAsync();
 
             User result = null;//TOdo

@@ -16,7 +16,7 @@ namespace MySocNet.Extensions
             return await httpContext.GetTokenAsync("access_token");
         }
 
-        public async static Task<User> GetAccessTokenByUserRepository(this HttpContext httpContext, IRepository<User> userRepository)
+        public async static Task<User> GetUserByAccessTokenAsync(this HttpContext httpContext, IRepository<User> userRepository)
         {
             var accessToken = await httpContext.GetTokenAsync("access_token");
             var user = await userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken)

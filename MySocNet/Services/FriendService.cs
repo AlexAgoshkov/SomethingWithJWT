@@ -37,12 +37,12 @@ namespace MySocNet.Services
 
         public async Task<IList<User>> GetFriendListAsync(int userId)
         {
-            var friendIds = await _friendRepository.GetWhereAsync(
+            var friendIds = await _friendRepository.GetWhere(
                   x => x.UserId == userId || x.Id == userId)
                  .Select(x => x.UserId == userId ? x.Id : x.UserId)
                  .ToListAsync();
 
-            var friends = await _userRepository.GetWhereAsync(
+            var friends = await _userRepository.GetWhere(
                 x => friendIds.Contains(x.Id))
                 .ToListAsync();
 

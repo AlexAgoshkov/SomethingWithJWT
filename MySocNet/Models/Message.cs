@@ -18,8 +18,13 @@ namespace MySocNet.Models
        public int? ChatId { get; set; }
 
        public int? SenderId { get; set; }
-        [JsonIgnore]
-        public virtual User Sender { get; set; }
+
+       public DateTime Time { get; set; }
+
+       public bool IsRead { get; set; }
+
+       [JsonIgnore]
+       public virtual User Sender { get; set; }
 
        [JsonIgnore]
        public virtual Chat Chat { get; set; }

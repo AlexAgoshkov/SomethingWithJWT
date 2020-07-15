@@ -22,7 +22,7 @@ namespace MySocNet.Services.Interfaces
 
         Task<IEnumerable<T>> GetAllAsync();
 
-        IQueryable<T> GetWhereAsync(Expression<Func<T, bool>> predicate);
+        IQueryable<T> GetWhere(Expression<Func<T, bool>> predicate);
 
         Task<int> CountAllAsync();
 

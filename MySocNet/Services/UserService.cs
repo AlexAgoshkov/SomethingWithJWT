@@ -51,7 +51,7 @@ namespace MySocNet.Services
 
         public async Task<User> GetUserByRefreshTokenAsync(string refreshToken)
         {
-            return await _userRepository.GetWhereAsync(x => x.Authentication.RefreshToken == refreshToken)
+            return await _userRepository.GetWhere(x => x.Authentication.RefreshToken == refreshToken)
                 .Include(x => x.Authentication).FirstOrDefaultAsync();
         }
     }

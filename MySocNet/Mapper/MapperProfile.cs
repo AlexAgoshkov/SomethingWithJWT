@@ -18,6 +18,7 @@ namespace MySocNet.Mapper
             CreateMap<UserUpdate, User>();
             CreateMap<User, UserUpdate>();
             CreateMap<UserRegistration, User>();
+            CreateMap<Chat, ChatResponse>();
         }
     }
 }

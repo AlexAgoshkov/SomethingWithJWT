@@ -32,7 +32,7 @@ namespace MySocNet.Services
             User newUser = GetInitUser(userRegistration);
             await _userRepository.AddAsync(newUser);
             var key = await GenerateActiveKeyAsync();
-            var user = await _userRepository.GetWhereAsync(x => x.UserName == newUser.UserName)
+            var user = await _userRepository.GetWhere(x => x.UserName == newUser.UserName)
                 .Include(x => x.ActiveKey).FirstOrDefaultAsync();
             await AddActiveKeyToUserAsync(user.Id, key.Id);
         }

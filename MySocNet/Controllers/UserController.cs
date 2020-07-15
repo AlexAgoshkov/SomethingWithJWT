@@ -71,7 +71,7 @@ namespace MySocNet.Controllers
 
             if (!string.IsNullOrWhiteSpace(userInput.Search))
             {
-                query = _userRepository.GetWhereAsync(x =>
+                query = _userRepository.GetWhere(x =>
                     x.FirstName.ToUpper().Contains(userInput.Search) ||
                     x.SurName.ToUpper().Contains(userInput.Search));
             }

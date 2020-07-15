@@ -43,7 +43,7 @@ namespace MySocNet.Services
         public async Task<T> GetByIdAsync(int id)
             => await _context.Set<T>().FindAsync(id);
        
-        public IQueryable<T> GetWhereAsync(Expression<Func<T, bool>> predicate)
+        public IQueryable<T> GetWhere(Expression<Func<T, bool>> predicate)
         {
             return _context.Set<T>().Where(predicate);
         }

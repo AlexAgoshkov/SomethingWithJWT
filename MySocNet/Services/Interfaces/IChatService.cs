@@ -11,10 +11,12 @@ namespace MySocNet.Services.Interfaces
     {
         Task<Chat> CreateChat(string chatName, User owner, int[] ids);
 
-        Task<string> SendMessage(int chatId, User sender, string message);
+        Task<Message> SendMessage(int chatId, User sender, string message);
 
         Task<IList<ChatResponse>> GetChats(int userId, int skip, int take);
 
         Task<IList<Message>> GetMessages(int chatId, int skip, int take);
+
+        Task GetReadMessage(int userId, int chatId);
     }
 }

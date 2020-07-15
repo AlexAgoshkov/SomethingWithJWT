@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MySocNet.Extensions;
@@ -18,59 +20,50 @@ namespace MySocNet.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ChatController : ControllerBase
+    public class ChatController : ApiControllerBase
     { 
         private readonly IRepository<User> _userRepository;
         private readonly IChatService _chatService;
+        private readonly IMapper _mapper;
 
         public ChatController(
-            IRepository<User> repository,
-            IChatService chatService)
+            IRepository<User> userRepository,
+            IChatService chatService) : base(userRepository)
         {
             _chatService = chatService;
-            _userRepository = repository;
+            _userRepository = userRepository;
         }
 
         [HttpGet("ShowChats")]
-        public async Task<IEnumerable<ChatResponse>> GetChats(PaginatedInput input)
+        public async Task<IEnumerable<ChatResponse>> GetChats([FromQuery]PaginatedInput input)
         {
-            var user = await HttpContext.GetAccessTokenByUserRepository(_userRepository);
+            var user = await CurrentUser();
             return await _chatService.GetChats(user.Id, input.Skip, input.Take);
         }
 
         [HttpPost("CreateChat")]
         public async Task<IActionResult> CreateChat(InputChatCreate input)
         {
-            var chatOwner = await HttpContext.GetAccessTokenByUserRepository(_userRepository); //chat owner
-            await _chatService.CreateChat(input.ChatName, chatOwner, input.Ids);
-
-            return new ContentResult
-            {
-                StatusCode = 200,
-                ContentType = "application/json",
-                Content = JsonConvert.SerializeObject(input)
-            };
+            var chatOwner = await HttpContext.GetUserByAccessTokenAsync(_userRepository);
+            var chat = await _chatService.CreateChat(input.ChatName, chatOwner, input.Ids);
+            return JsonResult(chat);
         }
 
-        [HttpPost("ShowMessages")]
-        public async Task<IEnumerable<Message>> GetChatMessages(GetMessagesInput input)
+        [HttpGet("ShowMessages")]
+        public async Task<IActionResult> GetChatMessages([FromQuery]GetMessagesInput input)
         {
-            return await _chatService.GetMessages(input.ChatId, input.Skip, input.Take);
+            var messages = await _chatService.GetMessages(input.ChatId, input.Skip, input.Take);
+            var user = await CurrentUser();
+            await _chatService.GetReadMessage(user.Id, input.ChatId);
+            return JsonResult(messages);
         }
 
         [HttpPost("SendMessageToChat")]
         public async Task<IActionResult> SendMessage(SendMessageInput input)
         {
-            var messageSender = await HttpContext.GetAccessTokenByUserRepository(_userRepository);
-          
-            var msg = await _chatService.SendMessage(input.ChatId, messageSender, input.Message);
-
-            return new ContentResult
-            {
-                StatusCode = 200,
-                ContentType = "application/json",
-                Content = JsonConvert.SerializeObject(msg)
-            };
+            var messageSender = await HttpContext.GetUserByAccessTokenAsync(_userRepository);
+            var message = await _chatService.SendMessage(input.ChatId, messageSender, input.Message);
+            return JsonResult(message);
         }
     }
 }
