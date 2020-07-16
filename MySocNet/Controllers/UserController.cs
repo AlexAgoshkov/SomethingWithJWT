@@ -37,7 +37,7 @@ namespace MySocNet.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : ApiControllerBase
     {
         private readonly IUserService _userService;
         private readonly IFriendService _friendService;
@@ -47,12 +47,12 @@ namespace MySocNet.Controllers
         public UserController(
             IUserService userService,
             IFriendService friendService,
-            IRepository<User> repository,
-            IEmailSender emailSender)
+            IRepository<User> userRepository,
+            IEmailSender emailSender) : base(userRepository)
         {
             _userService = userService;
             _friendService = friendService;
-            _userRepository = repository;
+            _userRepository = userRepository;
             _emailSender = emailSender;
         }
 
@@ -108,7 +108,7 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task UpdateUserAsync(UserUpdate input)
         {
-            var user = await GetUserByAccessToken();
+            var user = await CurrentUser();
             user.FirstName = input.FirstName;
             user.SurName = input.SurName;
             await _userRepository.UpdateAsync(user);
@@ -125,7 +125,7 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task<IActionResult> GetFriendListAsync()
         {
-            var user = await GetUserByAccessToken();
+            var user = await CurrentUser();
             var friendList = await _friendService.GetFriendListAsync(user.Id);
             return Ok(friendList);
         }
@@ -134,7 +134,7 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task AddFriendToUserAsync(int userAddedId)
         {
-            var user = await GetUserByAccessToken();
+            var user = await CurrentUser();
             await _friendService.AddFriendToUserAsync(user.Id, userAddedId);
         }
 

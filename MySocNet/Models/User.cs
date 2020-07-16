@@ -40,20 +40,19 @@ namespace MySocNet.Models
         public string Password { get; set; }
 
         public string UserRole { get; set; }
-
+        
         public int? ActiveKeyId { get; set; }
-
+        
         public virtual ActiveKey ActiveKey { get; set; }
 
-        [JsonIgnore]
         public int? AuthenticationId { get; set; } 
-        [JsonIgnore]
+        
         public virtual Authentication Authentication { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Friend> Friends { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Chat> Chats { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<UserChat> UserChats { get; set; }
 
         public User()

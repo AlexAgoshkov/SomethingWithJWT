@@ -9,14 +9,26 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<Chat> CreateChat(string chatName, User owner, int[] ids);
+        Task<Chat> AddNewUserToChatAsync(int chatId, int userId);
 
-        Task<Message> SendMessage(int chatId, User sender, string message);
+        Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
 
-        Task<IList<ChatResponse>> GetChats(int userId, int skip, int take);
+        Task RemoveChatAsync(int ownerId, int chatId);
 
-        Task<IList<Message>> GetMessages(int chatId, int skip, int take);
+        Task<Chat> EditChatAsync(int chatId, string chatName);
 
-        Task GetReadMessage(int userId, int chatId);
+        Task<Chat> CreateChatAsync(string chatName, User owner, int[] ids);
+
+        Task<Message> SendMessageAsync(int chatId, User sender, string message);
+
+        Task<IList<ChatResponse>> GetChatsAsync(int userId, int skip, int take);
+
+        Task<IList<Message>> GetNewMessagesAsync(int chatId, int skip, int take);
+
+        Task<IList<Message>> GetChatHistoryAsync(int chatId, int skip, int take);
+
+        Task GetReadMessageAsync(int userId, int chatId);
+
+        Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId);
     }
 }

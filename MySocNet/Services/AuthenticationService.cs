@@ -50,8 +50,8 @@ namespace MySocNet.Services
             DateTime created = DateTime.Now;
             DateTime expires = DateTime.Now.AddMinutes(30);
 
-            string accessToken = await GenerateJWTTokenAsync(user, _config["Jwt:SecretKey"], expires);
-            string refreshToken = await GenerateJWTTokenAsync(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
+            string accessToken = GenerateJWTToken(user, _config["Jwt:SecretKey"], expires);
+            string refreshToken = GenerateJWTToken(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
 
             if (!user.AuthenticationId.HasValue)
             {
@@ -102,7 +102,7 @@ namespace MySocNet.Services
             await _authRepository.AddAsync(authentication);
         }
 
-        private async Task<string> GenerateJWTTokenAsync(User user, string secretWord, DateTime expire)
+        private string GenerateJWTToken(User user, string secretWord, DateTime expire)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretWord));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

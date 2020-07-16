@@ -29,7 +29,7 @@ namespace MySocNet.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class LoginController : ControllerBase
+    public class LoginController : ApiControllerBase
     {
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
@@ -46,7 +46,7 @@ namespace MySocNet.Controllers
             IAuthenticationService authenticationService,
             IAccountActivationService accountActiveService,
             IRepository<User> userRepository,
-            IMapper mapper)
+            IMapper mapper) : base(userRepository)
         {
             _config = config;
             _userService = userService;
