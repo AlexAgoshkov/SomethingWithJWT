@@ -30,5 +30,7 @@ namespace MySocNet.Services.Interfaces
         Task GetReadMessageAsync(int userId, int chatId);
 
         Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId);
+
+        Task<Chat> AddImageToChatAsync(Image image, int chatId);
     }
 }

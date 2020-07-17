@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -25,12 +29,15 @@ namespace MySocNet.Controllers
     {
         private readonly IRepository<User> _userRepository;
         private readonly IChatService _chatService;
+        private readonly ImageServicable _imageServicable;
         private readonly IMapper _mapper;
 
         public ChatController(
             IRepository<User> userRepository,
-            IChatService chatService) : base(userRepository)
+            IChatService chatService,
+            ImageServicable imageServicable) : base(userRepository)
         {
+            _imageServicable = imageServicable;
             _chatService = chatService;
             _userRepository = userRepository;
         }
@@ -56,6 +63,14 @@ namespace MySocNet.Controllers
             var user = await CurrentUser();
             await _chatService.RemoveChatAsync(user.Id, chatId);
             return Ok();
+        }
+
+        [HttpPost("AddImageToChat")]
+        public async Task<IActionResult> AddImageToChat(IFormFile image, int chatId)
+        {
+            var pic = await _imageServicable.AddImageAsync(image);
+            await _chatService.AddImageToChatAsync(pic, chatId);
+            return JsonResult(pic);
         }
 
         [HttpPost("EditChat")]

@@ -11,5 +11,7 @@ namespace MySocNet.Response
         public List<string> Users { get; set; }
 
         public string ChatName { get; set; }
+
+        public string Image { get; set; }
     }
 }

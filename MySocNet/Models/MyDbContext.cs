@@ -22,6 +22,8 @@ namespace MySocNet.Models
 
         public DbSet<UserChat> UserChats { get; set; }
 
+        public DbSet<Image> Images { get; set; }
+
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
             Database.Migrate();

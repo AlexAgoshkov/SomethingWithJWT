@@ -15,7 +15,11 @@ namespace MySocNet.Models
 
        public string Text { get; set; }
 
-       public int? ChatId { get; set; }
+        public int? ImageId { get; set; }
+
+        public virtual Image MessageImage { get; set; }
+
+        public int? ChatId { get; set; }
 
        public int? SenderId { get; set; }
 

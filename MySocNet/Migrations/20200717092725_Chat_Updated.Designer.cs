@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200717092725_Chat_Updated")]
+    partial class Chat_Updated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,16 +80,26 @@ namespace MySocNet.Migrations
                     b.Property<int?>("ChatOwnerId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ChatOwnerId");
 
-                    b.HasIndex("ImageId");
-
                     b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("MySocNet.Models.FileModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -118,21 +130,6 @@ namespace MySocNet.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MySocNet.Models.Image", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Images");
-                });
-
             modelBuilder.Entity("MySocNet.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -141,9 +138,6 @@ namespace MySocNet.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ImageId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsRead")
@@ -161,8 +155,6 @@ namespace MySocNet.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
-
-                    b.HasIndex("ImageId");
 
                     b.HasIndex("SenderId");
 
@@ -190,9 +182,6 @@ namespace MySocNet.Migrations
                         .HasColumnType("varchar(25)")
                         .HasMaxLength(25);
 
-                    b.Property<int?>("ImageId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -216,8 +205,6 @@ namespace MySocNet.Migrations
 
                     b.HasIndex("AuthenticationId");
 
-                    b.HasIndex("ImageId");
-
                     b.ToTable("Users");
 
                     b.HasData(
@@ -226,7 +213,7 @@ namespace MySocNet.Migrations
                             Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$7K5T8Z5mq+cZ/O3xBNm47b8Ht5/bsznG+nuFwVaZzUDJW1e+",
+                            Password = "$MYHASH$V1$100$xmQIqr5Q3kWvFEYOdtWwCJi+kZd3+4YlZ8SYt/5MjdIYlCcl",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"
@@ -253,10 +240,6 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.User", "ChatOwner")
                         .WithMany("Chats")
                         .HasForeignKey("ChatOwnerId");
-
-                    b.HasOne("MySocNet.Models.Image", "ChatImage")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -274,10 +257,6 @@ namespace MySocNet.Migrations
                         .WithMany("Messages")
                         .HasForeignKey("ChatId");
 
-                    b.HasOne("MySocNet.Models.Image", "MessageImage")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
-
                     b.HasOne("MySocNet.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId");
@@ -292,10 +271,6 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Authentication", "Authentication")
                         .WithMany()
                         .HasForeignKey("AuthenticationId");
-
-                    b.HasOne("MySocNet.Models.Image", "ProfileImage")
-                        .WithMany()
-                        .HasForeignKey("ImageId");
                 });
 
             modelBuilder.Entity("MySocNet.Models.UserChat", b =>

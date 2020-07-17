@@ -11,6 +11,7 @@ namespace MySocNet.Services.Interfaces
     public interface IUserService
     {
         IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query);
-        Task<User> GetUserByRefreshTokenAsync(string refreshToken);//--
+        Task<User> GetUserByRefreshTokenAsync(string refreshToken);
+        Task<User> AddImageToUser(Image image, int userId);
     }
 }

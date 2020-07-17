@@ -34,6 +34,15 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
+        public async Task<User> AddImageToUser(Image image, int userId)
+        {
+            var user = await _userRepository.GetWhere(x => x.Id == userId)
+                .Include(x => x.ProfileImage).FirstOrDefaultAsync();
+            user.ProfileImage = image;
+            await _userRepository.UpdateAsync(user);
+            return user;
+        }
+
         public IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query)
         {
             switch (userInput.OrderKey)

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200717102435_Chat_Updated_2")]
+    partial class Chat_Updated_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,7 +132,7 @@ namespace MySocNet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Images");
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Message", b =>
@@ -226,7 +228,7 @@ namespace MySocNet.Migrations
                             Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$7K5T8Z5mq+cZ/O3xBNm47b8Ht5/bsznG+nuFwVaZzUDJW1e+",
+                            Password = "$MYHASH$V1$100$0qcC1DKsbZq9f47lvesltdSeE49X8utUlaxJjb4awzowsU/P",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"

@@ -40,6 +40,10 @@ namespace MySocNet.Models
         public string Password { get; set; }
 
         public string UserRole { get; set; }
+
+        public int? ImageId { get; set; }
+
+        public virtual Image ProfileImage { get; set; }
         
         public int? ActiveKeyId { get; set; }
         

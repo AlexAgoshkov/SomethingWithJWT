@@ -12,6 +12,10 @@ namespace MySocNet.Models
         [Key]
         public int Id { get; set; }
 
+        public int? ImageId { get; set; }
+
+        public virtual Image ChatImage { get; set; }
+
         public virtual ICollection<Message> Messages { get; set; }
 
         [JsonIgnore]

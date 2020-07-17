@@ -32,6 +32,7 @@ using MySocNet.Hubs;
 using Microsoft.AspNetCore.Razor.Language;
 using Newtonsoft.Json;
 using MySocNet.Input;
+using System.IO;
 
 namespace MySocNet.Controllers
 {
@@ -43,15 +44,18 @@ namespace MySocNet.Controllers
         private readonly IFriendService _friendService;
         private readonly IEmailSender _emailSender;
         private readonly IRepository<User> _userRepository;
+        private readonly ImageServicable _imageService;
         
         public UserController(
             IUserService userService,
             IFriendService friendService,
             IRepository<User> userRepository,
+            ImageServicable imageService,
             IEmailSender emailSender) : base(userRepository)
         {
             _userService = userService;
             _friendService = friendService;
+            _imageService = imageService;
             _userRepository = userRepository;
             _emailSender = emailSender;
         }
@@ -62,6 +66,14 @@ namespace MySocNet.Controllers
             var user = await _userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken)
                 ?? throw new UnauthorizedAccessException();
             return user;
+        }
+
+        [HttpPost("AddImageToUser")]
+        public async Task<IActionResult> AddImageToUser(IFormFile image, int userId)
+        {
+            var pic = await _imageService.AddImageAsync(image);
+            var user = await _userService.AddImageToUser(pic, userId);
+            return JsonResult(user);
         }
 
         [HttpPost("GetSortedUserList")]

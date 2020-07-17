@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using MySocNet.Models;
@@ -7,6 +8,7 @@ using MySocNet.Services.Interfaces;
 using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -19,6 +21,7 @@ namespace MySocNet.Services
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
+        private readonly ImageServicable _imageService;
         private readonly IMapper _mapper;
 
         public ChatService(
@@ -26,13 +29,24 @@ namespace MySocNet.Services
             IRepository<UserChat> userChatRepository, 
             IRepository<Chat> chatRepository, 
             IRepository<Message> messageRepository,
+            ImageServicable imageService,
             IMapper mapper)
         {
             _userRepository = userRepository;
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
+            _imageService = imageService;
             _mapper = mapper;
+        }
+
+        public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
+        {
+          var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
+                .Include(x => x.ChatImage).FirstOrDefaultAsync();
+              chat.ChatImage = image;
+              await _chatRepository.UpdateAsync(chat);
+              return chat;
         }
 
         public async Task<Chat> AddNewUserToChatAsync(int chatId, int userId)
@@ -42,6 +56,12 @@ namespace MySocNet.Services
             chat.UserChats.Add(new UserChat { ChatId = chatId, UserId = userId });
             await _chatRepository.UpdateAsync(chat);
             return chat;
+        }
+
+        public byte[] ImageToByteArray(string path)
+        {
+            byte[] imgdata = File.ReadAllBytes(path);
+            return imgdata;
         }
 
         public async Task<Chat> RemoveUserFromChatAsync(int chatId, int userId)
@@ -113,9 +133,10 @@ namespace MySocNet.Services
             var result = new ChatDetailsResponse();
             
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
-                .Include(x => x.UserChats).FirstOrDefaultAsync();
+                .Include(x => x.UserChats).Include(x => x.ChatImage).FirstOrDefaultAsync();
+             
             result.ChatName = chat.ChatName;
-
+            result.Image = await _imageService.UploadImageAsync(chat.ChatImage.ImagePath);
             foreach (var item in chat.UserChats)
             {
                 var user = await _userRepository.GetWhere(x => x.Id == item.UserId).FirstOrDefaultAsync();

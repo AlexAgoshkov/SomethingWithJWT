@@ -29,6 +29,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using System.Net;
+using System.IO;
 
 namespace MySocNet
 {
@@ -66,12 +67,14 @@ namespace MySocNet
             services.AddScoped<IAccountActivationService, AccountActiveService>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<ImageServicable, ImageService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
 
             services.AddControllersWithViews();
 
             services.AddSwaggerGen(c =>
             {
+                c.OperationFilter<FileOperationFilter>();
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "NumbaOne-Service", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
