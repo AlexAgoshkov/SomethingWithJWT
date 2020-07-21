@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Services
 {
-    public class ImageService : ImageServicable
+    public class ImageService : IImageService
     {
         private readonly IRepository<Image> _imageRepository;
 
@@ -41,9 +41,17 @@ namespace MySocNet.Services
             byte[] byData = new byte[fs.Length];
             await fs.ReadAsync(byData, 0, byData.Length);
 
-            var base64 = Convert.ToBase64String(byData);
-            var imgSrc = String.Format("data:image/jpg;base64,{0}", base64);
-            return imgSrc;
+            return Convert.ToBase64String(byData);
+           // var imgSrc = String.Format("data:image/jpg;base64,{0}", base64);
+            //return base64;
+        }
+
+        public async Task<byte[]> GetImageByBytesAsync(string path)
+        {
+            FileStream fs = new FileStream(path, FileMode.Open);
+            byte[] byData = new byte[fs.Length];
+            await fs.ReadAsync(byData, 0, byData.Length);
+            return byData;
         }
     }
 }

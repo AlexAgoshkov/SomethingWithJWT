@@ -13,7 +13,7 @@ namespace MySocNet.Services.Interfaces
 
         Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
 
-        Task RemoveChatAsync(int ownerId, int chatId);
+        Task<Chat> RemoveChatAsync(int ownerId, int chatId);
 
         Task<Chat> EditChatAsync(int chatId, string chatName);
 
@@ -26,8 +26,6 @@ namespace MySocNet.Services.Interfaces
         Task<IList<Message>> GetNewMessagesAsync(int chatId, int skip, int take);
 
         Task<IList<Message>> GetChatHistoryAsync(int chatId, int skip, int take);
-
-        Task GetReadMessageAsync(int userId, int chatId);
 
         Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId);
 

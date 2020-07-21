@@ -17,5 +17,7 @@ namespace MySocNet.Response
         public string LastMessage { get; set; }
 
         public string SenderName { get; set; }
+
+        public DateTime DateTime { get; set; }
     }
 }

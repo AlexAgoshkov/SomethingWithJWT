@@ -33,6 +33,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Newtonsoft.Json;
 using MySocNet.Input;
 using System.IO;
+using System.ComponentModel;
 
 namespace MySocNet.Controllers
 {
@@ -44,20 +45,23 @@ namespace MySocNet.Controllers
         private readonly IFriendService _friendService;
         private readonly IEmailSender _emailSender;
         private readonly IRepository<User> _userRepository;
-        private readonly ImageServicable _imageService;
+        private readonly IImageService _imageService;
+        private readonly ILog _log;
         
         public UserController(
             IUserService userService,
             IFriendService friendService,
             IRepository<User> userRepository,
-            ImageServicable imageService,
-            IEmailSender emailSender) : base(userRepository)
+            IImageService imageService,
+            IEmailSender emailSender,
+            ILog log) : base(userRepository)
         {
             _userService = userService;
             _friendService = friendService;
             _imageService = imageService;
             _userRepository = userRepository;
             _emailSender = emailSender;
+            _log = log;
         }
 
         private async Task<User> GetUserByAccessToken()
@@ -159,9 +163,16 @@ namespace MySocNet.Controllers
 
         [HttpDelete("RemoveUser")]
         [Authorize(Policy = Policies.Admin)]
-        public async Task RemoveUserByIdAsync(int id)
+        public async Task<IActionResult> RemoveUserByIdAsync(int id)//---------------
         {
-           await _userRepository.RemoveAsyncById(id);
+            var user = await _userRepository.GetWhere(x => x.Id == id)
+                .Include(x => x.UserChats).Include(x => x.Chats)
+                .ThenInclude(x => x.Messages).FirstOrDefaultAsync();
+            if (user == null)
+                return BadRequest();
+
+            await _userRepository.RemoveAsync(user);
+            return JsonResult(user);
         }
     }
 }

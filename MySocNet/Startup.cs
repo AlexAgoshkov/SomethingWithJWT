@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -30,6 +29,8 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.IO;
+using MySocNet.Logger;
+using NLog;
 
 namespace MySocNet
 {
@@ -67,9 +68,11 @@ namespace MySocNet
             services.AddScoped<IAccountActivationService, AccountActiveService>();
             services.AddScoped<IFriendService, FriendService>();
             services.AddScoped<IChatService, ChatService>();
-            services.AddScoped<ImageServicable, ImageService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<ILastDataService, LastDataService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
-
+            services.AddSingleton<ILog, LogNLog>();
+           
             services.AddControllersWithViews();
 
             services.AddSwaggerGen(c =>
@@ -137,13 +140,15 @@ namespace MySocNet
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-           
+
+            app.ConfigureExceptionHandler(logger);
+
             app.UseSwagger();
 
             app.UseSwaggerUI(c => 

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200721093215_Added_LastData_M")]
+    partial class Added_LastData_M
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -271,7 +273,7 @@ namespace MySocNet.Migrations
                             Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$ErNqvAaMQ4D8boJ8FZ60aTcU+cC61ff/yvnda+X93M5ucygT",
+                            Password = "$MYHASH$V1$100$rQTWW5QUrBo+cfXI1birqoETx5kXSvo+VbMj3HxfSMwn3oZ+",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"

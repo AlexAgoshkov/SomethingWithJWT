@@ -16,8 +16,6 @@ namespace MySocNet.Services.Interfaces
 
         Task UpdateAsync(T entity);
 
-        Task RemoveAsyncById(int id);
-
         Task RemoveAsync(T entiry);
 
         Task<IEnumerable<T>> GetAllAsync();

@@ -54,11 +54,6 @@ namespace MySocNet.Services
             await _context.SaveChangesAsync();
         }
 
-        public Task RemoveAsyncById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task UpdateAsync(T entity)
         {
             _context.Entry(entity).State = EntityState.Modified;

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200720103137_Added_Logger")]
+    partial class Added_Logger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,33 +153,6 @@ namespace MySocNet.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("MySocNet.Models.LastChatData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChatId");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("LastChatDatas");
-                });
-
             modelBuilder.Entity("MySocNet.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -271,7 +246,7 @@ namespace MySocNet.Migrations
                             Id = 1,
                             Email = "example@mail.hock",
                             FirstName = "Larry",
-                            Password = "$MYHASH$V1$100$ErNqvAaMQ4D8boJ8FZ60aTcU+cC61ff/yvnda+X93M5ucygT",
+                            Password = "$MYHASH$V1$100$p2bYy56pCd8V5t98yY9eUlVh50R1XRf+duwBlLWuxryOACu+",
                             SurName = "Richi",
                             UserName = "ggg",
                             UserRole = "Admin"
@@ -311,21 +286,6 @@ namespace MySocNet.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MySocNet.Models.LastChatData", b =>
-                {
-                    b.HasOne("MySocNet.Models.Chat", "Chat")
-                        .WithMany()
-                        .HasForeignKey("ChatId");
-
-                    b.HasOne("MySocNet.Models.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId");
-
-                    b.HasOne("MySocNet.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Message", b =>

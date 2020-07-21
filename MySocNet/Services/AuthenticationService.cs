@@ -71,7 +71,7 @@ namespace MySocNet.Services
 
             User result = null;//TOdo
 
-            if (HashService.Verify(loginCredentials.Password, userByLogin.Password))
+            if (userByLogin != null && HashService.Verify(loginCredentials.Password, userByLogin.Password))
             {
                 result = _mapper.Map<User>(userByLogin);
             }

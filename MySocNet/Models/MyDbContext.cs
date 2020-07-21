@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using MySocNet.Logger;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +25,10 @@ namespace MySocNet.Models
         public DbSet<UserChat> UserChats { get; set; }
 
         public DbSet<Image> Images { get; set; }
+
+        public DbSet<LogData> LogData { get; set; }
+
+        public DbSet<LastChatData> LastChatDatas { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
@@ -53,6 +59,7 @@ namespace MySocNet.Models
                 Email = "example@mail.hock",
                 Password = HashService.Hash("666"),
                 UserRole = "Admin",
+                AuthenticationId = 1
             });
 
             modelBuilder.Entity<Friend>().HasData(new Friend
@@ -61,6 +68,15 @@ namespace MySocNet.Models
                 UserAddedId = 1,
                 UserId = 1
             });
+
+            modelBuilder.Entity<LogData>();
         }
+
+        public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddFilter((category, level) => category == DbLoggerCategory.Database.Command.Name
+                                && level == LogLevel.Information)
+                .AddProvider(new DbLoggerProvider());
+        });
     }
 }

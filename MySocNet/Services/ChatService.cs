@@ -21,15 +21,17 @@ namespace MySocNet.Services
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
-        private readonly ImageServicable _imageService;
+        private readonly IImageService _imageService;
+        private readonly ILastDataService _lastDataService;
         private readonly IMapper _mapper;
 
         public ChatService(
-            IRepository<User> userRepository, 
-            IRepository<UserChat> userChatRepository, 
-            IRepository<Chat> chatRepository, 
+            IRepository<User> userRepository,
+            IRepository<UserChat> userChatRepository,
+            IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
-            ImageServicable imageService,
+            IImageService imageService,
+            ILastDataService lastDataService,
             IMapper mapper)
         {
             _userRepository = userRepository;
@@ -37,22 +39,28 @@ namespace MySocNet.Services
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
             _imageService = imageService;
+            _lastDataService = lastDataService;
             _mapper = mapper;
         }
 
         public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
         {
-          var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
-                .Include(x => x.ChatImage).FirstOrDefaultAsync();
-              chat.ChatImage = image;
-              await _chatRepository.UpdateAsync(chat);
-              return chat;
+            var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
+                  .Include(x => x.ChatImage).FirstOrDefaultAsync();
+            chat.ChatImage = image;
+            await _chatRepository.UpdateAsync(chat);
+            return chat;
         }
 
         public async Task<Chat> AddNewUserToChatAsync(int chatId, int userId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).FirstOrDefaultAsync();
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
+
+            if (chat == null || user == null)
+                return new Chat();
+
             chat.UserChats.Add(new UserChat { ChatId = chatId, UserId = userId });
             await _chatRepository.UpdateAsync(chat);
             return chat;
@@ -73,7 +81,7 @@ namespace MySocNet.Services
             return await _chatRepository.GetByIdAsync(chatId);
         }
 
-        public async Task RemoveChatAsync(int ownerId, int chatId)
+        public async Task<Chat> RemoveChatAsync(int ownerId, int chatId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).Include(x => x.Messages).FirstOrDefaultAsync();
@@ -81,12 +89,14 @@ namespace MySocNet.Services
             {
                await _chatRepository.RemoveAsync(chat);
             }
+
+            return chat;
         }
 
         public async Task<Chat> EditChatAsync(int chatId, string chatName)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
-            if (!string.IsNullOrWhiteSpace(chatName))
+            if (chat != null && !string.IsNullOrWhiteSpace(chatName))
             {
                 chat.ChatName = chatName;
                 await _chatRepository.UpdateAsync(chat);
@@ -96,32 +106,21 @@ namespace MySocNet.Services
 
         public async Task<IList<ChatResponse>> GetChatsAsync(int userId, int skip, int take)
         {          
-            var user = await _userRepository.GetWhere(x => x.Id == userId)
-                .Include(x => x.UserChats)
-                .Skip(skip).Take(take).FirstOrDefaultAsync();
-
             var chats = new List<ChatResponse>();
-           
-            foreach (var item in user.UserChats)
-            {
-                var chat = await _chatRepository.GetWhere(x => x.Id == item.ChatId)
-                    .Include(x => x.UserChats).Include(x => x.Messages).FirstOrDefaultAsync();
 
-                if (chat != null && chat.Messages.Count > 0)
+            var lastdata = await _lastDataService.GetLastData(userId);
+
+            foreach (var item in lastdata)
+            {
+                chats.Add(new ChatResponse
                 {
-                    var msg = chat.Messages.LastOrDefault(); //last message
-                    
-                    var sender = await _userRepository.GetByIdAsync(msg.SenderId.Value);//last user aka sender
-                   
-                    chats.Add(new ChatResponse
-                    {
-                        Id = chat.Id,
-                        ChatName = chat.ChatName,
-                        UnReadMessageCount = chat.Messages.Count,
-                        LastMessage = msg.Text,
-                        SenderName = sender.FirstName
-                    });
-                }
+                    Id = item.ChatId.Value,
+                    ChatName = item.Chat.ChatName,
+                    LastMessage = item.Message.Text,
+                    SenderName = $"{item.User.FirstName} {item.User.SurName}",
+                    DateTime = item.Message.Time,
+                    UnReadMessageCount = await GetUnReadCountMessages(item.ChatId.Value)
+                });
             }
 
             return chats;
@@ -134,15 +133,17 @@ namespace MySocNet.Services
             
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).Include(x => x.ChatImage).FirstOrDefaultAsync();
-             
-            result.ChatName = chat.ChatName;
-            result.Image = await _imageService.UploadImageAsync(chat.ChatImage.ImagePath);
-            foreach (var item in chat.UserChats)
+            if (chat != null)
             {
-                var user = await _userRepository.GetWhere(x => x.Id == item.UserId).FirstOrDefaultAsync();
-                list.Add(user.FirstName);
+                result.ChatName = chat.ChatName;
+                result.Image = await _imageService.UploadImageAsync(chat.ChatImage.ImagePath);
+                var userChats = chat.UserChats.Select(x => x.User);
+                foreach (var item in userChats)
+                {
+                    list.Add(item.FirstName);
+                }
+                result.Users = list;
             }
-            result.Users = list;
 
             return result;
         }
@@ -156,17 +157,21 @@ namespace MySocNet.Services
 
         public async Task<IList<Message>> GetNewMessagesAsync(int chatId, int skip, int take)
         {
-            return await _messageRepository
+            var result = await _messageRepository
                 .GetWhere(x => x.ChatId == chatId && x.IsRead == false)
                 .Skip(skip).Take(take).ToListAsync();
+            await GetReadMessageAsync(chatId);
+            return result;
         }
 
-        public async Task GetReadMessageAsync(int userId, int chatId)
+        private async Task<int> GetUnReadCountMessages(int chatId)
         {
-            var user = await _userRepository.GetWhere(x => x.Id == userId)
-                .Include(x => x.Chats)
-                .ThenInclude(x => x.Messages).FirstOrDefaultAsync();
-            var chats = user.Chats.Where(x => x.Id == chatId).FirstOrDefault();
+            return await _messageRepository.CountWhereAsync(x => x.ChatId == chatId);
+        }
+
+        private async Task GetReadMessageAsync(int chatId)
+        {
+            var chats = await _chatRepository.GetWhere(x => x.Id == chatId).Include(x => x.Messages).FirstOrDefaultAsync();
             var messages = chats.Messages.ToList();
             foreach (var item in messages)
             {
@@ -212,7 +217,7 @@ namespace MySocNet.Services
               Time = DateTime.Now
             };
             chat.Messages.Add(responseMessage);
-
+            var lastdata = new LastChatData { Chat = chat, User = sender, Message = responseMessage };
             await _chatRepository.UpdateAsync(chat);
 
             return responseMessage;
