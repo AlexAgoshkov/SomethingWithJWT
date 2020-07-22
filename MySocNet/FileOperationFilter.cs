@@ -54,8 +54,6 @@ namespace MySocNet
                 ["multipart/form-data"] = uploadFileMediaType
             }
                 };
-
-
             }
         }
     }

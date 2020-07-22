@@ -40,8 +40,11 @@ namespace MySocNet.Services
         public async Task ConfirmEmailAsync(string key)
         {
             var activeKey = await _activeKeyRepository.FirstOrDefaultAsync(x => x.Key == key);
-            var time = DateTime.Now - activeKey.Created;
+            if (activeKey == null)
+                return;
 
+            var time = DateTime.Now - activeKey.Created;
+          
             if (!activeKey.IsActive && time.Hours < 1)
             {
                 activeKey.IsActive = true;

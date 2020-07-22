@@ -46,6 +46,10 @@
               "target": "Package",
               "version": "[8.0.0, )"
             },
+            "Grpc.Core": {
+              "target": "Package",
+              "version": "[2.30.0, )"
+            },
             "MailKit": {
               "target": "Package",
               "version": "[2.8.0, )"
@@ -94,6 +98,10 @@
               "target": "Package",
               "version": "[3.1.5, )"
             },
+            "Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[3.1.6, )"
+            },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
               "version": "[3.1.3, )"
@@ -102,9 +110,33 @@
               "target": "Package",
               "version": "[2.0.3, )"
             },
+            "NLog": {
+              "target": "Package",
+              "version": "[4.7.2, )"
+            },
+            "NLog.Config": {
+              "target": "Package",
+              "version": "[4.7.2, )"
+            },
+            "NLog.Extensions.Logging": {
+              "target": "Package",
+              "version": "[1.6.4, )"
+            },
+            "NLog.Schema": {
+              "target": "Package",
+              "version": "[4.7.2, )"
+            },
+            "NLog.Web.AspNetCore": {
+              "target": "Package",
+              "version": "[4.9.2, )"
+            },
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[12.0.3, )"
+            },
+            "Ninject": {
+              "target": "Package",
+              "version": "[3.3.4, )"
             },
             "Swashbuckle.AspNetCore.Swagger": {
               "target": "Package",
@@ -141,7 +173,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.301\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.302\\RuntimeIdentifierGraph.json"
         }
       }
     }

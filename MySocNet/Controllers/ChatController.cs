@@ -29,28 +29,21 @@ namespace MySocNet.Controllers
     [ApiController]
     public class ChatController : ApiControllerBase
     {
-        private readonly IRepository<User> _userRepository;
+      
         private readonly IChatService _chatService;
         private readonly IImageService _imageService;
         private readonly ILogger<ChatController> _logger;
-        private readonly ILastDataService _lastDataService;
-        private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Image> _imageRepository;
 
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
-            IImageService imageServicable,
+            IImageService imageService,
             ILogger<ChatController> logger,
-            IRepository<Chat> chatRepository,
-            ILastDataService lastDataService,
             IRepository<Image> imageRepository) : base(userRepository)
         {
-            _imageService = imageServicable;
+            _imageService = imageService;
             _chatService = chatService;
-            _chatRepository = chatRepository;
-            _userRepository = userRepository;
-            _lastDataService = lastDataService;
             _imageRepository = imageRepository;
             _logger = logger;
         }
@@ -59,6 +52,9 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetImage(int imageId)
         {
             var image = await _imageRepository.GetByIdAsync(imageId);
+            if (image == null)
+                return BadRequest();
+            
             var imageBase64 = await _imageService.UploadImageAsync(image.ImagePath);
             return JsonResult(imageBase64);
         }
@@ -228,8 +224,6 @@ namespace MySocNet.Controllers
             {
                 var messageSender = await CurrentUser();
                 var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
-                var lastdata = new LastChatData { Message = message, ChatId = input.ChatId, User = messageSender };
-                await _lastDataService.AddLastChatData(lastdata);
                 return JsonResult(message);
             }
             catch (Exception ex)

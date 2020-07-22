@@ -23,7 +23,7 @@ namespace MySocNet.Services.Interfaces
 
         Task<IList<ChatResponse>> GetChatsAsync(int userId, int skip, int take);
 
-        Task<IList<Message>> GetNewMessagesAsync(int chatId, int skip, int take);
+        Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int skip, int take);
 
         Task<IList<Message>> GetChatHistoryAsync(int chatId, int skip, int take);
 

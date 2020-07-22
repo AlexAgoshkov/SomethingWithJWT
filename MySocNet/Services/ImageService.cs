@@ -23,7 +23,7 @@ namespace MySocNet.Services
         {
             Image result = null;
             var uploads = Path.Combine("Images");
-            if (input.Length > 0)
+            if(input != null && input.Length > 0)
             {
                 using (var fileStream = new FileStream(Path.Combine(uploads, input.FileName), FileMode.Create))
                 {

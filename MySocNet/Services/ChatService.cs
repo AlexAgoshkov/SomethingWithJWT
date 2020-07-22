@@ -66,12 +66,6 @@ namespace MySocNet.Services
             return chat;
         }
 
-        public byte[] ImageToByteArray(string path)
-        {
-            byte[] imgdata = File.ReadAllBytes(path);
-            return imgdata;
-        }
-
         public async Task<Chat> RemoveUserFromChatAsync(int chatId, int userId)
         {
             var userChat = await _userChatRepository
@@ -155,13 +149,17 @@ namespace MySocNet.Services
                 .Skip(skip).Take(take).ToListAsync();
         }
 
-        public async Task<IList<Message>> GetNewMessagesAsync(int chatId, int skip, int take)
+        public async Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int skip, int take)
         {
+            var response = new GetNewMessageResponse();
+
             var result = await _messageRepository
                 .GetWhere(x => x.ChatId == chatId && x.IsRead == false)
                 .Skip(skip).Take(take).ToListAsync();
+          
+            response.Messages = result;
             await GetReadMessageAsync(chatId);
-            return result;
+            return response;
         }
 
         private async Task<int> GetUnReadCountMessages(int chatId)
@@ -172,6 +170,9 @@ namespace MySocNet.Services
         private async Task GetReadMessageAsync(int chatId)
         {
             var chats = await _chatRepository.GetWhere(x => x.Id == chatId).Include(x => x.Messages).FirstOrDefaultAsync();
+            if (chats == null)
+                return;
+
             var messages = chats.Messages.ToList();
             foreach (var item in messages)
             {
@@ -208,16 +209,20 @@ namespace MySocNet.Services
         public async Task<Message> SendMessageAsync(int chatId, User sender, string message)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
-            var responseMessage = new Message 
-            { 
-              ChatId = chatId, 
-              Text = message, 
-              Sender = sender,
-              IsRead = false,
-              Time = DateTime.Now
+            if (chat == null)
+                return new Message();
+            
+            var responseMessage = new Message
+            {
+                ChatId = chatId,
+                Text = message,
+                Sender = sender,
+                IsRead = false,
+                Time = DateTime.Now
             };
             chat.Messages.Add(responseMessage);
-            var lastdata = new LastChatData { Chat = chat, User = sender, Message = responseMessage };
+            var lastdata = new LastChatData { ChatId = chat.Id, User = sender, Message = responseMessage };
+            await _lastDataService.AddLastChatData(lastdata);
             await _chatRepository.UpdateAsync(chat);
 
             return responseMessage;

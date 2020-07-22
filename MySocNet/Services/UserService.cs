@@ -38,8 +38,12 @@ namespace MySocNet.Services
         {
             var user = await _userRepository.GetWhere(x => x.Id == userId)
                 .Include(x => x.ProfileImage).FirstOrDefaultAsync();
-            user.ProfileImage = image;
-            await _userRepository.UpdateAsync(user);
+            if (user != null && image != null)
+            {
+                user.ProfileImage = image;
+                await _userRepository.UpdateAsync(user);
+            }
+           
             return user;
         }
 
