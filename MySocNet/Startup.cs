@@ -31,13 +31,12 @@ using System.Net;
 using System.IO;
 using MySocNet.Logger;
 using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace MySocNet
 {
     public class Startup
     {
-        readonly string VueCorsPolicy = "_vueCorsPolicy";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -51,16 +50,6 @@ namespace MySocNet
             services.AddSignalR();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
-
-            services.AddCors(options =>
-            {
-                options.AddPolicy(name: VueCorsPolicy,
-                                  builder =>
-                                  {
-                                      builder
-                                        .WithOrigins("http://localhost:57377");
-                                  });
-            });
 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailSender, EmailSender>();
@@ -78,7 +67,7 @@ namespace MySocNet
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<FileOperationFilter>();
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "NumbaOne-Service", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "The Deepest Network", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -147,6 +136,8 @@ namespace MySocNet
                 app.UseDeveloperExceptionPage();
             }
 
+            //LoggerFactory.AddProvider(new DbLoggerProvider(app));
+
             app.ConfigureExceptionHandler(logger);
 
             app.UseSwagger();
@@ -156,11 +147,11 @@ namespace MySocNet
                 c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "My API V1");
             });
 
-            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetService<MyDbContext>();
-                context.Database.Migrate();
-            }
+            //using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetService<MyDbContext>();
+            //    context.Database.Migrate();
+            //}
 
             app.UseHttpsRedirection();
 

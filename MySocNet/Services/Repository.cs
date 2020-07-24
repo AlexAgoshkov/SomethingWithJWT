@@ -26,6 +26,12 @@ namespace MySocNet.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddRangeAsync(IList<T> entities)
+        {
+            await _context.Set<T>().AddRangeAsync(entities);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<int> CountAllAsync()
             => await _context.Set<T>().CountAsync();
 

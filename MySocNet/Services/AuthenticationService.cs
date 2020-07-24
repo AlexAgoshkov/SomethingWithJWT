@@ -69,14 +69,13 @@ namespace MySocNet.Services
             var userByLogin = await _userRepository.GetWhere(x => x.UserName == loginCredentials.UserName)
                 .Include(x => x.Authentication).Include(x => x.ActiveKey).FirstOrDefaultAsync();
 
-            User result = null;//TOdo
+            if (userByLogin == null)
+                throw new Exception("User Not Found");
 
-            if (userByLogin != null && HashService.Verify(loginCredentials.Password, userByLogin.Password))
-            {
-                result = _mapper.Map<User>(userByLogin);
-            }
+            if (!HashService.Verify(loginCredentials.Password, userByLogin.Password))
+                throw new Exception("Login or Password Was Wrong");
 
-            return result;
+                return _mapper.Map<User>(userByLogin);
         }
 
         private async Task CreateNewTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)

@@ -21,6 +21,7 @@ namespace MySocNet.Services
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
+        private readonly IRepository<UserMessage> _userMessageRepository;
         private readonly IImageService _imageService;
         private readonly ILastDataService _lastDataService;
         private readonly IMapper _mapper;
@@ -30,6 +31,7 @@ namespace MySocNet.Services
             IRepository<UserChat> userChatRepository,
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
+            IRepository<UserMessage> userMessageRepository,
             IImageService imageService,
             ILastDataService lastDataService,
             IMapper mapper)
@@ -38,209 +40,233 @@ namespace MySocNet.Services
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
+            _userMessageRepository = userMessageRepository;
             _imageService = imageService;
             _lastDataService = lastDataService;
             _mapper = mapper;
         }
 
-        public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
+        public async Task<ChatResponse> AddImageToChatAsync(Image image, int chatId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                   .Include(x => x.ChatImage).FirstOrDefaultAsync();
             chat.ChatImage = image;
             await _chatRepository.UpdateAsync(chat);
-            return chat;
+            return _mapper.Map<ChatResponse>(chat);
         }
 
-        public async Task<Chat> AddNewUserToChatAsync(int chatId, int userId)
+        public async Task<ChatResponse> AddNewUserToChatAsync(int chatId, int userId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).FirstOrDefaultAsync();
-            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
 
-            if (chat == null || user == null)
-                return new Chat();
+            if (chat == null)
+                throw new ArgumentException("Chat not found");
+
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
+            // DONE: check global exception handler. correct status codes must be returned
+            if (user == null)
+                throw new ArgumentException("User not found");
 
             chat.UserChats.Add(new UserChat { ChatId = chatId, UserId = userId });
+
             await _chatRepository.UpdateAsync(chat);
-            return chat;
+
+            return _mapper.Map<ChatResponse>(chat);
         }
 
-        public async Task<Chat> RemoveUserFromChatAsync(int chatId, int userId)
+        public async Task<ChatResponse> RemoveUserFromChatAsync(int chatId, int userId)
         {
             var userChat = await _userChatRepository
                 .GetWhere(x => x.ChatId == chatId && x.UserId == userId)
+                .Include(x => x.Chat)
                 .FirstOrDefaultAsync();
+
+            // DONE: check fot null
+            if (userChat == null)
+                throw new Exception("UserChat not found");
+
             await _userChatRepository.RemoveAsync(userChat);
-            return await _chatRepository.GetByIdAsync(chatId);
+            return _mapper.Map<ChatResponse>(userChat.Chat);
         }
 
-        public async Task<Chat> RemoveChatAsync(int ownerId, int chatId)
+        public async Task<ChatResponse> RemoveChatAsync(int ownerId, int chatId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).Include(x => x.Messages).FirstOrDefaultAsync();
+
+            // DONE: check for null
+            if (chat == null)
+                throw new Exception("Chat not found");
             if (chat.ChatOwnerId == ownerId)
             {
-               await _chatRepository.RemoveAsync(chat);
+                await _chatRepository.RemoveAsync(chat);
             }
 
-            return chat;
+            return _mapper.Map<ChatResponse>(chat);
         }
 
-        public async Task<Chat> EditChatAsync(int chatId, string chatName)
+        public async Task<ChatResponse> EditChatAsync(int chatId, string chatName)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
+
+            // DONE: check for null
+            if (chat == null)
+                throw new Exception("Chat not found");
+
             if (chat != null && !string.IsNullOrWhiteSpace(chatName))
             {
                 chat.ChatName = chatName;
                 await _chatRepository.UpdateAsync(chat);
             }
-            return chat;
+            return _mapper.Map<ChatResponse>(chat);
         }
 
-        public async Task<IList<ChatResponse>> GetChatsAsync(int userId, int skip, int take)
-        {          
-            var chats = new List<ChatResponse>();
-
-            var lastdata = await _lastDataService.GetLastData(userId);
-
-            foreach (var item in lastdata)
-            {
-                chats.Add(new ChatResponse
-                {
-                    Id = item.ChatId.Value,
-                    ChatName = item.Chat.ChatName,
-                    LastMessage = item.Message.Text,
-                    SenderName = $"{item.User.FirstName} {item.User.SurName}",
-                    DateTime = item.Message.Time,
-                    UnReadMessageCount = await GetUnReadCountMessages(item.ChatId.Value)
-                });
-            }
-
-            return chats;
+        public async Task<IList<ChatLastResponse>> GetChatsAsync(int userId, int skip, int take)
+        {
+            // DONE: configure and test mapping; remove foreach
+            return _mapper.Map<List<ChatLastResponse>>(await _lastDataService.GetLastData(userId));
         }
 
+        // DONE: refactoring
         public async Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId)
         {
-            List<string> list = new List<string>(); //todo user list
+            List<User> list = new List<User>();
             var result = new ChatDetailsResponse();
-            
-            var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
-                .Include(x => x.UserChats).Include(x => x.ChatImage).FirstOrDefaultAsync();
-            if (chat != null)
-            {
-                result.ChatName = chat.ChatName;
-                result.Image = await _imageService.UploadImageAsync(chat.ChatImage.ImagePath);
-                var userChats = chat.UserChats.Select(x => x.User);
-                foreach (var item in userChats)
-                {
-                    list.Add(item.FirstName);
-                }
-                result.Users = list;
-            }
 
+            var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
+                .Include(x => x.UserChats).ThenInclude(x => x.User).Include(x => x.ChatImage).FirstOrDefaultAsync();
+
+            if (chat == null)
+                throw new Exception("Chat not found");
+
+            var users = await _userRepository.GetWhere(x => chat.UserChats.Select(y => y.UserId)
+                .Contains(x.Id)).ToListAsync();
+
+            result.ChatName = chat.ChatName;
+            result.Image = await _imageService.DownloadAsync(chat.ChatImage.ImagePath);
+              
+            foreach (var item in users)
+            {
+                list.Add(item);
+            }
+            result.Users = list;
+            
             return result;
         }
 
-        public async Task<IList<Message>> GetChatHistoryAsync(int chatId, int skip, int take)
+        public async Task<IList<MessageResponse>> GetChatHistoryAsync(int chatId, int skip, int take)
         {
-            return await _messageRepository
+            return _mapper.Map<List<MessageResponse>>(await _messageRepository
                 .GetWhere(x => x.ChatId == chatId)
-                .Skip(skip).Take(take).ToListAsync();
+                .Skip(skip).Take(take).ToListAsync());
         }
 
-        public async Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int skip, int take)
+        public async Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int userId, int skip, int take)
         {
-            var response = new GetNewMessageResponse();
+            var userMes = await _userMessageRepository.GetWhere(x => x.UserId == userId && !x.IsRead)
+                .Select(x => x.MessageId).ToListAsync();
 
-            var result = await _messageRepository
-                .GetWhere(x => x.ChatId == chatId && x.IsRead == false)
-                .Skip(skip).Take(take).ToListAsync();
-          
-            response.Messages = result;
-            await GetReadMessageAsync(chatId);
-            return response;
+            var query = _messageRepository
+                .GetWhere(x =>  userMes.Contains(x.Id) && x.ChatId == chatId);
+
+            var totalCount = await query.CountAsync();
+
+            var result = await query
+                .OrderByDescending(x => x.Time)
+                .Skip(skip).Take(take)
+                .ToListAsync();
+
+            // DONE: create endpoint for mark message as read
+            var messageResponse = _mapper.Map<List<MessageResponse>>(result);
+            return new GetNewMessageResponse(messageResponse, totalCount);
         }
 
-        private async Task<int> GetUnReadCountMessages(int chatId)
+        public async Task<IList<MessageResponse>> GetUnReadMessages(int userId)
         {
-            return await _messageRepository.CountWhereAsync(x => x.ChatId == chatId);
+            return _mapper.Map<IList<MessageResponse>>(await _userMessageRepository.GetWhere(x => x.UserId == userId && !x.IsRead)
+                .Include(x => x.Message).Select(x => x.Message).ToListAsync());
         }
-
-        private async Task GetReadMessageAsync(int chatId)
+        public async Task ReadMessages(int userId) //------------------------------------------
         {
-            var chats = await _chatRepository.GetWhere(x => x.Id == chatId).Include(x => x.Messages).FirstOrDefaultAsync();
-            if (chats == null)
-                return;
+            var test = await _userMessageRepository.GetWhere(x => x.UserId == userId && !x.IsRead)
+                .ToListAsync();
 
-            var messages = chats.Messages.ToList();
-            foreach (var item in messages)
+            foreach (var item in test)
             {
-                if (!item.IsRead)
-                {
-                    item.IsRead = true;
-                }
+                item.IsRead = true;
+                await _userMessageRepository.UpdateAsync(item);
             }
-            await _chatRepository.UpdateAsync(chats);
         }
 
-        public async Task<Chat> CreateChatAsync(string chatName, User owner, int[] usersIds)
+        public async Task<ChatResponse> CreateChatAsync(string chatName, User owner, int[] usersIds)
         {
-            var chat = new Chat { ChatName = chatName, ChatOwner = owner  };
+            var chat = new Chat { ChatName = chatName, ChatOwner = owner };
 
-            var users = await GetUsersByIdListAsync(usersIds.Distinct());
             await _userChatRepository.AddAsync(new UserChat { Chat = chat, User = owner });
 
+            var users = await _userRepository.GetWhere(x => usersIds.Distinct().Contains(x.Id))
+                .Where(x => x.Id != owner.Id).ToListAsync();
+            // DONE: think about it
+            List<UserChat> list = new List<UserChat>();
             foreach (var item in users)
             {
-                if (item.Id == owner.Id)
-                    continue;
-
-                await _userChatRepository.AddAsync(new UserChat
-                {
-                    Chat = chat,
-                    User = item
-                });
+                list.Add(new UserChat { User = item, Chat = chat});
             }
 
-            return chat;
+            await _userChatRepository.AddRangeAsync(list);
+            return _mapper.Map<ChatResponse>(chat);
         }
 
-        public async Task<Message> SendMessageAsync(int chatId, User sender, string message)
+        public async Task<MessageResponse> SendMessageAsync(int chatId, User sender, string message)
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
+            var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
+                .Select(x => x.UserId).ToListAsync();
+
+            // DONE: throw ex
             if (chat == null)
-                return new Message();
-            
+                throw new Exception("User not found");
+
             var responseMessage = new Message
             {
                 ChatId = chatId,
                 Text = message,
                 Sender = sender,
-                IsRead = false,
+
                 Time = DateTime.Now
             };
             chat.Messages.Add(responseMessage);
-            var lastdata = new LastChatData { ChatId = chat.Id, User = sender, Message = responseMessage };
-            await _lastDataService.AddLastChatData(lastdata);
-            await _chatRepository.UpdateAsync(chat);
 
-            return responseMessage;
+            // DONE: use mapper instead new { }----------
+          
+            await _lastDataService.AddLastChatData(new LastChatData
+            {
+                ChatId = chat.Id,
+                UserName = $"{sender.FirstName} {sender.SurName}",
+                Text = message,
+            });
+
+            await _chatRepository.UpdateAsync(chat);
+            await CreateUnReadMessages(users, responseMessage); //Add data to UserMessage Table
+
+            return _mapper.Map<MessageResponse>(responseMessage);
+        }
+
+        private async Task CreateUnReadMessages(List<int> users, Message responseMessage)
+        {
+            List<UserMessage> list = new List<UserMessage>();
+            foreach (var item in users)
+            {
+                list.Add(new UserMessage { UserId = item, MessageId = responseMessage.Id, IsRead = false });
+            }
+            await _userMessageRepository.AddRangeAsync(list);
         }
 
         private async Task<IList<User>> GetUsersByIdListAsync(IEnumerable<int> ids)
         {
-            List<User> result = new List<User>();
-
-            foreach (var item in ids)
-            {
-                var user = await _userRepository.GetByIdAsync(item);
-
-                if (user != null)
-                    result.Add(user);
-            }
-
-            return result;
+            // DONE: rewrite with LINQ
+            return await _userRepository.GetWhere(x => ids.Contains(x.Id)).ToListAsync();
         }
     }
 }

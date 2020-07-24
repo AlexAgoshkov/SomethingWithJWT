@@ -14,15 +14,12 @@ namespace MySocNet.Services
     {
         private readonly IRepository<LastChatData> _lastDataRepository;
         private readonly IRepository<UserChat> _userChatRepository;
-        private readonly IRepository<Chat> _chatRepository;
         
         public LastDataService(IRepository<LastChatData> lastDataRepository, 
-            IRepository<UserChat> userChatRepository,
-            IRepository<Chat> chatRepository)
+            IRepository<UserChat> userChatRepository)
         {
             _lastDataRepository = lastDataRepository;
             _userChatRepository = userChatRepository;
-            _chatRepository = chatRepository;
         }
 
         public async Task AddLastChatData(LastChatData lastChatData)
@@ -31,10 +28,9 @@ namespace MySocNet.Services
                 .GetWhere(x => x.ChatId == lastChatData.ChatId).FirstOrDefaultAsync();
             if (lastdata != null)
             {
-                var chat = await _lastDataRepository.GetWhere(x => x.ChatId == lastChatData.ChatId).FirstOrDefaultAsync();
-                chat.Message = lastChatData.Message;
-                chat.User = lastChatData.User;
-                await _lastDataRepository.UpdateAsync(chat);
+                lastdata.UserName = lastChatData.UserName;
+                lastdata.Text = lastChatData.Text;
+                await _lastDataRepository.UpdateAsync(lastdata);
             }
             else
             {
@@ -44,14 +40,12 @@ namespace MySocNet.Services
 
         public async Task<IList<LastChatData>> GetLastData(int userId)
         {
-            var userChat = await _userChatRepository.GetWhere(x => x.UserId == userId)
+            var userChatIds = await _userChatRepository.GetWhere(x => x.UserId == userId)
                 .Select(x => x.ChatId).ToListAsync();
 
-            return await _lastDataRepository.GetWhere(x => userChat.Contains(x.ChatId.Value))
-            .Include(x => x.User)
-            .ThenInclude(x => x.UserChats)
-            .ThenInclude(x => x.Chat)
-            .ThenInclude(x => x.Messages).ToListAsync();
+            return await _lastDataRepository.GetWhere(x => userChatIds.Contains(x.ChatId))
+                .Include(x => x.Chat)
+                .ToListAsync();
         }
     }
 }

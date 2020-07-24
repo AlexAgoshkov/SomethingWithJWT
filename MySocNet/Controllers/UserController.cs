@@ -72,14 +72,6 @@ namespace MySocNet.Controllers
             return user;
         }
 
-        [HttpPost("AddImageToUser")]
-        public async Task<IActionResult> AddImageToUser(IFormFile image, int userId)
-        {
-            var pic = await _imageService.AddImageAsync(image);
-            var user = await _userService.AddImageToUser(pic, userId);
-            return JsonResult(user);
-        }
-
         [HttpPost("GetSortedUserList")]
         public async Task<IActionResult> GetUsers(SearchUserInput userInput)
         {

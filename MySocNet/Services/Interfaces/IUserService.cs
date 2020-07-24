@@ -1,5 +1,6 @@
 ﻿using MySocNet.InputData;
 using MySocNet.Models;
+using MySocNet.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,6 @@ namespace MySocNet.Services.Interfaces
     {
         IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query);
         Task<User> GetUserByRefreshTokenAsync(string refreshToken);
-        Task<User> AddImageToUser(Image image, int userId);
+        Task<UserResponse> AddImageToUser(Image image, int userId);
     }
 }

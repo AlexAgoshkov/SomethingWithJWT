@@ -7,6 +7,7 @@ using MimeKit.Encodings;
 using MySocNet.Enums;
 using MySocNet.InputData;
 using MySocNet.Models;
+using MySocNet.Response;
 using MySocNet.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
-        public async Task<User> AddImageToUser(Image image, int userId)
+        public async Task<UserResponse> AddImageToUser(Image image, int userId)
         {
             var user = await _userRepository.GetWhere(x => x.Id == userId)
                 .Include(x => x.ProfileImage).FirstOrDefaultAsync();
@@ -44,7 +45,7 @@ namespace MySocNet.Services
                 await _userRepository.UpdateAsync(user);
             }
            
-            return user;
+            return _mapper.Map<UserResponse>(user);
         }
 
         public IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query)

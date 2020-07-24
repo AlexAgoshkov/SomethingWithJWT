@@ -9,8 +9,8 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IImageService
     {
-        Task<string> UploadImageAsync(string path);
-        Task<Image> AddImageAsync(IFormFile input);
+        Task<string> DownloadAsync(string path);
+        Task<Image> UploadAsync(IFormFile input);
         Task<byte[]> GetImageByBytesAsync(string path);
     }
 }

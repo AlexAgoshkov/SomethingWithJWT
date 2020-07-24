@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 using MySocNet.Logger;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +30,8 @@ namespace MySocNet.Models
 
         public DbSet<LogData> LogData { get; set; }
 
+        public DbSet<UserMessage> UserMessages { get; set; }
+
         public DbSet<LastChatData> LastChatDatas { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
@@ -48,28 +52,12 @@ namespace MySocNet.Models
                 .WithMany(c => c.UserChats)
                 .HasForeignKey(uc => uc.ChatId);
 
-
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<User>().HasData(new User
-            {
-                Id = 1,
-                UserName = "ggg",
-                FirstName = "Larry",
-                SurName = "Richi",
-                Email = "example@mail.hock",
-                Password = HashService.Hash("666"),
-                UserRole = "Admin",
-                AuthenticationId = 1
-            });
-
-            modelBuilder.Entity<Friend>().HasData(new Friend
-            {
-                Id = 1,
-                UserAddedId = 1,
-                UserId = 1
-            });
+            modelBuilder.Entity<UserMessage>()
+               .HasKey(uc => new { uc.MessageId, uc.UserId});
+          
 
             modelBuilder.Entity<LogData>();
+            base.OnModelCreating(modelBuilder);
         }
 
         public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>

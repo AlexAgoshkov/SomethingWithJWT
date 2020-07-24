@@ -19,7 +19,7 @@ namespace MySocNet.Services
             _imageRepository = imageRepository;
         }
 
-        public async Task<Image> AddImageAsync(IFormFile input)
+        public async Task<Image> UploadAsync(IFormFile input)
         {
             Image result = null;
             var uploads = Path.Combine("Images");
@@ -35,23 +35,26 @@ namespace MySocNet.Services
             return result;
         }
 
-        public async Task<string> UploadImageAsync(string path)
+        public async Task<string> DownloadAsync(string path)
         {
-            FileStream fs = new FileStream(path, FileMode.Open);
-            byte[] byData = new byte[fs.Length];
-            await fs.ReadAsync(byData, 0, byData.Length);
+            using (var fs = new FileStream(path, FileMode.Open))
+            {
+                byte[] byData = new byte[fs.Length];
+                await fs.ReadAsync(byData, 0, byData.Length);
 
-            return Convert.ToBase64String(byData);
-           // var imgSrc = String.Format("data:image/jpg;base64,{0}", base64);
-            //return base64;
+                return Convert.ToBase64String(byData);
+            }
         }
 
         public async Task<byte[]> GetImageByBytesAsync(string path)
         {
-            FileStream fs = new FileStream(path, FileMode.Open);
-            byte[] byData = new byte[fs.Length];
-            await fs.ReadAsync(byData, 0, byData.Length);
-            return byData;
+            //DONE: move to using
+            using (var fs = new FileStream(path, FileMode.Open))
+            {
+                byte[] byData = new byte[fs.Length];
+                await fs.ReadAsync(byData, 0, byData.Length);
+                return byData;
+            }
         }
     }
 }

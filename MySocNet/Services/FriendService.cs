@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Connections.Features;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.EntityFrameworkCore;
 using MySocNet.Models;
 using MySocNet.Response;
@@ -14,13 +15,16 @@ namespace MySocNet.Services
     {
         private readonly IRepository<Friend> _friendRepository;
         private readonly IRepository<User> _userRepository;
+        private readonly IMapper _mapper;
 
         public FriendService(
             IRepository<Friend> friendRepository, 
-            IRepository<User> userRepository)
+            IRepository<User> userRepository,
+            IMapper mapper)
         {
             _userRepository = userRepository;
             _friendRepository = friendRepository;
+            _mapper = mapper;
         }
 
         public async Task AddFriendToUserAsync(int userId, int friendId)
@@ -35,7 +39,7 @@ namespace MySocNet.Services
             }
         }
 
-        public async Task<IList<User>> GetFriendListAsync(int userId)
+        public async Task<IList<UserResponse>> GetFriendListAsync(int userId)
         {
             var friendIds = await _friendRepository.GetWhere(
                   x => x.UserId == userId || x.Id == userId)
@@ -46,7 +50,7 @@ namespace MySocNet.Services
                 x => friendIds.Contains(x.Id))
                 .ToListAsync();
 
-            return friends;
+            return _mapper.Map<IList<UserResponse>>(friends);
         }
     }
 }

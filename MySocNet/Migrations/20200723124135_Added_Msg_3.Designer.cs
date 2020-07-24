@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200723124135_Added_Msg_3")]
+    partial class Added_Msg_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,6 +190,9 @@ namespace MySocNet.Migrations
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserMessageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChatId");
@@ -279,6 +284,9 @@ namespace MySocNet.Migrations
 
                     b.HasKey("MessageId", "UserId");
 
+                    b.HasIndex("MessageId")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("UserMessages");
@@ -361,8 +369,8 @@ namespace MySocNet.Migrations
             modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
                 {
                     b.HasOne("MySocNet.Models.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId")
+                        .WithOne("UserMessage")
+                        .HasForeignKey("MySocNet.Models.UserMessage", "MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

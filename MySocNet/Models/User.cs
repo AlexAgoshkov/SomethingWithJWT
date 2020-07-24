@@ -58,6 +58,8 @@ namespace MySocNet.Models
         public virtual ICollection<Chat> Chats { get; set; }
         [JsonIgnore]
         public virtual ICollection<UserChat> UserChats { get; set; }
+        [JsonIgnore]
+        public virtual ICollection<UserMessage> UserMessages { get; set; }
 
         public User()
         {

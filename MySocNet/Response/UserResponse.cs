@@ -9,6 +9,8 @@ namespace MySocNet.Response
     {
         public string FirstName { get; set; }
 
+        public string UserRole { get; set; }
+
         public string SurName { get; set; }
 
         public string Email { get; set; }

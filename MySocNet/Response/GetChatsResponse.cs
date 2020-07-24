@@ -8,7 +8,7 @@ namespace MySocNet.Response
 {
     public class GetChatsResponse
     {
-       public IList<ChatResponse> ChatResponses { get; set; }
+       public IList<ChatLastResponse> ChatResponses { get; set; }
        
        public int TotalCount { get; set; }
     }

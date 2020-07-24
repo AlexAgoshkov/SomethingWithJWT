@@ -2,6 +2,7 @@
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Response;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,14 @@ namespace MySocNet.Mapper
             CreateMap<UserUpdate, User>();
             CreateMap<User, UserUpdate>();
             CreateMap<UserRegistration, User>();
+            CreateMap<Chat, ChatLastResponse>();
             CreateMap<Chat, ChatResponse>();
+            CreateMap<Message, MessageResponse>()
+                .ForMember(x => x.SenderId, y => y.MapFrom(x => x.SenderId));
+            CreateMap<LastChatData, ChatLastResponse>()
+                .ForMember(response => response.Id, opt => opt.MapFrom(lastChatData => lastChatData.ChatId))
+                .ForMember(x => x.SenderName, opt => opt.MapFrom(x => x.UserName))
+                .ForMember(x => x.LastMessage, opt => opt.MapFrom(x => x.Text));
         }
     }
 }

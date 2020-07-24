@@ -29,36 +29,22 @@ namespace MySocNet.Controllers
     [ApiController]
     public class ChatController : ApiControllerBase
     {
-      
         private readonly IChatService _chatService;
-        private readonly IImageService _imageService;
         private readonly ILogger<ChatController> _logger;
-        private readonly IRepository<Image> _imageRepository;
-
+       
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
-            IImageService imageService,
-            ILogger<ChatController> logger,
-            IRepository<Image> imageRepository) : base(userRepository)
+            ILogger<ChatController> logger
+            ) : base(userRepository)
         {
-            _imageService = imageService;
             _chatService = chatService;
-            _imageRepository = imageRepository;
             _logger = logger;
         }
 
-        [HttpGet("GetImageById")]
-        public async Task<IActionResult> GetImage(int imageId)
-        {
-            var image = await _imageRepository.GetByIdAsync(imageId);
-            if (image == null)
-                return BadRequest();
-            
-            var imageBase64 = await _imageService.UploadImageAsync(image.ImagePath);
-            return JsonResult(imageBase64);
-        }
+        // DONE: move to FilesController ->
 
+       
         [HttpPost("AddNewUserToChat")]
         public async Task<IActionResult> AddNewUserToChat(UserToChatInput input)
         {
@@ -67,10 +53,9 @@ namespace MySocNet.Controllers
                 var response = await _chatService.AddNewUserToChatAsync(input.ChatId, input.UserId);
                 return JsonResult(response);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -106,24 +91,8 @@ namespace MySocNet.Controllers
             }
         }
 
-        [HttpPost("AddImageToChat")]
-        public async Task<IActionResult> AddImageToChat(IFormFile image, int chatId)
-        {
-            if (!image.FileName.EndsWith(".jpg"))
-                return BadRequest();
-
-            try
-            {
-                var pic = await _imageService.AddImageAsync(image);
-                await _chatService.AddImageToChatAsync(pic, chatId);
-                return JsonResult(pic);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
-            }  
-        }
+        // DONE: move to FilesController ->
+       
 
         [HttpPost("EditChat")]
         public async Task<IActionResult> EditChat(UpdateChatInput input)
@@ -131,8 +100,6 @@ namespace MySocNet.Controllers
             try
             {
                 var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
-                if (response == null)
-                    return BadRequest();
 
                 return JsonResult(response);
             }
@@ -149,9 +116,6 @@ namespace MySocNet.Controllers
             try
             {
                 var result = await _chatService.GetChatDetailsAsync(chatId);
-                if (result.ChatName == null)
-                    return BadRequest();
-
                 return JsonResult(result);
             }
             catch (Exception ex)
@@ -199,6 +163,7 @@ namespace MySocNet.Controllers
         {
             try
             {
+                // DONE: do not return enity - map to DTO instead
                 var messages = await _chatService.GetChatHistoryAsync(input.ChatId, input.Skip, input.Take);
                 return JsonResult(messages);
             }
@@ -209,28 +174,31 @@ namespace MySocNet.Controllers
             }
         }
 
+        // DONE: implement ability to mark message as read for each user independently
         [HttpGet("GetNewMessages")]
         public async Task<IActionResult> GetNewMessages([FromQuery]GetMessagesInput input)
         {
-            var messages = await _chatService.GetNewMessagesAsync(input.ChatId, input.Skip, input.Take);
-            //var user = await CurrentUser();
-            return JsonResult(messages);
+            var user = await CurrentUser();
+            var messages = await _chatService.GetNewMessagesAsync(input.ChatId, user.Id, input.Skip, input.Take);
+            return Ok(messages);
+        }
+
+        [HttpGet("UnReadMessages")]
+        public async Task<IActionResult> MarkMessageAsRead()
+        {
+            var user = await CurrentUser();
+            var response = await _chatService.GetUnReadMessages(user.Id);
+            await _chatService.ReadMessages(user.Id);
+            return JsonResult(response);
         }
 
         [HttpPost("SendMessageToChat")]
         public async Task<IActionResult> SendMessage(SendMessageInput input)
         {
-            try
-            {
-                var messageSender = await CurrentUser();
-                var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
-                return JsonResult(message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
-            }
+            var messageSender = await CurrentUser();
+            var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
+            // DONE: do not return enity - map to DTO instead
+            return JsonResult(message);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace MySocNet.Response
 {
     public class ChatDetailsResponse
     {
-        public List<string> Users { get; set; }
+        public List<User> Users { get; set; }
 
         public string ChatName { get; set; }
 

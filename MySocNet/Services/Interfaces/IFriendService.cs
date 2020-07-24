@@ -1,4 +1,5 @@
 ﻿using MySocNet.Models;
+using MySocNet.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace MySocNet.Services.Interfaces
     {
         Task AddFriendToUserAsync(int userId, int friendId);
 
-        Task<IList<User>> GetFriendListAsync(int userId);
+        Task<IList<UserResponse>> GetFriendListAsync(int userId);
     }
 }

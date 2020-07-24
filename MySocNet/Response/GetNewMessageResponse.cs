@@ -8,8 +8,14 @@ namespace MySocNet.Response
 {
     public class GetNewMessageResponse
     {
-        public IList<Message> Messages { get; set; }
+        public List<MessageResponse> Messages { get; set; }
 
         public int TotalCount { get; set; }
+
+        public GetNewMessageResponse(List<MessageResponse> messages, int totalCount)
+        {
+            Messages = messages;
+            TotalCount = totalCount;
+        }
     }
 }

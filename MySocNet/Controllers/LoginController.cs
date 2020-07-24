@@ -102,7 +102,7 @@ namespace MySocNet.Controllers
             var user = await _userRepository.GetWhere(x => x.UserName == input.UserName)
                 .Include(x => x.ActiveKey).FirstOrDefaultAsync();
 
-            var confirmationLink = Url.Action(nameof(ConfirmEmail),
+            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
                                  "Login",
                                  new { user.ActiveKey.Key },
                                  Request.Scheme);

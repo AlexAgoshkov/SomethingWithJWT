@@ -9,26 +9,30 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<Chat> AddNewUserToChatAsync(int chatId, int userId);
+        Task<ChatResponse> AddNewUserToChatAsync(int chatId, int userId);
 
-        Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
+        Task<ChatResponse> RemoveUserFromChatAsync(int chatId, int userId);
 
-        Task<Chat> RemoveChatAsync(int ownerId, int chatId);
+        Task<ChatResponse> RemoveChatAsync(int ownerId, int chatId);
 
-        Task<Chat> EditChatAsync(int chatId, string chatName);
+        Task<ChatResponse> EditChatAsync(int chatId, string chatName);
 
-        Task<Chat> CreateChatAsync(string chatName, User owner, int[] ids);
+        Task<ChatResponse> CreateChatAsync(string chatName, User owner, int[] ids);
 
-        Task<Message> SendMessageAsync(int chatId, User sender, string message);
+        Task<MessageResponse> SendMessageAsync(int chatId, User sender, string message);
 
-        Task<IList<ChatResponse>> GetChatsAsync(int userId, int skip, int take);
+        Task<IList<ChatLastResponse>> GetChatsAsync(int userId, int skip, int take);
 
-        Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int skip, int take);
+        Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int userId, int skip, int take);
 
-        Task<IList<Message>> GetChatHistoryAsync(int chatId, int skip, int take);
+        Task<IList<MessageResponse>> GetChatHistoryAsync(int chatId, int skip, int take);
 
         Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId);
 
-        Task<Chat> AddImageToChatAsync(Image image, int chatId);
+        Task<ChatResponse> AddImageToChatAsync(Image image, int chatId);
+
+        Task<IList<MessageResponse>> GetUnReadMessages(int userId);
+
+        Task ReadMessages(int userId);
     }
 }
