@@ -47,6 +47,7 @@ namespace MySocNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddRazorPages();
             services.AddSignalR();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
@@ -61,7 +62,6 @@ namespace MySocNet
             services.AddScoped<ILastDataService, LastDataService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddSingleton<ILog, LogNLog>();
-           
             services.AddControllersWithViews();
 
             services.AddSwaggerGen(c =>
@@ -135,9 +135,8 @@ namespace MySocNet
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //LoggerFactory.AddProvider(new DbLoggerProvider(app));
-
+            app.UseSignalR(routes => { routes.MapHub<ChatHub>("/chathub"); });
+           
             app.ConfigureExceptionHandler(logger);
 
             app.UseSwagger();
@@ -147,17 +146,19 @@ namespace MySocNet
                 c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "My API V1");
             });
 
-            //using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            //{
-            //    var context = serviceScope.ServiceProvider.GetService<MyDbContext>();
-            //    context.Database.Migrate();
-            //}
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<MyDbContext>();
+                context.Database.Migrate();
+            }
 
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors("CorsPolicy");
 
             app.UseRequestLocalization();
 
@@ -168,7 +169,8 @@ namespace MySocNet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ChatHub>("/chat");
+                endpoints.MapRazorPages();
+                endpoints.MapHub<ChatHub>("/chathub");
             });
         }
     }

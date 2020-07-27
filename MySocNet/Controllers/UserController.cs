@@ -155,7 +155,7 @@ namespace MySocNet.Controllers
 
         [HttpDelete("RemoveUser")]
         [Authorize(Policy = Policies.Admin)]
-        public async Task<IActionResult> RemoveUserByIdAsync(int id)//---------------
+        public async Task<IActionResult> RemoveUserByIdAsync(int id)//--------------- CANT NOT REMOVE USER!!!
         {
             var user = await _userRepository.GetWhere(x => x.Id == id)
                 .Include(x => x.UserChats).Include(x => x.Chats)

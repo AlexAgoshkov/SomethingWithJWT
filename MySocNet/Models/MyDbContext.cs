@@ -53,7 +53,7 @@ namespace MySocNet.Models
                 .HasForeignKey(uc => uc.ChatId);
 
             modelBuilder.Entity<UserMessage>()
-               .HasKey(uc => new { uc.MessageId, uc.UserId});
+               .HasKey(uc => new { uc.ChatId, uc.UserId});
           
 
             modelBuilder.Entity<LogData>();

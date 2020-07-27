@@ -49,9 +49,9 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet("GetImageById")]
-        public async Task<IActionResult> GetImage(int imageId)
+        public async Task<IActionResult> GetImage(int fileId)
         {
-            var image = await _imageRepository.GetByIdAsync(imageId);
+            var image = await _imageRepository.GetByIdAsync(fileId);
 
             if (image == null)
                 return NotFound();

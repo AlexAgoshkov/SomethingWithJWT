@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+﻿using Microsoft.Data.SqlClient.DataClassification;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,9 +14,9 @@ namespace MySocNet.Models
 
         public virtual User User { get; set; }
 
-        public int MessageId { get; set; }
+        public int ChatId { get; set; }
 
-        public virtual Message Message { get; set; } 
+        public virtual Chat Chat {get; set;}
 
         public bool IsRead { get; set; }
     }

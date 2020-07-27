@@ -10,7 +10,7 @@ namespace MySocNet.Services.Interfaces
     {
         Task<T> GetByIdAsync(int id);
 
-        Task AddRangeAsync(IList<T> entities);
+        Task AddRangeAsync(IEnumerable<T> entities);
 
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
 

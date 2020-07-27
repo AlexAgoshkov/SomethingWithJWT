@@ -34,8 +34,8 @@
 //    "windowsAuthentication": false,
 //    "anonymousAuthentication": true,
 //    "iisExpress": {
-//      "applicationUrl": "http://localhost:61827",
-//      "sslPort": 0
+//      "applicationUrl": "http://localhost:50297",
+//      "sslPort": 44376
 //    }
 //  },
 //  "profiles": {
@@ -46,13 +46,13 @@
 //        "ASPNETCORE_ENVIRONMENT": "Development"
 //      }
 //    },
-//    "WebApplication1": {
+//    "MsWeb": {
 //      "commandName": "Project",
 //      "launchBrowser": true,
+//      "applicationUrl": "https://localhost:5001;http://localhost:5000",
 //      "environmentVariables": {
 //        "ASPNETCORE_ENVIRONMENT": "Development"
-//      },
-//      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+//      }
 //    }
 //  }
 //}

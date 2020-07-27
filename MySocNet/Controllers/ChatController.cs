@@ -13,9 +13,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MySocNet.Extensions;
+using MySocNet.Hubs;
 using MySocNet.Input;
 using MySocNet.InputData;
 using MySocNet.Models;
@@ -31,20 +33,27 @@ namespace MySocNet.Controllers
     {
         private readonly IChatService _chatService;
         private readonly ILogger<ChatController> _logger;
-       
+        private readonly IHubContext<ChatHub> _hubContext;
+
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
-            ILogger<ChatController> logger
+            ILogger<ChatController> logger,
+            IHubContext<ChatHub> hubContext
             ) : base(userRepository)
         {
             _chatService = chatService;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
-        // DONE: move to FilesController ->
+        [HttpPost("ChatTest")]
+        public IActionResult Post()
+        {
+          //  _hubContext.Clients.All.SendCoreAsync("send", new[] { "hello from server" });
+            return Ok();
+        }
 
-       
         [HttpPost("AddNewUserToChat")]
         public async Task<IActionResult> AddNewUserToChat(UserToChatInput input)
         {
@@ -91,16 +100,12 @@ namespace MySocNet.Controllers
             }
         }
 
-        // DONE: move to FilesController ->
-       
-
         [HttpPost("EditChat")]
         public async Task<IActionResult> EditChat(UpdateChatInput input)
         {
             try
             {
                 var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
-
                 return JsonResult(response);
             }
             catch (Exception ex)
@@ -183,21 +188,15 @@ namespace MySocNet.Controllers
             return Ok(messages);
         }
 
-        [HttpGet("UnReadMessages")]
-        public async Task<IActionResult> MarkMessageAsRead()
-        {
-            var user = await CurrentUser();
-            var response = await _chatService.GetUnReadMessages(user.Id);
-            await _chatService.ReadMessages(user.Id);
-            return JsonResult(response);
-        }
-
         [HttpPost("SendMessageToChat")]
         public async Task<IActionResult> SendMessage(SendMessageInput input)
         {
             var messageSender = await CurrentUser();
             var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
             // DONE: do not return enity - map to DTO instead
+
+            // TODO: send notification to SignalR hub
+         
             return JsonResult(message);
         }
     }

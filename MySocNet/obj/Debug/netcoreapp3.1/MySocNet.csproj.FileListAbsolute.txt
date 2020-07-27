@@ -268,7 +268,6 @@ D:\SomethingWithJWT\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csprojAssemblyRefe
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\appsettings.Development.json
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\appsettings.json
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\Properties\launchSettings.json
-D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\libman.json
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\MySocNet.exe
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\MySocNet.deps.json
 D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\MySocNet.runtimeconfig.json
@@ -450,4 +449,17 @@ D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\NLog.config
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csproj.CoreCompileInputs.cache
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cs
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.MvcApplicationPartsAssemblyInfo.cache
-D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csprojAssemblyReference.cache
+D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\libman.json
+D:\Projects\MySocNet\bin\Debug\netcoreapp3.1\MySocNet.Views.pdb
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorAssemblyInfo.cache
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorAssemblyInfo.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.TagHelpers.input.cache
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.TagHelpers.output.cache
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorCoreGenerate.cache
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\Index.cshtml.g.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\Shared\_Layout.cshtml.g.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\Shared\_ValidationScriptsPartial.cshtml.g.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\_ViewImports.cshtml.g.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\_ViewStart.cshtml.g.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorTargetAssemblyInfo.cs
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.Views.pdb

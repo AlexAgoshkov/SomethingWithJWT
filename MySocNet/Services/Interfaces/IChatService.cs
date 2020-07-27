@@ -31,8 +31,6 @@ namespace MySocNet.Services.Interfaces
 
         Task<ChatResponse> AddImageToChatAsync(Image image, int chatId);
 
-        Task<IList<MessageResponse>> GetUnReadMessages(int userId);
-
-        Task ReadMessages(int userId);
+        Task ReadMessages(int userId, int chatId);
     }
 }

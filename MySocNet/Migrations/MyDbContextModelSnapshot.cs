@@ -15,7 +15,7 @@ namespace MySocNet.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
+                .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -268,7 +268,7 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -277,7 +277,7 @@ namespace MySocNet.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.HasKey("MessageId", "UserId");
+                    b.HasKey("ChatId", "UserId");
 
                     b.HasIndex("UserId");
 
@@ -360,9 +360,9 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
                 {
-                    b.HasOne("MySocNet.Models.Message", "Message")
+                    b.HasOne("MySocNet.Models.Chat", "Chat")
                         .WithMany()
-                        .HasForeignKey("MessageId")
+                        .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
