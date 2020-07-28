@@ -47,13 +47,6 @@ namespace MySocNet.Controllers
             _hubContext = hubContext;
         }
 
-        [HttpPost("ChatTest")]
-        public IActionResult Post()
-        {
-          //  _hubContext.Clients.All.SendCoreAsync("send", new[] { "hello from server" });
-            return Ok();
-        }
-
         [HttpPost("AddNewUserToChat")]
         public async Task<IActionResult> AddNewUserToChat(UserToChatInput input)
         {

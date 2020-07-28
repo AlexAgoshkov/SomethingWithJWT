@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "dkIPFVnUjLS5gk/Ag2j5ZtFcv0IHKtKzUh+WKTpj25t8l+OdNAiiqKjfHGvvjpGiMuju0DkSvwgsU7KaWyGmmQ==",
+  "dgSpecHash": "wK5sdPYtAe2UDm0Tao5x1ERkiSmLXbnCy5bAWXOtOhlJSWSy/ig9EcniZzUGfsxcmH4kxvBDdSjU237bzjBT7w==",
   "success": true,
   "projectFilePath": "D:\\Projects\\MySocNet\\MySocNet.csproj",
   "expectedPackageFiles": [
@@ -94,6 +94,7 @@
     "C:\\Users\\Alex\\.nuget\\packages\\nlog.web.aspnetcore\\4.9.2\\nlog.web.aspnetcore.4.9.2.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\nuget.frameworks\\4.7.0\\nuget.frameworks.4.7.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\portable.bouncycastle\\1.8.5\\portable.bouncycastle.1.8.5.nupkg.sha512",
+    "C:\\Users\\Alex\\.nuget\\packages\\restsharp\\106.11.4\\restsharp.106.11.4.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",

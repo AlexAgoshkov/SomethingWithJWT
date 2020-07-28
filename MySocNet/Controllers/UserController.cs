@@ -72,6 +72,12 @@ namespace MySocNet.Controllers
             return user;
         }
 
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            return JsonResult(await _userRepository.GetAllAsync());
+        }
+
         [HttpPost("GetSortedUserList")]
         public async Task<IActionResult> GetUsers(SearchUserInput userInput)
         {

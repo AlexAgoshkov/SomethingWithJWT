@@ -47,6 +47,8 @@ namespace MySocNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+            services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSignalR();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
@@ -62,7 +64,6 @@ namespace MySocNet
             services.AddScoped<ILastDataService, LastDataService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddSingleton<ILog, LogNLog>();
-            services.AddControllersWithViews();
 
             services.AddSwaggerGen(c =>
             {
@@ -116,6 +117,22 @@ namespace MySocNet
                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:SecretKey"])),
                   ClockSkew = TimeSpan.Zero
               };
+              options.Events = new JwtBearerEvents
+              {
+                  OnMessageReceived = context =>
+                  {
+                      var accessToken = context.Request.Query["access_token"];
+
+                      // если запрос направлен хабу
+                      var path = context.HttpContext.Request.Path;
+                      if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chathub")))
+                      {
+                          // получаем токен из строки запроса
+                          context.Token = accessToken;
+                      }
+                      return Task.CompletedTask;
+                  }
+              };
           });
 
             IMapper mapper = mappingConfig.CreateMapper();
@@ -134,8 +151,9 @@ namespace MySocNet
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseDefaultFiles();
+                app.UseStaticFiles();
             }
-            app.UseSignalR(routes => { routes.MapHub<ChatHub>("/chathub"); });
            
             app.ConfigureExceptionHandler(logger);
 
@@ -154,11 +172,10 @@ namespace MySocNet
 
             app.UseHttpsRedirection();
 
-            app.UseStaticFiles();
-
             app.UseRouting();
 
-            app.UseCors("CorsPolicy");
+            // подключаем CORS
+            app.UseCors(builder => builder.AllowAnyOrigin());
 
             app.UseRequestLocalization();
 
@@ -169,6 +186,9 @@ namespace MySocNet
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
                 endpoints.MapHub<ChatHub>("/chathub");
             });
