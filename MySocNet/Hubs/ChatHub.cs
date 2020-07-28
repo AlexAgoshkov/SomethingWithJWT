@@ -27,12 +27,11 @@ namespace MySocNet.Hubs
             _chatService = chatService;
         }
 
-        public async Task SendMessage(string chatId, string token, string message)
+        public async Task SendMessage(int chatId, string token, string message)
         {
-            var id = Convert.ToInt32(chatId);
             var test = await _userRepository.GetWhere(x => x.Authentication.AccessToken == token)
                 .Include(x => x.Authentication).FirstOrDefaultAsync();
-            await _chatService.SendMessageAsync(id, test, message);
+            await _chatService.SendMessageAsync(chatId, test, message);
             await Clients.All.SendAsync("ReceiveMessage", chatId, test.FirstName, message);
         }
     }

@@ -463,3 +463,4 @@ D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\_ViewImports.cshtml.g.c
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\Razor\Pages\_ViewStart.cshtml.g.cs
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.RazorTargetAssemblyInfo.cs
 D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.Views.pdb
+D:\Projects\MySocNet\obj\Debug\netcoreapp3.1\MySocNet.csprojAssemblyReference.cache
