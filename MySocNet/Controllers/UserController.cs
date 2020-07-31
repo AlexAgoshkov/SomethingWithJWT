@@ -43,7 +43,7 @@ namespace MySocNet.Controllers
     {
         private readonly IUserService _userService;
         private readonly IFriendService _friendService;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailSender;
         private readonly IRepository<User> _userRepository;
         private readonly IImageService _imageService;
         private readonly ILog _log;
@@ -53,7 +53,7 @@ namespace MySocNet.Controllers
             IFriendService friendService,
             IRepository<User> userRepository,
             IImageService imageService,
-            IEmailSender emailSender,
+            IEmailService emailSender,
             ILog log) : base(userRepository)
         {
             _userService = userService;
@@ -161,7 +161,7 @@ namespace MySocNet.Controllers
 
         [HttpDelete("RemoveUser")]
         [Authorize(Policy = Policies.Admin)]
-        public async Task<IActionResult> RemoveUserByIdAsync(int id)//--------------- CANT NOT REMOVE USER!!!
+        public async Task<IActionResult> RemoveUserByIdAsync(int id)//--------------- CAN NOT REMOVE USER!!!
         {
             var user = await _userRepository.GetWhere(x => x.Id == id)
                 .Include(x => x.UserChats).Include(x => x.Chats)

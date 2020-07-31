@@ -8,10 +8,6 @@ namespace MySocNet.Input
 {
     public class LoginSignalRModel
     {
-       
-        public string ChatId { get; set; }
-
-        
         public string AccessToken { get; set; }
     }
 }

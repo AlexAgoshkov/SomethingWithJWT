@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySocNet.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -8,7 +9,7 @@ namespace MySocNet.Response
 {
     public class GetChatsResponse
     {
-       public IList<ChatLastResponse> ChatResponses { get; set; }
+       public IList<LastChatData> ChatResponses { get; set; }
        
        public int TotalCount { get; set; }
     }

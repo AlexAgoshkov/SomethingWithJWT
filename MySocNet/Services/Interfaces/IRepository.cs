@@ -20,6 +20,8 @@ namespace MySocNet.Services.Interfaces
 
         Task RemoveAsync(T entiry);
 
+        Task RemoveRangeAsync(IEnumerable<T> entiry);
+
         Task<IEnumerable<T>> GetAllAsync();
 
         IQueryable<T> GetWhere(Expression<Func<T, bool>> predicate);

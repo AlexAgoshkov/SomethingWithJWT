@@ -1,11 +1,11 @@
 ﻿function getCook(cookiename) {
 // Get name followed by anything except a semicolon
-var cookiestring=RegExp(cookiename+"=[^;]+").exec(document.cookie);
+let cookiestring=RegExp(cookiename+"=[^;]+").exec(document.cookie);
 // Return everything after the equal sign, or an empty string if the cookie name not found
 return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
 }
 //Sample usage
-var cookieValue = getCook('key');
+let cookieValue = getCook('key');
 console.log(cookieValue);
 
 "use strict";
@@ -16,7 +16,6 @@ let connection = new signalR.HubConnectionBuilder().withUrl("/chatHub", { access
 document.getElementById("sendButton").disabled = true;
 
 connection.on("ReceiveMessage", function (chat, user, message) {
-    let cht = chat;
     let msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     let encodedMsg = user + " says " + msg;
     let li = document.createElement("li");
@@ -31,11 +30,11 @@ connection.start().then(function () {
 });
 
 document.getElementById("sendButton").addEventListener("click", function (event) {
-    let name = document.getElementById("nameInput").innerHTML;
+  
     let message = document.getElementById("messageInput").value;
     let chat = document.getElementById("chatId").innerHTML;
     let chatId = Number(chat);
-    connection.invoke("SendMessage", chatId, name, message).catch(function (err) {
+    connection.invoke("SendMessage", chatId, message).catch(function (err) {
         return console.error(err.toString());
     });
     event.preventDefault();

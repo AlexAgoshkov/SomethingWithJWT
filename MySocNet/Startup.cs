@@ -47,6 +47,7 @@ namespace MySocNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
             services.AddCors();
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -55,7 +56,7 @@ namespace MySocNet
             services.AddDbContext<MyDbContext>(options => options.UseSqlServer(connectionString));
 
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAccountActivationService, AccountActiveService>();
             services.AddScoped<IFriendService, FriendService>();
@@ -64,7 +65,7 @@ namespace MySocNet
             services.AddScoped<ILastDataService, LastDataService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddSingleton<ILog, LogNLog>();
-
+           
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<FileOperationFilter>();

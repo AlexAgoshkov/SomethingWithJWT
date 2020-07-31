@@ -59,6 +59,11 @@ namespace MySocNet.Services
             _context.Set<T>().Remove(entiry);
             await _context.SaveChangesAsync();
         }
+        public async Task RemoveRangeAsync(IEnumerable<T> entiry)
+        {
+            _context.Set<T>().RemoveRange(entiry);
+            await _context.SaveChangesAsync();
+        }
 
         public async Task UpdateAsync(T entity)
         {

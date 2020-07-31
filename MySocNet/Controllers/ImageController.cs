@@ -43,7 +43,6 @@ namespace MySocNet.Controllers
             }
             catch (Exception ex)
             {
-               // _logger.LogInformation(ex.Message);
                 return BadRequest();
             }
         }

@@ -34,7 +34,7 @@ namespace MySocNet.Controllers
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IRepository<User> _userRepository;
-        private readonly IEmailSender _emailSender;
+        private readonly IEmailService _emailSender;
         private readonly IAuthenticationService _authenticationService;
         private readonly IAccountActivationService _accountActiveService;
         private readonly IMapper _mapper;
@@ -42,7 +42,7 @@ namespace MySocNet.Controllers
         public LoginController(
             IConfiguration config, 
             IUserService userService,
-            IEmailSender emailSender, 
+            IEmailService emailSender, 
             IAuthenticationService authenticationService,
             IAccountActivationService accountActiveService,
             IRepository<User> userRepository,
@@ -89,7 +89,6 @@ namespace MySocNet.Controllers
 
             response.AccessToken = response.User.Authentication.AccessToken;
             response.RefreshToken = response.User.Authentication.RefreshToken;
-
             return Ok(response);
         }
 
@@ -97,10 +96,17 @@ namespace MySocNet.Controllers
         [AllowAnonymous]
         public async Task RegistrationAsync(UserRegistration input)
         {
-            await _accountActiveService.CreateActiveKeyAsync(input);
+            if (!_emailSender.IsValidEmail(input.Email))
+                throw new Exception("Invalid Email");
 
-            var user = await _userRepository.GetWhere(x => x.UserName == input.UserName)
-                .Include(x => x.ActiveKey).FirstOrDefaultAsync();
+            var user = await _accountActiveService.UserRegistration(input);
+            if (user == null)
+                throw new Exception("User not Found");
+
+
+            var key = await _accountActiveService.CreateActiveKeyAsync();
+            
+            await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
 
             var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
                                  "Login",

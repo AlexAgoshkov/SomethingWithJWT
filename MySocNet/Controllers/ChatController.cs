@@ -33,18 +33,18 @@ namespace MySocNet.Controllers
     {
         private readonly IChatService _chatService;
         private readonly ILogger<ChatController> _logger;
-        private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IMapper _mapper;
 
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
             ILogger<ChatController> logger,
-            IHubContext<ChatHub> hubContext
+            IMapper mapper
             ) : base(userRepository)
         {
             _chatService = chatService;
+            _mapper = mapper;
             _logger = logger;
-            _hubContext = hubContext;
         }
 
         [HttpPost("AddNewUserToChat")]
@@ -53,7 +53,7 @@ namespace MySocNet.Controllers
             try
             {
                 var response = await _chatService.AddNewUserToChatAsync(input.ChatId, input.UserId);
-                return JsonResult(response);
+                return JsonResult(_mapper.Map<ChatResponse>(response));
             }
             catch (ArgumentException ex)
             {
@@ -67,7 +67,7 @@ namespace MySocNet.Controllers
             try
             {
                 var response = await _chatService.RemoveUserFromChatAsync(input.ChatId, input.UserId);
-                return JsonResult(response);
+                return JsonResult(_mapper.Map<ChatResponse>(response));
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace MySocNet.Controllers
             {
                 var user = await CurrentUser();
                 var chat = await _chatService.RemoveChatAsync(user.Id, chatId);
-                return JsonResult(chat);
+                return JsonResult(_mapper.Map<ChatResponse>(chat));
             }
             catch(Exception ex)
             {
@@ -99,7 +99,7 @@ namespace MySocNet.Controllers
             try
             {
                 var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
-                return JsonResult(response);
+                return JsonResult(_mapper.Map<ChatResponse>(response));
             }
             catch (Exception ex)
             {
@@ -161,7 +161,6 @@ namespace MySocNet.Controllers
         {
             try
             {
-                // DONE: do not return enity - map to DTO instead
                 var messages = await _chatService.GetChatHistoryAsync(input.ChatId, input.Skip, input.Take);
                 return JsonResult(messages);
             }
@@ -172,7 +171,6 @@ namespace MySocNet.Controllers
             }
         }
 
-        // DONE: implement ability to mark message as read for each user independently
         [HttpGet("GetNewMessages")]
         public async Task<IActionResult> GetNewMessages([FromQuery]GetMessagesInput input)
         {
@@ -186,10 +184,7 @@ namespace MySocNet.Controllers
         {
             var messageSender = await CurrentUser();
             var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
-            // DONE: do not return enity - map to DTO instead
-
-            // TODO: send notification to SignalR hub
-         
+           
             return JsonResult(message);
         }
     }

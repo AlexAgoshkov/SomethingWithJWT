@@ -4,17 +4,16 @@
 <form asp-action="Login" asp-controller="Signal">
     <div>
         <div class="form-group">
-            <label asp-for="ChatId">ChatId</label><br />
-            <input type="text" asp-for="ChatId" />
-           <br />
+            <div class="form-group">
+                <label asp-for="AccessToken">Token</label><br />
+                <input id="token" asp-for="AccessToken" />
+                <br />
+            </div>
+            <br />
         </div>
         <div class="form-group">
-            <label asp-for="AccessToken">Token</label><br />
-            <input asp-for="AccessToken" />
-           <br />
-        </div>
-        <div class="form-group">
-            <input type="submit" value="Login" class="btn" />
+            <input id="myButton" type="submit" value="Login" class="btn" />
         </div>
     </div>
 </form>
+@* <script src="~/js/login.js"></script> *@

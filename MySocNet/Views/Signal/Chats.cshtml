@@ -1,0 +1,16 @@
+﻿@model IEnumerable<MySocNet.Models.Chat>
+
+<table class="table">
+    <tr>
+        <th>Chat Name</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.ChatName</td>
+            <td>
+                <a asp-controller="Signal" asp-action="Index" asp-route-chatId="@item.Id">Go to</a>
+            </td>
+        </tr>
+    }
+</table>

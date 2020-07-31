@@ -19,7 +19,7 @@ namespace MySocNet.Hubs
         private readonly IChatService _chatService;  
 
         public ChatHub(IRepository<User> userReposity, 
-            IRepository<Chat> chatRepository,
+             IRepository<Chat> chatRepository,
              IChatService chatService
             )
         {
@@ -28,13 +28,14 @@ namespace MySocNet.Hubs
             _chatService = chatService;
         }
 
-        public async Task SendMessage(int chatId, string userName, string message)
+        public async Task SendMessage(int chatId, string message)
         {
             var context = Context.GetHttpContext();
             var token = await context.GetAccessToken();
             var user = await _userRepository.GetWhere(x => x.Authentication.AccessToken == token)
                 .Include(x => x.Authentication).FirstOrDefaultAsync();
             await _chatService.SendMessageAsync(chatId, user, message);
+            var userName = $"{user.FirstName} {user.SurName}";
             await Clients.All.SendAsync("ReceiveMessage",chatId, userName, message);
         }
        
@@ -42,13 +43,5 @@ namespace MySocNet.Hubs
         {
             await Clients.All.SendAsync("Receive", message, userName);
         }
-
-        //public async Task SendMessage(int chatId, string token, string message)
-        //{
-        //    var test = await _userRepository.GetWhere(x => x.Authentication.AccessToken == token)
-        //        .Include(x => x.Authentication).FirstOrDefaultAsync();
-        //    await _chatService.SendMessageAsync(chatId, test, message);
-        //    await Clients.All.SendAsync("ReceiveMessage", chatId, test.FirstName, message);
-        //}
     }
 }

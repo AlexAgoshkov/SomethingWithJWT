@@ -27,14 +27,11 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
-        public async Task CreateActiveKeyAsync(UserRegistration userRegistration)
+        public async Task<ActiveKey> CreateActiveKeyAsync()
         {
-            User newUser = GetInitUser(userRegistration);
-            await _userRepository.AddAsync(newUser);
-            var key = await GenerateActiveKeyAsync();
-            var user = await _userRepository.GetWhere(x => x.UserName == newUser.UserName)
-                .Include(x => x.ActiveKey).FirstOrDefaultAsync();
-            await AddActiveKeyToUserAsync(user.Id, key.Id);
+            var activeKey = new ActiveKey { Key = GetRandomString(), Created = DateTime.Now, IsActive = false };
+            await _activeKeyRepository.AddAsync(activeKey);
+            return activeKey;
         }
 
         public async Task ConfirmEmailAsync(string key)
@@ -44,7 +41,7 @@ namespace MySocNet.Services
                 return;
 
             var time = DateTime.Now - activeKey.Created;
-          
+
             if (!activeKey.IsActive && time.Hours < 1)
             {
                 activeKey.IsActive = true;
@@ -52,24 +49,19 @@ namespace MySocNet.Services
             }
         }
 
-        private User GetInitUser(UserRegistration userRegistration)
+        public async Task<User> UserRegistration(UserRegistration userRegistration)
         {
             var newUser = _mapper.Map<User>(userRegistration);
             newUser.Password = HashService.Hash(newUser.Password);
             newUser.UserRole = "User";
+            await _userRepository.AddAsync(newUser);
             return newUser;
         }
 
-        private async Task<ActiveKey> GenerateActiveKeyAsync()
+        public async Task AddActiveKeyToUserAsync(int userId, int keyId)
         {
-            var activeKey = new ActiveKey { Key = GetRandomString(), Created = DateTime.Now, IsActive = false };
-            await _activeKeyRepository.AddAsync(activeKey);
-            return activeKey;
-        }
-
-        private async Task AddActiveKeyToUserAsync(int userId, int keyId)
-        {
-            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
+            var user = await _userRepository.GetWhere(x => x.Id == userId)
+                .Include(x => x.ActiveKey).FirstOrDefaultAsync();
             user.ActiveKeyId = keyId;
             await _userRepository.UpdateAsync(user);
         }

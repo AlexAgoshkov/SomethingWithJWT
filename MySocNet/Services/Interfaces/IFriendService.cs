@@ -12,5 +12,7 @@ namespace MySocNet.Services.Interfaces
         Task AddFriendToUserAsync(int userId, int friendId);
 
         Task<IList<UserResponse>> GetFriendListAsync(int userId);
+
+        Task<bool> IsFriend(int userId, int friendId);
     }
 }
