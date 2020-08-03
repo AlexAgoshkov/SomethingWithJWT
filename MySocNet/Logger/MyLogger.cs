@@ -1,20 +1,21 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MySocNet.Models;
+using MySocNet.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MySocNet.Models;
-
 
 namespace MySocNet.Logger
 {
-    public class DbLogger : ILogger
+    public class MyLogger : ILogger
     {
         private readonly IApplicationBuilder _app;
         private string _category;
-        public DbLogger(IApplicationBuilder app, string category)
+
+        public MyLogger(IApplicationBuilder app, string category)
         {
             _app = app;
             _category = category;

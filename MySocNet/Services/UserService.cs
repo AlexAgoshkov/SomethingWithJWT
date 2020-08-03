@@ -39,6 +39,9 @@ namespace MySocNet.Services
         {
             var user = await _userRepository.GetWhere(x => x.Id == userId)
                 .Include(x => x.ProfileImage).FirstOrDefaultAsync();
+            if (user == null)
+                throw new ArgumentException("User not found");
+
             if (user != null && image != null)
             {
                 user.ProfileImage = image;
@@ -66,7 +69,8 @@ namespace MySocNet.Services
         public async Task<User> GetUserByRefreshTokenAsync(string refreshToken)
         {
             return await _userRepository.GetWhere(x => x.Authentication.RefreshToken == refreshToken)
-                .Include(x => x.Authentication).FirstOrDefaultAsync();
+                .Include(x => x.Authentication).FirstOrDefaultAsync() ??
+                throw new ArgumentException("RefreshToken not found");
         }
     }
 }

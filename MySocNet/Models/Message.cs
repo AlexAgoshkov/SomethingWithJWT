@@ -19,9 +19,9 @@ namespace MySocNet.Models
 
        public virtual Image MessageImage { get; set; }
 
-       public int? ChatId { get; set; }
+       public int ChatId { get; set; }
 
-       public int? SenderId { get; set; }
+       public int SenderId { get; set; }
 
        public DateTime Time { get; set; }
  

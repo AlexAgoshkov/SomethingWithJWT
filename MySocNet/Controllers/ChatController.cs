@@ -32,8 +32,8 @@ namespace MySocNet.Controllers
     public class ChatController : ApiControllerBase
     {
         private readonly IChatService _chatService;
-        private readonly ILogger<ChatController> _logger;
         private readonly IMapper _mapper;
+        private readonly ILogger<ChatController> _logger;
 
         public ChatController(
             IRepository<User> userRepository,
@@ -42,9 +42,10 @@ namespace MySocNet.Controllers
             IMapper mapper
             ) : base(userRepository)
         {
+            _logger = logger;
             _chatService = chatService;
             _mapper = mapper;
-            _logger = logger;
+           
         }
 
         [HttpPost("AddNewUserToChat")]
@@ -52,7 +53,9 @@ namespace MySocNet.Controllers
         {
             try
             {
+                var user = await CurrentUser();
                 var response = await _chatService.AddNewUserToChatAsync(input.ChatId, input.UserId);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Added User id: {input.UserId} to Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
             catch (ArgumentException ex)
@@ -66,13 +69,14 @@ namespace MySocNet.Controllers
         {
             try
             {
+                var user = await CurrentUser();
                 var response = await _chatService.RemoveUserFromChatAsync(input.ChatId, input.UserId);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed User Id {input.UserId} from Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -84,12 +88,12 @@ namespace MySocNet.Controllers
             {
                 var user = await CurrentUser();
                 var chat = await _chatService.RemoveChatAsync(user.Id, chatId);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed Chat Id: {chatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(chat));
             }
-            catch(Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -98,13 +102,14 @@ namespace MySocNet.Controllers
         {
             try
             {
+                var user = await CurrentUser();
                 var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Edited Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -113,13 +118,14 @@ namespace MySocNet.Controllers
         {
             try
             {
+                var user = await CurrentUser();
                 var result = await _chatService.GetChatDetailsAsync(chatId);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got ChatDetails from Chat Id: {chatId}");
                 return JsonResult(result);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -131,12 +137,12 @@ namespace MySocNet.Controllers
                 var user = await CurrentUser();
                 var chatList = await _chatService.GetChatsAsync(user.Id, input.Skip, input.Take);
                 var response = new GetChatsResponse { ChatResponses = chatList, TotalCount = chatList.Count };
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got his/her Chats total count {chatList.Count}");
                 return JsonResult(response);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -147,12 +153,12 @@ namespace MySocNet.Controllers
             {
                 var chatOwner = await CurrentUser();
                 var chat = await _chatService.CreateChatAsync(input.ChatName, chatOwner, input.Ids);
+                _logger.LogInformation($"User id: {chatOwner.Id} Login {chatOwner.UserName} Created new Chat Id: {chat.Id}");
                 return JsonResult(chat);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
@@ -161,31 +167,47 @@ namespace MySocNet.Controllers
         {
             try
             {
+                var user = await CurrentUser();
                 var messages = await _chatService.GetChatHistoryAsync(input.ChatId, input.Skip, input.Take);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Read Messages from Chat Id {input.ChatId}");
                 return JsonResult(messages);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
-                _logger.LogInformation(ex.Message);
-                return BadRequest();
+                return NotFound(ex.Message);
             }
         }
 
         [HttpGet("GetNewMessages")]
         public async Task<IActionResult> GetNewMessages([FromQuery]GetMessagesInput input)
         {
-            var user = await CurrentUser();
-            var messages = await _chatService.GetNewMessagesAsync(input.ChatId, user.Id, input.Skip, input.Take);
-            return Ok(messages);
+            try
+            {
+                var user = await CurrentUser();
+                var messages = await _chatService.GetNewMessagesAsync(input.ChatId, user.Id, input.Skip, input.Take);
+                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Read New Messages from Chat Id {input.ChatId}");
+                return JsonResult(messages);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("SendMessageToChat")]
         public async Task<IActionResult> SendMessage(SendMessageInput input)
         {
-            var messageSender = await CurrentUser();
-            var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
-           
-            return JsonResult(message);
+            try
+            {
+                var messageSender = await CurrentUser();
+                var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
+                _logger.LogInformation($"User id: {messageSender.Id}, Login {messageSender.UserName} Sent message to chat Id: {input.ChatId}");
+                return JsonResult(message);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

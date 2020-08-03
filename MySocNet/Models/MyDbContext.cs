@@ -60,11 +60,11 @@ namespace MySocNet.Models
             base.OnModelCreating(modelBuilder);
         }
 
-        public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddFilter((category, level) => category == DbLoggerCategory.Database.Command.Name
-                                && level == LogLevel.Information)
-                .AddProvider(new DbLoggerProvider());
-        });
+        //public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
+        //{
+        //    builder.AddFilter((category, level) => category == DbLoggerCategory.Database.Command.Name
+        //                        && level == LogLevel.Information)
+        //        .AddProvider(new MyLoggerProvider());
+        //});
     }
 }

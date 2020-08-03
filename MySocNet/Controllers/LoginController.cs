@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MySocNet.Input;
@@ -24,6 +25,7 @@ using MySocNet.Response;
 using MySocNet.Services;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
+using NLog.Fluent;
 
 namespace MySocNet.Controllers
 {
@@ -37,6 +39,7 @@ namespace MySocNet.Controllers
         private readonly IEmailService _emailSender;
         private readonly IAuthenticationService _authenticationService;
         private readonly IAccountActivationService _accountActiveService;
+        private readonly ILogger<LoginController> _logger;
         private readonly IMapper _mapper;
 
         public LoginController(
@@ -46,6 +49,7 @@ namespace MySocNet.Controllers
             IAuthenticationService authenticationService,
             IAccountActivationService accountActiveService,
             IRepository<User> userRepository,
+            ILogger<LoginController> logger,
             IMapper mapper) : base(userRepository)
         {
             _config = config;
@@ -54,72 +58,77 @@ namespace MySocNet.Controllers
             _emailSender = emailSender;
             _authenticationService = authenticationService;
             _accountActiveService = accountActiveService;
+            _logger = logger;
             _mapper = mapper;
         }
 
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> UpdateAccess(UpdateAccessTokenInput input)
         {
-            var response = new RefreshTokenResponse();
-            var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
-            if (user != null)
+            try
             {
+                var response = new RefreshTokenResponse();
+                var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
                 await _authenticationService.CreateAuthTokenAsync(user.UserName);
                 response.AccessToken = user.Authentication.AccessToken;
                 response.RefreshToken = user.Authentication.RefreshToken;
-                return Ok(response);
+                _logger.LogInformation($"User Id: {user.Id} Login: {user.UserName} Has new Token Pair");
+                return JsonResult(response);
             }
-            return BadRequest();
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] UserLogin login)
         {
-            var response = new LoginResponse();
-
-            response.User = await _authenticationService.AuthenticateUserAsync(login);
-
-            if (response.User == null || response.User.ActiveKey == null || !response.User.ActiveKey.IsActive)
+            try
             {
-                return BadRequest();
+                var response = new LoginResponse();
+                response.User = await _authenticationService.AuthenticateUserAsync(login);
+                await _authenticationService.CreateAuthTokenAsync(login.UserName);
+                response.AccessToken = response.User.Authentication.AccessToken;
+                response.RefreshToken = response.User.Authentication.RefreshToken;
+                _logger.LogInformation($"Access was successful for User id: {response.User.Id} Login: {login.UserName}");
+                return JsonResult(response);
             }
-
-            await _authenticationService.CreateAuthTokenAsync(login.UserName);
-
-            response.AccessToken = response.User.Authentication.AccessToken;
-            response.RefreshToken = response.User.Authentication.RefreshToken;
-            return Ok(response);
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPost("Registration")]
         [AllowAnonymous]
-        public async Task RegistrationAsync(UserRegistration input)
+        public async Task<IActionResult> RegistrationAsync(UserRegistration input)
         {
-            if (!_emailSender.IsValidEmail(input.Email))
-                throw new Exception("Invalid Email");
-
-            var user = await _accountActiveService.UserRegistration(input);
-            if (user == null)
-                throw new Exception("User not Found");
-
-
-            var key = await _accountActiveService.CreateActiveKeyAsync();
-            
-            await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
-
-            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                                 "Login",
-                                 new { user.ActiveKey.Key },
-                                 Request.Scheme);
-
-            await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
+            try
+            {
+                var user = await _accountActiveService.UserRegistration(input);
+                var key = await _accountActiveService.CreateActiveKeyAsync();
+                await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
+                var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
+                                     "Login",
+                                     new { user.ActiveKey.Key },
+                                     Request.Scheme);
+                await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
+                _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
+                return JsonResult(confirmationLink);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("ConfirmEmail")]
         public async Task ConfirmEmail(string Key)
         {
             await _accountActiveService.ConfirmEmailAsync(Key);
+            _logger.LogInformation($"Email with {Key} was Confirmed");
         }
     }
 }

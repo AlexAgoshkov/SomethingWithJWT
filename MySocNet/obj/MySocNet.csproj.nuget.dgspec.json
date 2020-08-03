@@ -38,10 +38,6 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
-            "Abp": {
-              "target": "Package",
-              "version": "[5.10.1, )"
-            },
             "AutoMapper": {
               "target": "Package",
               "version": "[10.0.0, )"
@@ -49,6 +45,10 @@
             "AutoMapper.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
               "version": "[8.0.1, )"
+            },
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.0.35, )"
             },
             "EO.WebBrowser": {
               "target": "Package",
@@ -67,6 +67,10 @@
               "version": "[2.2.3, )"
             },
             "Microsoft.AspNet.Mvc": {
+              "target": "Package",
+              "version": "[5.2.7, )"
+            },
+            "Microsoft.AspNet.WebApi.Core": {
               "target": "Package",
               "version": "[5.2.7, )"
             },
@@ -106,6 +110,10 @@
               "target": "Package",
               "version": "[3.1.6, )"
             },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[3.1.6, )"
+            },
             "Microsoft.Extensions.Identity.Core": {
               "target": "Package",
               "version": "[3.1.6, )"
@@ -124,11 +132,11 @@
             },
             "NLog": {
               "target": "Package",
-              "version": "[4.7.2, )"
+              "version": "[4.7.3, )"
             },
             "NLog.Config": {
               "target": "Package",
-              "version": "[4.7.2, )"
+              "version": "[4.7.3, )"
             },
             "NLog.Extensions.Logging": {
               "target": "Package",
@@ -136,11 +144,11 @@
             },
             "NLog.Schema": {
               "target": "Package",
-              "version": "[4.7.2, )"
+              "version": "[4.7.3, )"
             },
             "NLog.Web.AspNetCore": {
               "target": "Package",
-              "version": "[4.9.2, )"
+              "version": "[4.9.3, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",

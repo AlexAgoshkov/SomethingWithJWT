@@ -48,8 +48,14 @@ namespace MySocNet.Services
 
         public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
         {
+            if (image == null)
+                throw new ArgumentException("Image was null");
+            
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                   .Include(x => x.ChatImage).FirstOrDefaultAsync();
+            if (chat == null)
+                throw new ArgumentException("Chat not found");
+
             chat.ChatImage = image;
             await _chatRepository.UpdateAsync(chat);
             return chat;
@@ -84,7 +90,7 @@ namespace MySocNet.Services
 
             // DONE: check fot null
             if (userChat == null)
-                throw new Exception("UserChat not found");
+                throw new ArgumentException("UserChat not found");
 
             await _userChatRepository.RemoveAsync(userChat);
             return userChat.Chat;
@@ -97,7 +103,7 @@ namespace MySocNet.Services
 
             // DONE: check for null
             if (chat == null)
-                throw new Exception("Chat not found");
+                throw new ArgumentException("Chat not found");
             if (chat.ChatOwnerId == ownerId)
             {
                 await _chatRepository.RemoveAsync(chat);
@@ -112,7 +118,7 @@ namespace MySocNet.Services
 
             // DONE: check for null
             if (chat == null)
-                throw new Exception("Chat not found");
+                throw new ArgumentException("Chat not found");
 
             if (chat != null && !string.IsNullOrWhiteSpace(chatName))
             {
@@ -137,7 +143,7 @@ namespace MySocNet.Services
                 .FirstOrDefaultAsync();
 
             if (chat == null)
-                throw new Exception("Chat not found");
+                throw new ArgumentException("Chat not found");
 
             return new ChatDetailsResponse
             {
@@ -163,7 +169,7 @@ namespace MySocNet.Services
                 .Select(x => x.ChatId).ToListAsync();
 
             if (userMessage == null)
-                throw new Exception("UserMessage is not Found");
+                throw new ArgumentException("UserMessage is not Found");
 
             var query = _messageRepository
                 .GetWhere(x => userMessage.Contains(x.Id));
@@ -181,15 +187,18 @@ namespace MySocNet.Services
             return new GetNewMessageResponse(messageResponse, totalCount);
         }
 
-        public async Task ReadMessages(int userId, int chatId) //------------------------------------------
+        public async Task ReadMessages(int userId, int chatId)
         {
-            var messages = await _userMessageRepository.GetWhere(x => x.UserId == userId && x.ChatId == chatId && !x.IsRead)
+            var messages = await _userMessageRepository
+                .GetWhere(x => x.UserId == userId && x.ChatId == chatId && !x.IsRead)
                 .ToListAsync();
+            if (messages == null)
+                throw new ArgumentException("Messages not found");
 
             foreach (var item in messages)
             {
-                item.IsRead = true;
-                await _userMessageRepository.UpdateAsync(item);
+            item.IsRead = true;
+            await _userMessageRepository.UpdateAsync(item);
             }
         }
 
@@ -211,7 +220,7 @@ namespace MySocNet.Services
             var chat = await _chatRepository.GetByIdAsync(chatId);
            
             if (chat == null)
-                throw new Exception("User not found");
+                throw new ArgumentException("Chat not found");
 
             var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
                 .Select(x => x.UserId).ToListAsync();
@@ -225,16 +234,7 @@ namespace MySocNet.Services
             };
             chat.Messages.Add(responseMessage);
 
-            // TODO: use mapper instead new { }--------------------------
-            // _mapper.Map<LastChatData>(responseMessage)
-
-            await _lastDataService.AddLastChatData(new LastChatData
-            {
-                ChatId = chat.Id,
-                UserName = $"{sender.FirstName} {sender.SurName}",
-                Text = message,
-            });
-
+            await _lastDataService.AddLastChatData(_mapper.Map<LastChatData>(responseMessage));
             await _chatRepository.UpdateAsync(chat);
             await CreateUnReadMessages(users, chat); 
             return responseMessage;

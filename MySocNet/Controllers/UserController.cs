@@ -45,6 +45,9 @@ namespace MySocNet.Controllers
         private readonly IFriendService _friendService;
         private readonly IEmailService _emailSender;
         private readonly IRepository<User> _userRepository;
+        private readonly IRepository<UserChat> _userChatRepository;
+        private readonly IRepository<Chat> _chatRepository;
+        private readonly IRepository<Message> _messageRepository;
         private readonly IImageService _imageService;
         private readonly ILog _log;
         
@@ -52,6 +55,9 @@ namespace MySocNet.Controllers
             IUserService userService,
             IFriendService friendService,
             IRepository<User> userRepository,
+            IRepository<UserChat> userChatRepository,
+            IRepository<Chat> chatRepository,
+            IRepository<Message> messageRepository,
             IImageService imageService,
             IEmailService emailSender,
             ILog log) : base(userRepository)
@@ -60,6 +66,9 @@ namespace MySocNet.Controllers
             _friendService = friendService;
             _imageService = imageService;
             _userRepository = userRepository;
+            _userChatRepository = userChatRepository;
+            _chatRepository = chatRepository;
+            _messageRepository = messageRepository;
             _emailSender = emailSender;
             _log = log;
         }
@@ -132,7 +141,8 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.User)]
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            return await _userRepository.GetByIdAsync(userId);
+            return await _userRepository.GetByIdAsync(userId) ??
+            throw new ArgumentException("User not found");
         }
 
         [HttpGet("GetFriendList")]
@@ -160,17 +170,32 @@ namespace MySocNet.Controllers
         }
 
         [HttpDelete("RemoveUser")]
-        [Authorize(Policy = Policies.Admin)]
+       
         public async Task<IActionResult> RemoveUserByIdAsync(int id)//--------------- CAN NOT REMOVE USER!!!
         {
-            var user = await _userRepository.GetWhere(x => x.Id == id)
-                .Include(x => x.UserChats).Include(x => x.Chats)
-                .ThenInclude(x => x.Messages).FirstOrDefaultAsync();
-            if (user == null)
-                return BadRequest();
+            try
+            {
+                var userChats = _userChatRepository.GetWhere(x => x.UserId == id);
+                await _userChatRepository.RemoveRangeAsync(userChats);
 
-            await _userRepository.RemoveAsync(user);
-            return JsonResult(user);
+                var chat = await _chatRepository.GetWhere(x => x.ChatOwnerId == id).ToListAsync();
+                if (chat != null)
+                {
+                    var usersChats = _userChatRepository.GetWhere(x => chat.Select(x => x.ChatOwnerId).Contains(x.ChatId));
+                    var messages = _messageRepository.GetWhere(x => chat.Select(x => x.Id).Contains(x.ChatId));
+                    await _messageRepository.RemoveRangeAsync(messages);
+                    await _userChatRepository.RemoveRangeAsync(userChats);
+                    await _chatRepository.RemoveRangeAsync(chat);   
+                }
+                
+                var user = _userRepository.GetWhere(x => x.Id == id);
+                await _userRepository.RemoveAsync(await user.FirstOrDefaultAsync());
+                return JsonResult(user);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }
