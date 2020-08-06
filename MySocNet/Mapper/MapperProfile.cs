@@ -29,7 +29,7 @@ namespace MySocNet.Mapper
                 .ForMember(x => x.LastMessage, opt => opt.MapFrom(x => x.Text));
             CreateMap<Message, LastChatData>()
                 .ForMember(response => response.ChatId, opt => opt.MapFrom(x => x.ChatId))
-                .ForMember(response => response.UserName, opt => opt.MapFrom(x => x.Sender.FirstName + " " + x.Sender.SurName))
+                .ForMember(response => response.UserName, opt => opt.MapFrom(x => x.Sender.FirstName + x.Sender.SurName))
                 .ForMember(response => response.Text, opt => opt.MapFrom(x => x.Text));
         }
     }

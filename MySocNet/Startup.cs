@@ -124,11 +124,9 @@ namespace MySocNet
                   {
                       var accessToken = context.Request.Query["access_token"];
 
-                      // если запрос направлен хабу
                       var path = context.HttpContext.Request.Path;
                       if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chathub")))
-                      {
-                          // получаем токен из строки запроса
+                      {   
                           context.Token = accessToken;
                       }
                       return Task.CompletedTask;
@@ -147,8 +145,10 @@ namespace MySocNet
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILog logger, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddProvider(new MyLoggerProvider(app));
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -156,7 +156,7 @@ namespace MySocNet
                 app.UseStaticFiles();
             }
            
-            app.ConfigureExceptionHandler(logger);
+           // app.ConfigureExceptionHandler(logger);
 
             app.UseSwagger();
 
@@ -175,7 +175,6 @@ namespace MySocNet
 
             app.UseRouting();
 
-            // подключаем CORS
             app.UseCors(builder => builder.AllowAnyOrigin());
 
             app.UseRequestLocalization();

@@ -34,6 +34,7 @@ using Newtonsoft.Json;
 using MySocNet.Input;
 using System.IO;
 using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace MySocNet.Controllers
 {
@@ -48,6 +49,7 @@ namespace MySocNet.Controllers
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Message> _messageRepository;
+        private readonly ILogger<UserController> _logger;
         private readonly IImageService _imageService;
         private readonly ILog _log;
         
@@ -60,6 +62,7 @@ namespace MySocNet.Controllers
             IRepository<Message> messageRepository,
             IImageService imageService,
             IEmailService emailSender,
+            ILogger<UserController> logger,
             ILog log) : base(userRepository)
         {
             _userService = userService;
@@ -71,14 +74,7 @@ namespace MySocNet.Controllers
             _messageRepository = messageRepository;
             _emailSender = emailSender;
             _log = log;
-        }
-
-        private async Task<User> GetUserByAccessToken()
-        {
-            var accessToken = await HttpContext.GetAccessToken();
-            var user = await _userRepository.FirstOrDefaultAsync(x => x.Authentication.AccessToken == accessToken)
-                ?? throw new UnauthorizedAccessException();
-            return user;
+            _logger = logger;
         }
 
         [HttpGet("GetAll")]
@@ -109,12 +105,22 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet]
-        [Route("GetUserData")]
+        [Route("GetCurrentUser(TEST)")]
+        [Authorize]
+        
+        public async Task<IActionResult> GetCurrerUser()
+        {
+            return JsonResult(await CurrentUser());
+        }
+
+        [HttpGet]
         [Authorize(Policy = Policies.User)]
+        [Route("GetUserData")]
         public async Task<IActionResult> GetUserData()
         {
-            User user = await GetUserByAccessToken();
-            return Ok(user);
+            var user = await CurrentUser();
+            _log.Information($"User Id {user.Id} Login {user.UserName} checked information about himself");
+            return JsonResult(user);
         }
 
         [HttpGet]
@@ -122,18 +128,20 @@ namespace MySocNet.Controllers
         [Authorize(Policy = Policies.Admin)]
         public async Task<IActionResult> GetAdminData()
         {
-            User user = await GetUserByAccessToken();
-            return Ok(user);
+            var user = await CurrentUser();
+            _log.Information($"User Id {user.Id} Login {user.UserName} checked information about himself");
+            return JsonResult(user);
         }
 
         [HttpPost]
         [Route("UpdateUser")]
-        [Authorize(Policy = Policies.User)]
+        [Authorize(Roles = Policies.Admin + "," + Policies.User)]
         public async Task UpdateUserAsync(UserUpdate input)
         {
             var user = await CurrentUser();
             user.FirstName = input.FirstName;
             user.SurName = input.SurName;
+            _log.Information($"User Id {user.Id} Login {user.UserName} Added First Name {user.FirstName} and Sur Name {user.SurName}");
             await _userRepository.UpdateAsync(user);
         }
         
@@ -170,17 +178,19 @@ namespace MySocNet.Controllers
         }
 
         [HttpDelete("RemoveUser")]
-       
-        public async Task<IActionResult> RemoveUserByIdAsync(int id)//--------------- CAN NOT REMOVE USER!!!
+        public async Task<IActionResult> RemoveUserByIdAsync(int id)
         {
             try
             {
-                var userChats = _userChatRepository.GetWhere(x => x.UserId == id);
-                await _userChatRepository.RemoveRangeAsync(userChats);
+                var user = await _userRepository.GetWhere(x => x.Id == id).FirstOrDefaultAsync();
+                if (user == null)
+                    return NotFound("User not found");
 
-                var chat = await _chatRepository.GetWhere(x => x.ChatOwnerId == id).ToListAsync();
-                if (chat != null)
+                var userChats = await _userChatRepository.GetWhere(x => x.UserId == id).ToListAsync();
+                
+                if (userChats.Any())
                 {
+                    var chat = _chatRepository.GetWhere(x => x.ChatOwnerId == id);
                     var usersChats = _userChatRepository.GetWhere(x => chat.Select(x => x.ChatOwnerId).Contains(x.ChatId));
                     var messages = _messageRepository.GetWhere(x => chat.Select(x => x.Id).Contains(x.ChatId));
                     await _messageRepository.RemoveRangeAsync(messages);
@@ -188,8 +198,9 @@ namespace MySocNet.Controllers
                     await _chatRepository.RemoveRangeAsync(chat);   
                 }
                 
-                var user = _userRepository.GetWhere(x => x.Id == id);
-                await _userRepository.RemoveAsync(await user.FirstOrDefaultAsync());
+                await _userRepository.RemoveAsync(user);
+                var admin = await CurrentUser();
+                _log.Information($"User Id: {user.Id} Login {user.UserName} was removed by Admin {admin.UserName}");
                 return JsonResult(user);
             }
             catch (ArgumentException ex)

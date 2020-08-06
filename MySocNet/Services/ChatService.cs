@@ -70,7 +70,7 @@ namespace MySocNet.Services
                 throw new ArgumentException("Chat not found");
 
             var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
-            // DONE: check global exception handler. correct status codes must be returned
+            
             if (user == null)
                 throw new ArgumentException("User not found");
 
@@ -88,7 +88,6 @@ namespace MySocNet.Services
                 .Include(x => x.Chat)
                 .FirstOrDefaultAsync();
 
-            // DONE: check fot null
             if (userChat == null)
                 throw new ArgumentException("UserChat not found");
 
@@ -101,7 +100,6 @@ namespace MySocNet.Services
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).Include(x => x.Messages).FirstOrDefaultAsync();
 
-            // DONE: check for null
             if (chat == null)
                 throw new ArgumentException("Chat not found");
             if (chat.ChatOwnerId == ownerId)
@@ -148,7 +146,7 @@ namespace MySocNet.Services
             return new ChatDetailsResponse
             {
                 ChatName = chat.ChatName,
-                Image = await _imageService.DownloadAsync(chat.ChatImage.ImagePath),
+                Image = await _imageService.DownloadAsync(chat.ChatImage.CroppedImagePath),
                 Users = await _userRepository
                     .GetWhere(x => chat.UserChats.Select(y => y.UserId)
                     .Contains(x.Id))

@@ -25,13 +25,13 @@ namespace MySocNet.Services
         {
             while (!stopToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromSeconds(30));
+                await Task.Delay(TimeSpan.FromMinutes(30));
 
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var myScopedService = scope.ServiceProvider.GetRequiredService<IRepository<User>>();
                     var users = await myScopedService
-                        .GetWhere(x => !x.ActiveKey.IsActive && 59 - x.ActiveKey.Created.Minute > 2)
+                        .GetWhere(x => !x.ActiveKey.IsActive && 59 - x.ActiveKey.Created.Minute > 20)
                         .Include(x => x.ActiveKey).ToListAsync();
                     if (users != null)
                     {

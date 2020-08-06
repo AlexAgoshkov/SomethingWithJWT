@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects\\MySocNet\\MySocNet.csproj": {}
+    "D:\\Source\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\MySocNet\\MySocNet.csproj": {
+    "D:\\Source\\SomethingWithJWT\\MySocNet\\MySocNet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\MySocNet\\MySocNet.csproj",
+        "projectUniqueName": "D:\\Source\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
         "projectName": "MySocNet",
-        "projectPath": "D:\\Projects\\MySocNet\\MySocNet.csproj",
+        "projectPath": "D:\\Source\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
         "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\MySocNet\\obj\\",
+        "outputPath": "D:\\Source\\SomethingWithJWT\\MySocNet\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -53,10 +53,6 @@
             "EO.WebBrowser": {
               "target": "Package",
               "version": "[20.2.19, )"
-            },
-            "Grpc.Core": {
-              "target": "Package",
-              "version": "[2.30.0, )"
             },
             "MailKit": {
               "target": "Package",
@@ -124,7 +120,7 @@
             },
             "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
               "target": "Package",
-              "version": "[3.1.3, )"
+              "version": "[3.1.4, )"
             },
             "NETCore.MailKit": {
               "target": "Package",
@@ -161,6 +157,10 @@
             "RestSharp": {
               "target": "Package",
               "version": "[106.11.4, )"
+            },
+            "SixLabors.ImageSharp": {
+              "target": "Package",
+              "version": "[1.0.0, )"
             },
             "Swashbuckle.AspNetCore.Swagger": {
               "target": "Package",

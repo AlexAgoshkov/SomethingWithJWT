@@ -30,7 +30,7 @@ namespace MySocNet.Logger
         {
             return true;
         }
-
+        //Model For logs
         public async void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             var log = new LogData { Category = _category, Message = state.ToString() };
