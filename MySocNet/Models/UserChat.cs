@@ -14,5 +14,9 @@ namespace MySocNet.Models
         public int UserId { get; set; }
 
         public User User { get; set; }
+
+        public bool IsPrivateMask { get; set; }
+
+        public bool IsUserJoined { get; set; }
     }
 }

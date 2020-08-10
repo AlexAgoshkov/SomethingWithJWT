@@ -24,7 +24,7 @@ namespace MySocNet.Controllers
             IHttpClientFactory clientFactory) : base(userRepository)
         {
             _clientFactory = clientFactory;
-        }//IHostedService
+        }
 
         [HttpGet("GetWeather")]
         public async Task<IActionResult> GetWeather()

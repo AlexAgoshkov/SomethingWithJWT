@@ -1,4 +1,5 @@
-﻿using MySocNet.Models;
+﻿using MySocNet.Input;
+using MySocNet.Models;
 using MySocNet.Response;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,9 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IChatService
     {
-        Task<Chat> AddNewUserToChatAsync(int chatId, int userId);
+        Task<Chat> InviteUserToChatAsync(int chatId, int userId);
+
+        Task<List<Chat>> GetFiltredChat(SearchChatsInput input);
 
         Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
 
@@ -17,7 +20,7 @@ namespace MySocNet.Services.Interfaces
 
         Task<Chat> EditChatAsync(int chatId, string chatName);
 
-        Task<Chat> CreateChatAsync(string chatName, User owner, int[] ids);
+        Task<Chat> CreateChatAsync(InputChatCreate input, User chatOwner);
 
         Task<Message> SendMessageAsync(int chatId, User sender, string message);
 
@@ -32,5 +35,7 @@ namespace MySocNet.Services.Interfaces
         Task<Chat> AddImageToChatAsync(Image image, int chatId);
 
         Task ReadMessages(int userId, int chatId);
+
+        Task<Chat> JoinToChannel(int channelId, User user);
     }
 }

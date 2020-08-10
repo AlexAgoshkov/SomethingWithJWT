@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MySocNet.Input;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Response;
@@ -21,6 +22,9 @@ namespace MySocNet.Mapper
             CreateMap<UserRegistration, User>();
             CreateMap<Chat, ChatLastResponse>();
             CreateMap<Chat, ChatResponse>();
+            CreateMap<Authentication, UpdateTokenInput>();
+            CreateMap<UpdateTokenInput, Authentication>();
+            CreateMap<InputChatCreate, Chat>();
             CreateMap<Message, MessageResponse>()
                 .ForMember(x => x.SenderId, y => y.MapFrom(x => x.SenderId));
             CreateMap<LastChatData, ChatLastResponse>()

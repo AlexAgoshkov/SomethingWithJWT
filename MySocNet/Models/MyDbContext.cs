@@ -30,7 +30,7 @@ namespace MySocNet.Models
 
         public DbSet<LogData> LogData { get; set; }
 
-        public DbSet<UserMessage> UserMessages { get; set; }
+        public DbSet<UserChatRead> UserMessages { get; set; }
 
         public DbSet<LastChatData> LastChatDatas { get; set; }
 
@@ -52,7 +52,7 @@ namespace MySocNet.Models
                 .WithMany(c => c.UserChats)
                 .HasForeignKey(uc => uc.ChatId);
 
-            modelBuilder.Entity<UserMessage>()
+            modelBuilder.Entity<UserChatRead>()
                .HasKey(uc => new { uc.ChatId, uc.UserId});
           
 

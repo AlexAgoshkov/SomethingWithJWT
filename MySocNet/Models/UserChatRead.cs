@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Models
 {
-    public class UserMessage
+    public class UserChatRead
     {
         public int UserId { get; set; }
 

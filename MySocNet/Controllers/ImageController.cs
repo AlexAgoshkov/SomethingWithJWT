@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MySocNet.Enums;
+using MySocNet.Exceptions;
 using MySocNet.Models;
 using MySocNet.Services.Interfaces;
 using NLog.Filters;
@@ -27,21 +28,19 @@ namespace MySocNet.Controllers
         private readonly IImageService _imageService;
         private readonly IRepository<MySocNet.Models.Image> _imageRepository;
         private readonly IUserService _userService;
-        private readonly ILogger<ImageController> _logger;
-
+        
         public ImageController(
             IRepository<User> userRepository,
             IRepository<MySocNet.Models.Image> imageRepository,
             IUserService userService,
             IChatService chatService,
-            IImageService imageService,
-            ILogger<ImageController> logger) : base(userRepository)
+            IImageService imageService
+            ) : base(userRepository)
         {
             _chatService = chatService;
             _imageService = imageService;
             _userService = userService;
             _imageRepository = imageRepository;
-            _logger = logger;
         }
 
         [HttpPost("AddImageToChat")]
@@ -49,20 +48,12 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> AddImageToChat(IFormFile image, Filters filters, int chatId)
         {
             if (!_imageService.IsImage(image))
-                return BadRequest("Wrong Image Formate");
+                throw new EntityNotFoundException("Image must be .jpg .png. .jpeg");
 
-            try
-            {
                 var chatFileName = $"Chat_{chatId}";
                 var pic = await _imageService.UploadAsync(image, filters, chatFileName);
                 var chat = await _chatService.AddImageToChatAsync(pic, chatId);
-                _logger.LogInformation($"Image Id: {pic.Id} Was Added to Chat Id: {chatId}");
                 return JsonResult(chat);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
         }
 
         [HttpGet("GetImageById")]
@@ -70,10 +61,9 @@ namespace MySocNet.Controllers
         {
             var image = await _imageRepository.GetByIdAsync(fileId);
             if (image == null)
-                return NotFound("Image not found");
+                throw new EntityNotFoundException("Image not found");
 
             var imageBase64 = await _imageService.DownloadAsync(image.CroppedImagePath);
-            _logger.LogInformation($"Image Id: {image.Id} Was Printed");
             return JsonResult(imageBase64);   
         }
 
@@ -82,22 +72,14 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> AddImageToUser(IFormFile image, Filters filters)
         {
             var currentUser = await CurrentUser();
-            
-            if (!_imageService.IsImage(image))
-                return BadRequest("Wrong Image Formate");
 
-            try
-            {
-                var userFileName = $"User_{currentUser.Id}";
-                var pic = await _imageService.UploadAsync(image, filters, userFileName);
-                var user = await _userService.AddImageToUser(pic, currentUser.Id);
-                _logger.LogInformation($"Image Id: {pic.Id} Was Added to User Id {currentUser.Id}");
-                return JsonResult(user);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            if (!_imageService.IsImage(image))
+                throw new EntityNotFoundException("Image must be .jpg .png. .jpeg");
+
+            var userFileName = $"User_{currentUser.Id}";
+            var pic = await _imageService.UploadAsync(image, filters, userFileName);
+            var user = await _userService.AddImageToUser(pic, currentUser.Id);
+            return JsonResult(user);
         }
     }
 }

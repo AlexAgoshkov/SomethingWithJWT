@@ -34,183 +34,108 @@ namespace MySocNet.Controllers
     {
         private readonly IChatService _chatService;
         private readonly IMapper _mapper;
-        private readonly ILogger<ChatController> _logger;
         private readonly IMyLogger _myLogger;
+        private readonly IRepository<Chat> _chatRepository;
 
         public ChatController(
             IRepository<User> userRepository,
+            IRepository<Chat> chatRepository,
             IChatService chatService,
-            ILogger<ChatController> logger,
             IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
-            _logger = logger;
             _chatService = chatService;
+            _chatRepository = chatRepository;
             _mapper = mapper;
-           
         }
 
-        [HttpPost("AddNewUserToChat")]
-        public async Task<IActionResult> AddNewUserToChat(UserToChatInput input)
+        [HttpPost("InviteUserToChat")]
+        public async Task<IActionResult> InviteUserToChat(UserToChatInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var response = await _chatService.AddNewUserToChatAsync(input.ChatId, input.UserId);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Added User id: {input.UserId} to Chat Id {input.ChatId}");
-                return JsonResult(_mapper.Map<ChatResponse>(response));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var user = await CurrentUser();
+            var response = await _chatService.InviteUserToChatAsync(input.ChatId, input.UserId);
+            return JsonResult(_mapper.Map<ChatResponse>(response));
+        }
+
+        [Authorize(Policy = Policies.User)]
+        [HttpPost("JoinToChannel")]
+        public async Task<IActionResult> JoinToChannel(int channelId)
+        {
+            var currentUser = await CurrentUser();
+            var channel = await _chatService.JoinToChannel(channelId, currentUser);
+            return JsonResult(channel);
         }
 
         [HttpDelete("RemoveUserFromChat")]
         public async Task<IActionResult> RemoveUserFromChat(UserToChatInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var response = await _chatService.RemoveUserFromChatAsync(input.ChatId, input.UserId);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed User Id {input.UserId} from Chat Id {input.ChatId}");
-                return JsonResult(_mapper.Map<ChatResponse>(response));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var user = await CurrentUser();
+            var response = await _chatService.RemoveUserFromChatAsync(input.ChatId, input.UserId);
+            return JsonResult(_mapper.Map<ChatResponse>(response));
         }
 
         [Authorize(Policy = Policies.User)]
         [HttpDelete("RemoveChat")]
         public async Task<IActionResult> RemoveChat(int chatId)
-        {
-            try
-            {
-                var user = await CurrentUser();
-                var chat = await _chatService.RemoveChatAsync(user.Id, chatId);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed Chat Id: {chatId}");
-                return JsonResult(_mapper.Map<ChatResponse>(chat));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+        { 
+            var user = await CurrentUser();
+            var chat = await _chatService.RemoveChatAsync(user.Id, chatId);
+            return JsonResult(_mapper.Map<ChatResponse>(chat));
         }
 
         [HttpPost("EditChat")]
         public async Task<IActionResult> EditChat(UpdateChatInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Edited Chat Id {input.ChatId}");
-                return JsonResult(_mapper.Map<ChatResponse>(response));
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var user = await CurrentUser();
+            var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
+            return JsonResult(_mapper.Map<ChatResponse>(response));
         }
 
         [HttpGet("GetChatDetails")]
         public async Task<IActionResult> GetChatDetails(int chatId)
-        {
-            try
-            {
-                var user = await CurrentUser();
-                var result = await _chatService.GetChatDetailsAsync(chatId);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got ChatDetails from Chat Id: {chatId}");
-                return JsonResult(result);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+        { 
+            var user = await CurrentUser();
+            var result = await _chatService.GetChatDetailsAsync(chatId);
+            return JsonResult(result);
         }
 
         [HttpGet("GetChats")]
-        public async Task<IActionResult> GetChats([FromQuery]PaginatedInput input)
+        public async Task<IActionResult> GetChats([FromQuery]SearchChatsInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var chatList = await _chatService.GetChatsAsync(user.Id, input.Skip, input.Take);
-                var response = new GetChatsResponse { ChatResponses = chatList, TotalCount = chatList.Count };
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got his/her Chats total count {chatList.Count}");
-                return JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var mappedChat = _mapper.Map<List<ChatResponse>>(await _chatService.GetFiltredChat(input));
+            return JsonResult(new PaginatedResponse<ChatResponse>(mappedChat.Count, mappedChat));
         }
 
         [HttpPost("CreateChat")]
         public async Task<IActionResult> CreateChat(InputChatCreate input)
         {
-            try
-            {
-                var chatOwner = await CurrentUser();
-                var chat = await _chatService.CreateChatAsync(input.ChatName, chatOwner, input.Ids);
-                _logger.LogInformation($"User id: {chatOwner.Id} Login {chatOwner.UserName} Created new Chat Id: {chat.Id}");
-                return JsonResult(chat);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var chatOwner = await CurrentUser();
+            var chat = await _chatService.CreateChatAsync(input, chatOwner);
+            return JsonResult(_mapper.Map<ChatResponse>(chat));
         }
 
         [HttpGet("GetAllMessages")]
         public async Task<IActionResult> GetAllMessages([FromQuery] GetMessagesInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var messages = await _chatService.GetChatHistoryAsync(input.ChatId, input.Skip, input.Take);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Read Messages from Chat Id {input.ChatId}");
-                return JsonResult(messages);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var messages = await _chatService.GetChatHistoryAsync(input.ChatId, input.Skip, input.Take);
+            return JsonResult(messages);
         }
 
         [HttpGet("GetNewMessages")]
         public async Task<IActionResult> GetNewMessages([FromQuery]GetMessagesInput input)
         {
-            try
-            {
-                var user = await CurrentUser();
-                var messages = await _chatService.GetNewMessagesAsync(input.ChatId, user.Id, input.Skip, input.Take);
-                _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Read New Messages from Chat Id {input.ChatId}");
-                return JsonResult(messages);
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var user = await CurrentUser();
+            var messages = await _chatService.GetNewMessagesAsync(input.ChatId, user.Id, input.Skip, input.Take);
+            return JsonResult(messages);
         }
 
         [HttpPost("SendMessageToChat")]
         public async Task<IActionResult> SendMessage(SendMessageInput input)
         {
-            try
-            {
-                var messageSender = await CurrentUser();
-                var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
-                _logger.LogInformation($"User id: {messageSender.Id}, Login {messageSender.UserName} Sent message to chat Id: {input.ChatId}");
-                return JsonResult(message);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var messageSender = await CurrentUser();
+            var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
+            return JsonResult(message);
         }
     }
 }

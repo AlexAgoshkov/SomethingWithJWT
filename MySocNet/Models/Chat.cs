@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MySocNet.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,19 +13,23 @@ namespace MySocNet.Models
         [Key]
         public int Id { get; set; }
 
+        public bool IsPrivate { get; set; }
+
+        public bool IsOnlyJoin { get; set; }
+
+        public ChatType ChatType { get; set; }
+
         public int? ImageId { get; set; }
 
         public virtual Image ChatImage { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Message> Messages { get; set; }
-
         [JsonIgnore]
         public virtual ICollection<UserChat> UserChats { get; set; }
 
         public string ChatName { get; set; }
 
         public int? ChatOwnerId { get; set; }
-
         [JsonIgnore]
         public User ChatOwner { get; set; }
 

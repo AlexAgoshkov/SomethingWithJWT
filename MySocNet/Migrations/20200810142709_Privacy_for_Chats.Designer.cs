@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200810142709_Privacy_for_Chats")]
+    partial class Privacy_for_Chats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,9 +115,6 @@ namespace MySocNet.Migrations
 
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsOnlyJoin")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPrivate")
                         .HasColumnType("bit");
@@ -282,12 +281,6 @@ namespace MySocNet.Migrations
 
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsPrivateMask")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUserJoined")
-                        .HasColumnType("bit");
 
                     b.HasKey("UserId", "ChatId");
 

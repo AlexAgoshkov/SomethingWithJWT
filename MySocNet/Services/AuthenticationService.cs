@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using MySocNet.Exceptions;
+using MySocNet.Input;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Services;
@@ -31,6 +32,7 @@ namespace MySocNet.Services
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Authentication> _authRepository;
         private readonly IMapper _mapper;
+        private const int TokenMinutes = 360; 
         
         public AuthenticationService(
             IConfiguration config, 
@@ -48,21 +50,20 @@ namespace MySocNet.Services
         {
             var user = await _userRepository.FirstOrDefaultAsync(x => x.UserName == userName);
 
-            DateTime created = DateTime.Now;
-            DateTime expires = DateTime.Now.AddMinutes(30);
-
-            string accessToken = GenerateJWTToken(user, _config["Jwt:SecretKey"], expires);
-            string refreshToken = GenerateJWTToken(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
-
+            var input = new UpdateTokenInput();
+            input.Created = DateTime.Now;
+            input.Expires = DateTime.Now.AddMinutes(TokenMinutes);
+            input.AccessToken = GenerateJWTToken(user, _config["Jwt:SecretKey"], input.Expires);
+            input.RefreshToken = GenerateJWTToken(user, "Super_Pushka_Raketa_Turba_Boost", DateTime.Now.AddDays(30));
+            
             if (!user.AuthenticationId.HasValue)
             {
-                await CreateNewTokens(user, created, expires, accessToken, refreshToken);
+                await CreateNewTokens(user, input);
             }
             else
             {
-                await UpdateTokens(user, created, expires, accessToken, refreshToken);
+                await UpdateTokens(user,input);
             }
-            await _userRepository.UpdateAsync(user);
         }
 
         public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
@@ -79,27 +80,17 @@ namespace MySocNet.Services
                 return _mapper.Map<User>(userByLogin);
         }
 
-        private async Task CreateNewTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)
+        private async Task CreateNewTokens(User user, UpdateTokenInput input)
         {
-            var jwtToken = new Authentication { Created = created, Expires = expires, AccessToken = accessToken, RefreshToken = refreshToken };
-            await CreateTokenAsync(jwtToken);
-            user.Authentication = jwtToken;
+           var auth = _mapper.Map<Authentication>(input);
+           user.Authentication = auth;
+           await _userRepository.UpdateAsync(user);
         }
 
-        private async Task UpdateTokens(User user, DateTime created, DateTime expires, string accessToken, string refreshToken)
+        private async Task UpdateTokens(User user, UpdateTokenInput input)
         {
-            var auth = await _authRepository.FirstOrDefaultAsync(x => x.Id == user.AuthenticationId);
-            auth.AccessToken = accessToken;
-            auth.RefreshToken = refreshToken;
-            auth.Created = created;
-            auth.Expires = expires;
-            await _authRepository.UpdateAsync(auth);
-            user.AuthenticationId = auth.Id;
-        }
-
-        private async Task CreateTokenAsync(Authentication authentication)
-        {
-            await _authRepository.AddAsync(authentication);
+            user.Authentication = _mapper.Map<Authentication>(input);
+            await _userRepository.UpdateAsync(user);
         }
 
         private string GenerateJWTToken(User user, string secretWord, DateTime expire)
@@ -120,6 +111,7 @@ namespace MySocNet.Services
                 expires: expire,
                 signingCredentials: credentials
             );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

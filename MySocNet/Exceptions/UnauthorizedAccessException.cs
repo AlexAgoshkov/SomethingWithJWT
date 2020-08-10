@@ -10,7 +10,6 @@ namespace MySocNet.Exceptions
         public UnauthorizedAccessException(string message) : base(message)
         {
             //401 
-            
         }
     }
 }

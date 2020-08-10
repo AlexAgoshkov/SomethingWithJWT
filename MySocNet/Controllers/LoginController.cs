@@ -65,48 +65,30 @@ namespace MySocNet.Controllers
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> UpdateAccess(UpdateAccessTokenInput input)
         {
-            try
-            {
-                var response = new RefreshTokenResponse();
-                var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
-                await _authenticationService.CreateAuthTokenAsync(user.UserName);
-                response.AccessToken = user.Authentication.AccessToken;
-                response.RefreshToken = user.Authentication.RefreshToken;
-                _logger.LogInformation($"User Id: {user.Id} Login: {user.UserName} Has new Token Pair");
-                return JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var response = new RefreshTokenResponse();
+            var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
+            await _authenticationService.CreateAuthTokenAsync(user.UserName);
+            response.AccessToken = user.Authentication.AccessToken;
+            response.RefreshToken = user.Authentication.RefreshToken;
+            return JsonResult(response);
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] UserLogin login)
         {
-            try
-            {
-                var response = new LoginResponse();
-                response.User = await _authenticationService.AuthenticateUserAsync(login);
-                await _authenticationService.CreateAuthTokenAsync(login.UserName);
-                response.AccessToken = response.User.Authentication.AccessToken;
-                response.RefreshToken = response.User.Authentication.RefreshToken;
-                _logger.LogInformation($"Access was successful for User id: {response.User.Id} Login: {login.UserName}");
-                return JsonResult(response);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var response = new LoginResponse();
+            response.User = await _authenticationService.AuthenticateUserAsync(login);
+            await _authenticationService.CreateAuthTokenAsync(login.UserName);
+            response.AccessToken = response.User.Authentication.AccessToken;
+            response.RefreshToken = response.User.Authentication.RefreshToken;
+            return JsonResult(response);
         }
 
         [HttpPost("Registration")]
         [AllowAnonymous]
         public async Task<IActionResult> RegistrationAsync(UserRegistration input)
         {
-            try
-            {
                 var user = await _accountActiveService.UserRegistration(input);
                 var key = await _accountActiveService.CreateActiveKeyAsync();
                 await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
@@ -117,11 +99,6 @@ namespace MySocNet.Controllers
                 await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
                 _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
                 return JsonResult(confirmationLink);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
         }
 
         [HttpGet("ConfirmEmail")]

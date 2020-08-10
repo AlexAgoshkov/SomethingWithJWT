@@ -181,34 +181,25 @@ namespace MySocNet.Controllers
         [HttpDelete("RemoveUser")]
         public async Task<IActionResult> RemoveUserByIdAsync(int id)
         {
-            try
-            {
-                var user = await _userRepository.GetWhere(x => x.Id == id).FirstOrDefaultAsync();
-                if (user == null)
-                    return NotFound("User not found");
+            var user = await _userRepository.GetWhere(x => x.Id == id).FirstOrDefaultAsync();
+            if (user == null)
+                return NotFound("User not found");
 
-                var userChats = await _userChatRepository.GetWhere(x => x.UserId == id).ToListAsync();
+            var userChats = await _userChatRepository.GetWhere(x => x.UserId == id).ToListAsync();
                 
-                if (userChats.Any())
-                {
-                    var chat = _chatRepository.GetWhere(x => x.ChatOwnerId == id);
-                    var usersChats = _userChatRepository.GetWhere(x => chat.Select(x => x.ChatOwnerId).Contains(x.ChatId));
-                    var messages = _messageRepository.GetWhere(x => chat.Select(x => x.Id).Contains(x.ChatId));
-                    await _messageRepository.RemoveRangeAsync(messages);
-                    await _userChatRepository.RemoveRangeAsync(userChats);
-                    await _chatRepository.RemoveRangeAsync(chat);   
-                }
-                
-                await _userRepository.RemoveAsync(user);
-                var admin = await CurrentUser();
-                _log.Information($"User Id: {user.Id} Login {user.UserName} was removed by Admin {admin.UserName}");
-             //   _logger.
-                return JsonResult(user);
-            }
-            catch (ArgumentException ex)
+            if (userChats.Any())
             {
-                return NotFound(ex.Message);
+                var chat = _chatRepository.GetWhere(x => x.ChatOwnerId == id);
+                var usersChats = _userChatRepository.GetWhere(x => chat.Select(x => x.ChatOwnerId).Contains(x.ChatId));
+                var messages = _messageRepository.GetWhere(x => chat.Select(x => x.Id).Contains(x.ChatId));
+                await _messageRepository.RemoveRangeAsync(messages);
+                await _userChatRepository.RemoveRangeAsync(userChats);
+                await _chatRepository.RemoveRangeAsync(chat);   
             }
+                
+            await _userRepository.RemoveAsync(user);
+            var admin = await CurrentUser();
+            return JsonResult(user);
         }
     }
 }

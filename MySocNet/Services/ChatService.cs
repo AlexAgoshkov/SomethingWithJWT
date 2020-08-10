@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
+using MySocNet.Enums;
 using MySocNet.Exceptions;
+using MySocNet.Input;
 using MySocNet.Models;
 using MySocNet.Response;
 using MySocNet.Services.Interfaces;
@@ -12,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace MySocNet.Services
@@ -22,7 +25,7 @@ namespace MySocNet.Services
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
-        private readonly IRepository<UserMessage> _userMessageRepository;
+        private readonly IRepository<UserChatRead> _userMessageRepository;
         private readonly IImageService _imageService;
         private readonly ILastDataService _lastDataService;
         private readonly IMapper _mapper;
@@ -32,7 +35,7 @@ namespace MySocNet.Services
             IRepository<UserChat> userChatRepository,
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
-            IRepository<UserMessage> userMessageRepository,
+            IRepository<UserChatRead> userMessageRepository,
             IImageService imageService,
             ILastDataService lastDataService,
             IMapper mapper)
@@ -45,6 +48,32 @@ namespace MySocNet.Services
             _imageService = imageService;
             _lastDataService = lastDataService;
             _mapper = mapper;
+        }
+
+        public async Task<List<Chat>> GetFiltredChat(SearchChatsInput input)
+        {
+            if (string.IsNullOrWhiteSpace(input.Search))
+                throw new EntityNotFoundException("Search was empty");
+            //make query with sorted privacy from UserChat
+            IQueryable<Chat> query = _chatRepository
+               .GetWhere(x => !x.IsPrivate && x.ChatName.ToUpper().Contains(input.Search));
+            query = input.IsAscending ? query.OrderBy(x => x.ChatName) : query.OrderByDescending(x => x.ChatName);
+            var chats = await query.Skip(input.Skip).Take(input.Take).ToListAsync();
+            return chats;
+        }
+
+        public async Task<Chat> JoinToChannel(int channelId, User user)
+        {
+            var userChats = await _userChatRepository
+                .GetWhere(x => x.ChatId == channelId).Include(x => x.Chat).FirstOrDefaultAsync();
+
+            if (userChats == null || userChats.Chat.ChatType == ChatType.Chat || userChats.Chat.IsPrivate)
+                throw new EntityNotFoundException("Chat not found");
+
+            userChats.IsUserJoined = true;
+            await _userChatRepository.UpdateAsync(userChats);
+
+            return userChats.Chat;
         }
 
         public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
@@ -62,7 +91,7 @@ namespace MySocNet.Services
             return chat;
         }
 
-        public async Task<Chat> AddNewUserToChatAsync(int chatId, int userId)
+        public async Task<Chat> InviteUserToChatAsync(int chatId, int userId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                 .Include(x => x.UserChats).FirstOrDefaultAsync();
@@ -129,11 +158,9 @@ namespace MySocNet.Services
 
         public async Task<IList<LastChatData>> GetChatsAsync(int userId, int skip, int take)
         {
-            // DONE: configure and test mapping; remove foreach
             return await _lastDataService.GetLastData(userId);
         }
 
-        // DONE: refactoring
         public async Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId)
         {
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
@@ -201,13 +228,13 @@ namespace MySocNet.Services
             }
         }
 
-        public async Task<Chat> CreateChatAsync(string chatName, User owner, int[] usersIds)
+        public async Task<Chat> CreateChatAsync(InputChatCreate input, User owner)
         {
-            var chat = new Chat { ChatName = chatName, ChatOwner = owner };
-
+            var chat = _mapper.Map<Chat>(input);
+            chat.ChatOwner = owner;
             await _userChatRepository.AddAsync(new UserChat { Chat = chat, User = owner });
 
-            var users = await _userRepository.GetWhere(x => usersIds.Distinct().Contains(x.Id))
+            var users = await _userRepository.GetWhere(x => input.Ids.Distinct().Contains(x.Id))
                 .Where(x => x.Id != owner.Id).ToListAsync();
           
             await _userChatRepository.AddRangeAsync(users.Select(x => new UserChat { User = x, Chat = chat }));
@@ -245,7 +272,7 @@ namespace MySocNet.Services
 
             if (chatRep == null)
             {
-                await _userMessageRepository.AddRangeAsync(users.Select(x => new UserMessage { UserId = x, Chat = chat, IsRead = false }));
+                await _userMessageRepository.AddRangeAsync(users.Select(x => new UserChatRead { UserId = x, Chat = chat, IsRead = false }));
             }
             else
             {

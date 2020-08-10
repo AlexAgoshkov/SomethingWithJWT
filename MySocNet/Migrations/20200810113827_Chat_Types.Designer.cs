@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200810113827_Chat_Types")]
+    partial class Chat_Types
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,6 +120,9 @@ namespace MySocNet.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPrivate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrivateMask")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -283,12 +288,6 @@ namespace MySocNet.Migrations
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsPrivateMask")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUserJoined")
-                        .HasColumnType("bit");
-
                     b.HasKey("UserId", "ChatId");
 
                     b.HasIndex("ChatId");
@@ -296,7 +295,7 @@ namespace MySocNet.Migrations
                     b.ToTable("UserChats");
                 });
 
-            modelBuilder.Entity("MySocNet.Models.UserChatRead", b =>
+            modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
                 {
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
@@ -392,7 +391,7 @@ namespace MySocNet.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MySocNet.Models.UserChatRead", b =>
+            modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
                 {
                     b.HasOne("MySocNet.Models.Chat", "Chat")
                         .WithMany()
