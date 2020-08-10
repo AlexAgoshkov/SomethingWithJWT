@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
+using MySocNet.Exceptions;
 using MySocNet.Models;
 using MySocNet.Response;
 using MySocNet.Services.Interfaces;
@@ -49,12 +50,12 @@ namespace MySocNet.Services
         public async Task<Chat> AddImageToChatAsync(Image image, int chatId)
         {
             if (image == null)
-                throw new ArgumentException("Image was null");
+                throw new EntityNotFoundException("Image was null");
             
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                   .Include(x => x.ChatImage).FirstOrDefaultAsync();
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
 
             chat.ChatImage = image;
             await _chatRepository.UpdateAsync(chat);
@@ -67,12 +68,12 @@ namespace MySocNet.Services
                 .Include(x => x.UserChats).FirstOrDefaultAsync();
 
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
 
             var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == userId);
             
             if (user == null)
-                throw new ArgumentException("User not found");
+                throw new EntityNotFoundException("User not found");
 
             chat.UserChats.Add(new UserChat { ChatId = chatId, UserId = userId });
 
@@ -89,7 +90,7 @@ namespace MySocNet.Services
                 .FirstOrDefaultAsync();
 
             if (userChat == null)
-                throw new ArgumentException("UserChat not found");
+                throw new EntityNotFoundException("UserChat not found");
 
             await _userChatRepository.RemoveAsync(userChat);
             return userChat.Chat;
@@ -101,7 +102,7 @@ namespace MySocNet.Services
                 .Include(x => x.UserChats).Include(x => x.Messages).FirstOrDefaultAsync();
 
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
             if (chat.ChatOwnerId == ownerId)
             {
                 await _chatRepository.RemoveAsync(chat);
@@ -116,7 +117,7 @@ namespace MySocNet.Services
 
             // DONE: check for null
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
 
             if (chat != null && !string.IsNullOrWhiteSpace(chatName))
             {
@@ -141,7 +142,7 @@ namespace MySocNet.Services
                 .FirstOrDefaultAsync();
 
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
 
             return new ChatDetailsResponse
             {
@@ -167,7 +168,7 @@ namespace MySocNet.Services
                 .Select(x => x.ChatId).ToListAsync();
 
             if (userMessage == null)
-                throw new ArgumentException("UserMessage is not Found");
+                throw new EntityNotFoundException("UserMessage is not Found");
 
             var query = _messageRepository
                 .GetWhere(x => userMessage.Contains(x.Id));
@@ -191,7 +192,7 @@ namespace MySocNet.Services
                 .GetWhere(x => x.UserId == userId && x.ChatId == chatId && !x.IsRead)
                 .ToListAsync();
             if (messages == null)
-                throw new ArgumentException("Messages not found");
+                throw new EntityNotFoundException("Messages not found");
 
             foreach (var item in messages)
             {
@@ -218,7 +219,7 @@ namespace MySocNet.Services
             var chat = await _chatRepository.GetByIdAsync(chatId);
            
             if (chat == null)
-                throw new ArgumentException("Chat not found");
+                throw new EntityNotFoundException("Chat not found");
 
             var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
                 .Select(x => x.UserId).ToListAsync();

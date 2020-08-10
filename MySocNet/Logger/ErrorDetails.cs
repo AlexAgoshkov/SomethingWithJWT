@@ -8,8 +8,13 @@ namespace MySocNet.Logger
 {
     public class ErrorDetails
     {
-        public int StatusCode { get; set; }
+        public ErrorDetails(string message)
+        {
+            Message = message;
+        }
+
         public string Message { get; set; }
+
         public override string ToString()
         {
             return JsonSerializer.Serialize(this);

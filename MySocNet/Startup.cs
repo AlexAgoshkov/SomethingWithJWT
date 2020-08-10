@@ -64,8 +64,9 @@ namespace MySocNet
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<ILastDataService, LastDataService>();
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
-            services.AddSingleton<ILog, LogNLog>();
-           
+            services.AddScoped<ILog, LogNLog>();
+            services.AddScoped<IMyLogger, MyLogger>();
+          
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<FileOperationFilter>();
@@ -84,15 +85,15 @@ namespace MySocNet
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
-                          new OpenApiSecurityScheme
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
                             {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            },
-                            new string[] {}
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
                     }
                 });
             });
@@ -156,7 +157,7 @@ namespace MySocNet
                 app.UseStaticFiles();
             }
            
-           // app.ConfigureExceptionHandler(logger);
+            app.ConfigureExceptionHandler(logger);
 
             app.UseSwagger();
 

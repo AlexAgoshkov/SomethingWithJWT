@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using MySocNet.Enums;
+using MySocNet.Exceptions;
 using MySocNet.Models;
 using MySocNet.Services.Interfaces;
 using NLog.Filters;
@@ -29,13 +30,14 @@ namespace MySocNet.Services
             _imageRepository = imageRepository;
         }
 
-        public async Task<Models.Image> UploadAsync(IFormFile input, Filters filters)
+        public async Task<Models.Image> UploadAsync(IFormFile input, Filters filters, string fileName)
         {
-            await CreateImage(input.OpenReadStream(), input.FileName, filters);
+            var imageName = $"{fileName}_{input.FileName}";
+            await CreateImage(input.OpenReadStream(), imageName, filters);
             var image = new Models.Image
             {
-                ImagePath = $"{ImageFolderPath}{input.FileName}",
-                CroppedImagePath = $"{ResizeFolderPath}{input.FileName}"
+                ImagePath = $"{ImageFolderPath}{imageName}",
+                CroppedImagePath = $"{ResizeFolderPath}{imageName}"
             };
             return image;
         }
@@ -43,6 +45,9 @@ namespace MySocNet.Services
 
         public async Task<string> DownloadAsync(string path)
         {
+            if (!File.Exists(path))
+                throw new EntityNotFoundException("File not found");
+
             using (var fs = new FileStream(path, FileMode.Open))
             {
                 byte[] byData = new byte[fs.Length];
@@ -91,11 +96,11 @@ namespace MySocNet.Services
             {
                 if (image.Height > image.Width)
                 {
-                    image.Mutate(x => x.Resize(GetWidth(image.Width, image.Height), 320));
+                    image.Mutate(x => x.Resize(GetWidth(image.Width, image.Height), ImageSize));
                 }
                 else
                 {
-                    image.Mutate(x => x.Resize(320, GetHeight(image.Width, image.Height)));
+                    image.Mutate(x => x.Resize(ImageSize, GetHeight(image.Width, image.Height)));
                 }
                 
                 await image.SaveAsync($"{ResizeFolderPath}{imageName}");  

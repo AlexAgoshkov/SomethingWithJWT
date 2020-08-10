@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,7 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("AddImageToChat")]
+        
         public async Task<IActionResult> AddImageToChat(IFormFile image, Filters filters, int chatId)
         {
             if (!_imageService.IsImage(image))
@@ -51,45 +53,48 @@ namespace MySocNet.Controllers
 
             try
             {
-                var pic = await _imageService.UploadAsync(image, filters);
+                var chatFileName = $"Chat_{chatId}";
+                var pic = await _imageService.UploadAsync(image, filters, chatFileName);
                 var chat = await _chatService.AddImageToChatAsync(pic, chatId);
                 _logger.LogInformation($"Image Id: {pic.Id} Was Added to Chat Id: {chatId}");
                 return JsonResult(chat);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
-
         }
 
         [HttpGet("GetImageById")]
         public async Task<IActionResult> GetImage(int fileId)
         {
             var image = await _imageRepository.GetByIdAsync(fileId);
-
             if (image == null)
-                return NotFound();
+                return NotFound("Image not found");
 
             var imageBase64 = await _imageService.DownloadAsync(image.CroppedImagePath);
             _logger.LogInformation($"Image Id: {image.Id} Was Printed");
-            return JsonResult(imageBase64);
+            return JsonResult(imageBase64);   
         }
 
         [HttpPost("AddImageToUser")]
-        public async Task<IActionResult> AddImageToUser(IFormFile image, Filters filters, int userId)
+        [Authorize(Roles = Policies.Admin + "," + Policies.User)]
+        public async Task<IActionResult> AddImageToUser(IFormFile image, Filters filters)
         {
+            var currentUser = await CurrentUser();
+            
             if (!_imageService.IsImage(image))
                 return BadRequest("Wrong Image Formate");
 
             try
             {
-                var pic = await _imageService.UploadAsync(image, filters);
-                var user = await _userService.AddImageToUser(pic, userId);
-                _logger.LogInformation($"Image Id: {pic.Id} Was Added to User Id {userId}");
+                var userFileName = $"User_{currentUser.Id}";
+                var pic = await _imageService.UploadAsync(image, filters, userFileName);
+                var user = await _userService.AddImageToUser(pic, currentUser.Id);
+                _logger.LogInformation($"Image Id: {pic.Id} Was Added to User Id {currentUser.Id}");
                 return JsonResult(user);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }

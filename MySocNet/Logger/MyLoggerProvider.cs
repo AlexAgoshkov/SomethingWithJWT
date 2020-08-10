@@ -19,7 +19,7 @@ namespace MySocNet.Logger
 
         public ILogger CreateLogger(string categoryName)
         {
-            return new MyLogger(_app, categoryName);
+           return new Logger(_app, categoryName);
         }
 
         public void Dispose()

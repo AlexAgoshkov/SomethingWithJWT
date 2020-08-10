@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.EntityFrameworkCore;
+using MySocNet.Exceptions;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Services.Interfaces;
@@ -38,7 +39,7 @@ namespace MySocNet.Services
         {
             var activeKey = await _activeKeyRepository.FirstOrDefaultAsync(x => x.Key == key);
             if (activeKey == null)
-                return;
+                throw new EntityNotFoundException("ActiveKey not found");
 
             var time = DateTime.Now - activeKey.Created;
 

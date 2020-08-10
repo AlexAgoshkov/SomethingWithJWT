@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MySocNet.Models;
 using MySocNet.Services.Interfaces;
+using NLog.Fluent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,37 +11,17 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Logger
 {
-    public class MyLogger : ILogger
+    public class MyLogger : IMyLogger
     {
-        private readonly IApplicationBuilder _app;
-        private string _category;
+        private readonly IRepository<LogData> _logDataRepository;
 
-        public MyLogger(IApplicationBuilder app, string category)
+        public MyLogger(IRepository<LogData> logDataRepository)
         {
-            _app = app;
-            _category = category;
+            _logDataRepository = logDataRepository;
         }
-
-        public IDisposable BeginScope<TState>(TState state)
+        public async Task AddLog(LogData logData)
         {
-            return null;
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-        //Model For logs
-        public async void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-            var log = new LogData { Category = _category, Message = state.ToString() };
-
-            using (var serviceScope = _app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetService<MyDbContext>();
-                await context.LogData.AddAsync(log);
-                await context.SaveChangesAsync();
-            }
+            await _logDataRepository.AddAsync(logData);
         }
     }
 }

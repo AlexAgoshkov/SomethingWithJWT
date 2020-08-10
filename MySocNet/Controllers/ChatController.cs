@@ -24,6 +24,7 @@ using MySocNet.Models;
 using MySocNet.Response;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace MySocNet.Controllers
 {
@@ -34,11 +35,13 @@ namespace MySocNet.Controllers
         private readonly IChatService _chatService;
         private readonly IMapper _mapper;
         private readonly ILogger<ChatController> _logger;
+        private readonly IMyLogger _myLogger;
 
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
             ILogger<ChatController> logger,
+            IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
@@ -58,7 +61,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Added User id: {input.UserId} to Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -74,7 +77,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed User Id {input.UserId} from Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -91,7 +94,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Removed Chat Id: {chatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(chat));
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -107,7 +110,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Edited Chat Id {input.ChatId}");
                 return JsonResult(_mapper.Map<ChatResponse>(response));
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -123,7 +126,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got ChatDetails from Chat Id: {chatId}");
                 return JsonResult(result);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -140,7 +143,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Got his/her Chats total count {chatList.Count}");
                 return JsonResult(response);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -156,7 +159,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {chatOwner.Id} Login {chatOwner.UserName} Created new Chat Id: {chat.Id}");
                 return JsonResult(chat);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -172,7 +175,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {user.Id} Login {user.UserName} Read Messages from Chat Id {input.ChatId}");
                 return JsonResult(messages);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -204,7 +207,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User id: {messageSender.Id}, Login {messageSender.UserName} Sent message to chat Id: {input.ChatId}");
                 return JsonResult(message);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }

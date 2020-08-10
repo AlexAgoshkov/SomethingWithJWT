@@ -75,7 +75,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User Id: {user.Id} Login: {user.UserName} Has new Token Pair");
                 return JsonResult(response);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -95,7 +95,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"Access was successful for User id: {response.User.Id} Login: {login.UserName}");
                 return JsonResult(response);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
@@ -118,7 +118,7 @@ namespace MySocNet.Controllers
                 _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
                 return JsonResult(confirmationLink);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }

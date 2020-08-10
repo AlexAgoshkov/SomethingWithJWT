@@ -35,6 +35,8 @@ using MySocNet.Input;
 using System.IO;
 using System.ComponentModel;
 using Microsoft.Extensions.Logging;
+using MySocNet.Logger;
+using MySocNet.Exceptions;
 
 namespace MySocNet.Controllers
 {
@@ -49,7 +51,7 @@ namespace MySocNet.Controllers
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Message> _messageRepository;
-        private readonly ILogger<UserController> _logger;
+        private readonly IMyLogger _logger;
         private readonly IImageService _imageService;
         private readonly ILog _log;
         
@@ -62,7 +64,7 @@ namespace MySocNet.Controllers
             IRepository<Message> messageRepository,
             IImageService imageService,
             IEmailService emailSender,
-            ILogger<UserController> logger,
+            IMyLogger logger,
             ILog log) : base(userRepository)
         {
             _userService = userService;
@@ -107,7 +109,6 @@ namespace MySocNet.Controllers
         [HttpGet]
         [Route("GetCurrentUser(TEST)")]
         [Authorize]
-        
         public async Task<IActionResult> GetCurrerUser()
         {
             return JsonResult(await CurrentUser());
@@ -119,7 +120,7 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetUserData()
         {
             var user = await CurrentUser();
-            _log.Information($"User Id {user.Id} Login {user.UserName} checked information about himself");
+            await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
             return JsonResult(user);
         }
 
@@ -146,11 +147,11 @@ namespace MySocNet.Controllers
         }
         
         [HttpGet("GetUserById")]
-        [Authorize(Policy = Policies.User)]
+        
         public async Task<User> GetUserByIdAsync(int userId)
         {
             return await _userRepository.GetByIdAsync(userId) ??
-            throw new ArgumentException("User not found");
+            throw new EntityNotFoundException("User not found");
         }
 
         [HttpGet("GetFriendList")]
@@ -201,6 +202,7 @@ namespace MySocNet.Controllers
                 await _userRepository.RemoveAsync(user);
                 var admin = await CurrentUser();
                 _log.Information($"User Id: {user.Id} Login {user.UserName} was removed by Admin {admin.UserName}");
+             //   _logger.
                 return JsonResult(user);
             }
             catch (ArgumentException ex)

@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using MySocNet.Exceptions;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Services;
@@ -70,10 +71,10 @@ namespace MySocNet.Services
                 .Include(x => x.Authentication).Include(x => x.ActiveKey).FirstOrDefaultAsync();
 
             if (userByLogin == null)
-                throw new Exception("User Not Found");
+                throw new EntityNotFoundException("User not found");
 
             if (!HashService.Verify(loginCredentials.Password, userByLogin.Password))
-                throw new Exception("Login or Password Was Wrong");
+                throw new EntityNotFoundException("Login or Password Was Wrong");
 
                 return _mapper.Map<User>(userByLogin);
         }

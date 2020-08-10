@@ -14,5 +14,13 @@ namespace MySocNet.Logger
         public string Category { get; set; }
 
         public string Message { get; set; }
+
+        public string User { get; set; }
+
+        public int UserId { get; set; }
+
+        public string Chat { get; set; }
+
+        public int ChatId { get; set; }
     }
 }

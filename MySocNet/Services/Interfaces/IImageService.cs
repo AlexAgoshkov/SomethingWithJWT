@@ -13,8 +13,8 @@ namespace MySocNet.Services.Interfaces
     public interface IImageService
     {
         Task<string> DownloadAsync(string path);
-        Task<byte[]> GetImageByBytesAsync(string path);
-        Task<Models.Image> UploadAsync(IFormFile input, Filters filters);
+    
+        Task<Models.Image> UploadAsync(IFormFile input, Filters filters, string fileName);
         bool IsImage(IFormFile file);
     }
 }

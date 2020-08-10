@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit.Encodings;
 using MySocNet.Enums;
+using MySocNet.Exceptions;
 using MySocNet.InputData;
 using MySocNet.Models;
 using MySocNet.Response;
@@ -40,7 +41,7 @@ namespace MySocNet.Services
             var user = await _userRepository.GetWhere(x => x.Id == userId)
                 .Include(x => x.ProfileImage).FirstOrDefaultAsync();
             if (user == null)
-                throw new ArgumentException("User not found");
+                throw new EntityNotFoundException("User not found");
 
             if (user != null && image != null)
             {
@@ -70,7 +71,7 @@ namespace MySocNet.Services
         {
             return await _userRepository.GetWhere(x => x.Authentication.RefreshToken == refreshToken)
                 .Include(x => x.Authentication).FirstOrDefaultAsync() ??
-                throw new ArgumentException("RefreshToken not found");
+                throw new EntityNotFoundException("RefreshToken not found");
         }
     }
 }
