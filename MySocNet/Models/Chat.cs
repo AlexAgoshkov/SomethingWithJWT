@@ -17,6 +17,8 @@ namespace MySocNet.Models
 
         public bool IsOnlyJoin { get; set; }
 
+        public bool IsReadOnly { get; set; }
+
         public ChatType ChatType { get; set; }
 
         public int? ImageId { get; set; }

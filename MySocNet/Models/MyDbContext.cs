@@ -30,9 +30,11 @@ namespace MySocNet.Models
 
         public DbSet<LogData> LogData { get; set; }
 
-        public DbSet<UserChatRead> UserMessages { get; set; }
+        public DbSet<UserChatRead> UserChatReads { get; set; }
 
         public DbSet<LastChatData> LastChatDatas { get; set; }
+
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
@@ -42,29 +44,24 @@ namespace MySocNet.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserChat>()
-                .HasKey(uc => new { uc.UserId, uc.ChatId });
+               .HasKey(uc => new {  uc.ChatId, uc.UserId });
             modelBuilder.Entity<UserChat>()
-                .HasOne(uc => uc.User)
-                .WithMany(c => c.UserChats)
-                .HasForeignKey(uc => uc.UserId);
+              .HasOne(uc => uc.Chat)
+              .WithMany(c => c.UserChats)
+              .HasForeignKey(uc => uc.ChatId);
             modelBuilder.Entity<UserChat>()
-                .HasOne(uc => uc.Chat)
-                .WithMany(c => c.UserChats)
-                .HasForeignKey(uc => uc.ChatId);
-
-            modelBuilder.Entity<UserChatRead>()
-               .HasKey(uc => new { uc.ChatId, uc.UserId});
+              .HasOne(uc => uc.User)
+              .WithMany(c => c.UserChats)
+              .HasForeignKey(uc => uc.UserId);
           
+            modelBuilder.Entity<UserChatRead>()
+              .HasKey(uc => new { uc.ChatId, uc.UserId});
+
+            modelBuilder.Entity<ChatMessage>()
+            .HasKey(uc => new { uc.ChatId, uc.MessageId });
 
             modelBuilder.Entity<LogData>();
             base.OnModelCreating(modelBuilder);
         }
-
-        //public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
-        //{
-        //    builder.AddFilter((category, level) => category == DbLoggerCategory.Database.Command.Name
-        //                        && level == LogLevel.Information)
-        //        .AddProvider(new MyLoggerProvider());
-        //});
     }
 }

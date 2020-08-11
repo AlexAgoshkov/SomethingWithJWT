@@ -12,7 +12,7 @@ namespace MySocNet.Services.Interfaces
     {
         Task<Chat> InviteUserToChatAsync(int chatId, int userId);
 
-        Task<List<Chat>> GetFiltredChat(SearchChatsInput input);
+        Task<List<Chat>> GetFiltredChatAsync(SearchChatsInput input);
 
         Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
 
@@ -37,5 +37,11 @@ namespace MySocNet.Services.Interfaces
         Task ReadMessages(int userId, int chatId);
 
         Task<Chat> JoinToChannel(int channelId, User user);
+
+        Task<List<Chat>> GetUserChatsAsync(User user);
+
+        Task<UserChat> AddToHiddenListAsync(User user, int chatId);
+
+        Task<List<Chat>> GetHiddenChatList(User user);
     }
 }

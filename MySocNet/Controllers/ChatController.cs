@@ -35,19 +35,26 @@ namespace MySocNet.Controllers
         private readonly IChatService _chatService;
         private readonly IMapper _mapper;
         private readonly IMyLogger _myLogger;
-        private readonly IRepository<Chat> _chatRepository;
+        private readonly IRepository<ChatMessage> _fRepository;
 
         public ChatController(
             IRepository<User> userRepository,
-            IRepository<Chat> chatRepository,
+            IRepository<ChatMessage> fRepository,
             IChatService chatService,
             IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
             _chatService = chatService;
-            _chatRepository = chatRepository;
+            _fRepository = fRepository;
             _mapper = mapper;
+        }
+
+
+        [HttpPost("ForwardMessage")]
+        public async Task<IActionResult> ForwardMessage(ForwardMessageInput input)
+        { 
+            return Ok();
         }
 
         [HttpPost("InviteUserToChat")]
@@ -100,11 +107,32 @@ namespace MySocNet.Controllers
             return JsonResult(result);
         }
 
-        [HttpGet("GetChats")]
-        public async Task<IActionResult> GetChats([FromQuery]SearchChatsInput input)
+        [HttpGet("SearchChats")]
+        public async Task<IActionResult> SearchChats([FromQuery]SearchChatsInput input)
         {
-            var mappedChat = _mapper.Map<List<ChatResponse>>(await _chatService.GetFiltredChat(input));
+            var mappedChat = _mapper.Map<List<ChatResponse>>(await _chatService.GetFiltredChatAsync(input));
             return JsonResult(new PaginatedResponse<ChatResponse>(mappedChat.Count, mappedChat));
+        }
+
+        [HttpGet("GetUserChats")]
+        public async Task<IActionResult> GetUserChats()
+        {
+            var currentUser = await CurrentUser();
+            return JsonResult(await _chatService.GetUserChatsAsync(currentUser));
+        }
+
+        [HttpGet("GetHiddenChatList")]
+        public async Task<IActionResult> GetHiddenChatList()
+        {
+            var currentUser = await CurrentUser();
+            return JsonResult(await _chatService.GetHiddenChatList(currentUser));
+        }
+
+        [HttpPost("AddToHiddenList")]
+        public async Task<IActionResult> AddToHiddenList(int chatId)
+        {
+            var currentUser = await CurrentUser();
+            return JsonResult(await _chatService.AddToHiddenListAsync(currentUser, chatId));
         }
 
         [HttpPost("CreateChat")]

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200811095804_Added_IsReadOnly_For_Chats")]
+    partial class Added_IsReadOnly_For_Chats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,21 +132,6 @@ namespace MySocNet.Migrations
                     b.HasIndex("ImageId");
 
                     b.ToTable("Chats");
-                });
-
-            modelBuilder.Entity("MySocNet.Models.ChatMessage", b =>
-                {
-                    b.Property<int?>("ChatId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ChatId", "MessageId");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -341,21 +328,6 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Image", "ChatImage")
                         .WithMany()
                         .HasForeignKey("ImageId");
-                });
-
-            modelBuilder.Entity("MySocNet.Models.ChatMessage", b =>
-                {
-                    b.HasOne("MySocNet.Models.Chat", "Chat")
-                        .WithMany()
-                        .HasForeignKey("ChatId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MySocNet.Models.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>

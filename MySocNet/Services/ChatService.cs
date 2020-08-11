@@ -26,6 +26,7 @@ namespace MySocNet.Services
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
         private readonly IRepository<UserChatRead> _userMessageRepository;
+        private readonly IRepository<ChatMessage> _chatMessageRepository;
         private readonly IImageService _imageService;
         private readonly ILastDataService _lastDataService;
         private readonly IMapper _mapper;
@@ -36,6 +37,7 @@ namespace MySocNet.Services
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
             IRepository<UserChatRead> userMessageRepository,
+            IRepository<ChatMessage> chatMessageRepository,
             IImageService imageService,
             ILastDataService lastDataService,
             IMapper mapper)
@@ -45,21 +47,46 @@ namespace MySocNet.Services
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
             _userMessageRepository = userMessageRepository;
+            _chatMessageRepository = chatMessageRepository;
             _imageService = imageService;
             _lastDataService = lastDataService;
             _mapper = mapper;
         }
 
-        public async Task<List<Chat>> GetFiltredChat(SearchChatsInput input)
+        public async Task<List<Chat>> GetFiltredChatAsync(SearchChatsInput input)
         {
             if (string.IsNullOrWhiteSpace(input.Search))
                 throw new EntityNotFoundException("Search was empty");
-            //make query with sorted privacy from UserChat
             IQueryable<Chat> query = _chatRepository
                .GetWhere(x => !x.IsPrivate && x.ChatName.ToUpper().Contains(input.Search));
             query = input.IsAscending ? query.OrderBy(x => x.ChatName) : query.OrderByDescending(x => x.ChatName);
             var chats = await query.Skip(input.Skip).Take(input.Take).ToListAsync();
             return chats;
+        }
+
+        public async Task<List<Chat>> GetHiddenChatList(User user)
+        {
+            var userChat = _userChatRepository
+                .GetWhere(x => x.User.Id == user.Id && x.IsPrivateMask)
+                .Select(x => x.ChatId);
+            return await _chatRepository.GetWhere(x => userChat.Contains(x.Id)).ToListAsync();
+        }
+
+        public async Task<List<Chat>> GetUserChatsAsync(User user)
+        {
+            var userChat = _userChatRepository
+                .GetWhere(x => x.User.Id == user.Id && !x.IsPrivateMask)
+                .Select(x => x.ChatId);
+            return await _chatRepository.GetWhere(x => userChat.Contains(x.Id)).ToListAsync();
+        }
+
+        public async Task<UserChat> AddToHiddenListAsync(User user, int chatId)
+        {
+            var userChat = await _userChatRepository
+                .GetWhere(x => x.UserId == user.Id && x.ChatId == chatId).FirstOrDefaultAsync();
+            userChat.IsPrivateMask = true;
+            await _userChatRepository.UpdateAsync(userChat);
+            return userChat;
         }
 
         public async Task<Chat> JoinToChannel(int channelId, User user)
@@ -132,6 +159,7 @@ namespace MySocNet.Services
 
             if (chat == null)
                 throw new EntityNotFoundException("Chat not found");
+
             if (chat.ChatOwnerId == ownerId)
             {
                 await _chatRepository.RemoveAsync(chat);
@@ -144,7 +172,6 @@ namespace MySocNet.Services
         {
             var chat = await _chatRepository.GetByIdAsync(chatId);
 
-            // DONE: check for null
             if (chat == null)
                 throw new EntityNotFoundException("Chat not found");
 
@@ -230,15 +257,28 @@ namespace MySocNet.Services
 
         public async Task<Chat> CreateChatAsync(InputChatCreate input, User owner)
         {
+            if (input.ChatType == ChatType.Channel)
+                input.IsReadOnly = true;
+
             var chat = _mapper.Map<Chat>(input);
             chat.ChatOwner = owner;
+           
             await _userChatRepository.AddAsync(new UserChat { Chat = chat, User = owner });
 
             var users = await _userRepository.GetWhere(x => input.Ids.Distinct().Contains(x.Id))
                 .Where(x => x.Id != owner.Id).ToListAsync();
           
-            await _userChatRepository.AddRangeAsync(users.Select(x => new UserChat { User = x, Chat = chat }));
+            await _userChatRepository.AddRangeAsync(users.Select(x => new UserChat { Chat = chat, User = x }));
             return chat;
+        }
+
+        public async Task<Message> ForwardMessageAsync(int messageId, int chatId)
+        {
+            var message = await _messageRepository.GetWhere(x => x.Id == messageId).FirstOrDefaultAsync();
+            var chat = await _chatRepository.GetWhere(x => x.Id == chatId).FirstOrDefaultAsync();
+            var fm = new ChatMessage { Message = message, Chat = chat };
+            await _chatMessageRepository.AddAsync(fm);
+            return message;
         }
 
         public async Task<Message> SendMessageAsync(int chatId, User sender, string message)
@@ -248,8 +288,17 @@ namespace MySocNet.Services
             if (chat == null)
                 throw new EntityNotFoundException("Chat not found");
 
+            var userChats = await _userChatRepository
+                .GetWhere(x => x.ChatId == chatId && sender.Id == x.UserId).FirstOrDefaultAsync();
+
+            if (userChats == null || chat.IsOnlyJoin && !userChats.IsUserJoined)
+                throw new EntityNotFoundException("You can't send messages to the Chat");
+
             var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
                 .Select(x => x.UserId).ToListAsync();
+
+            if (chat.IsReadOnly && sender.Id != chat.ChatOwnerId)
+                throw new EntityNotFoundException("You can't send messages to the Chat");
 
             var responseMessage = new Message
             {
