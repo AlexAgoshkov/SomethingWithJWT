@@ -2,23 +2,17 @@
 
 namespace MySocNet.Migrations
 {
-    public partial class Privacy_for_Chats_3 : Migration
+    public partial class UserChat_Removed_IsJoin : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IsOnlyJoin",
+                name: "IsUserJoined",
                 table: "UserChats");
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsUserJoined",
-                table: "UserChats",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsOnlyJoin",
-                table: "Chats",
+                table: "ChatMembers",
                 nullable: false,
                 defaultValue: false);
         }
@@ -27,14 +21,10 @@ namespace MySocNet.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "IsUserJoined",
-                table: "UserChats");
-
-            migrationBuilder.DropColumn(
-                name: "IsOnlyJoin",
-                table: "Chats");
+                table: "ChatMembers");
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsOnlyJoin",
+                name: "IsUserJoined",
                 table: "UserChats",
                 type: "bit",
                 nullable: false,

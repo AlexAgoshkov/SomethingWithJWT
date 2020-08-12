@@ -34,7 +34,7 @@ namespace MySocNet.Models
 
         public DbSet<LastChatData> LastChatDatas { get; set; }
 
-        public DbSet<ChatMessage> ChatMessages { get; set; }
+        public DbSet<ChatMembers> ChatMembers { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
@@ -57,8 +57,8 @@ namespace MySocNet.Models
             modelBuilder.Entity<UserChatRead>()
               .HasKey(uc => new { uc.ChatId, uc.UserId});
 
-            modelBuilder.Entity<ChatMessage>()
-            .HasKey(uc => new { uc.ChatId, uc.MessageId });
+            modelBuilder.Entity<ChatMembers>()
+            .HasKey(uc => new { uc.ChatId, uc.UserId });
 
             modelBuilder.Entity<LogData>();
             base.OnModelCreating(modelBuilder);

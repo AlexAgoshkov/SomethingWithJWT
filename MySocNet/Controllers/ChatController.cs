@@ -35,26 +35,24 @@ namespace MySocNet.Controllers
         private readonly IChatService _chatService;
         private readonly IMapper _mapper;
         private readonly IMyLogger _myLogger;
-        private readonly IRepository<ChatMessage> _fRepository;
-
+       
         public ChatController(
             IRepository<User> userRepository,
-            IRepository<ChatMessage> fRepository,
             IChatService chatService,
             IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
             _chatService = chatService;
-            _fRepository = fRepository;
             _mapper = mapper;
         }
 
-
         [HttpPost("ForwardMessage")]
         public async Task<IActionResult> ForwardMessage(ForwardMessageInput input)
-        { 
-            return Ok();
+        {
+            var currentUser = await CurrentUser();
+            var message = await _chatService.ForwardMessageAsync(currentUser, input.MessageId, input.ChatId);
+            return JsonResult(message);
         }
 
         [HttpPost("InviteUserToChat")]
@@ -77,7 +75,6 @@ namespace MySocNet.Controllers
         [HttpDelete("RemoveUserFromChat")]
         public async Task<IActionResult> RemoveUserFromChat(UserToChatInput input)
         {
-            var user = await CurrentUser();
             var response = await _chatService.RemoveUserFromChatAsync(input.ChatId, input.UserId);
             return JsonResult(_mapper.Map<ChatResponse>(response));
         }
@@ -94,7 +91,6 @@ namespace MySocNet.Controllers
         [HttpPost("EditChat")]
         public async Task<IActionResult> EditChat(UpdateChatInput input)
         {
-            var user = await CurrentUser();
             var response = await _chatService.EditChatAsync(input.ChatId, input.ChatName);
             return JsonResult(_mapper.Map<ChatResponse>(response));
         }
@@ -102,7 +98,6 @@ namespace MySocNet.Controllers
         [HttpGet("GetChatDetails")]
         public async Task<IActionResult> GetChatDetails(int chatId)
         { 
-            var user = await CurrentUser();
             var result = await _chatService.GetChatDetailsAsync(chatId);
             return JsonResult(result);
         }
@@ -115,17 +110,10 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet("GetUserChats")]
-        public async Task<IActionResult> GetUserChats()
+        public async Task<IActionResult> GetUserChats([FromQuery]UserChatsInput input)
         {
             var currentUser = await CurrentUser();
-            return JsonResult(await _chatService.GetUserChatsAsync(currentUser));
-        }
-
-        [HttpGet("GetHiddenChatList")]
-        public async Task<IActionResult> GetHiddenChatList()
-        {
-            var currentUser = await CurrentUser();
-            return JsonResult(await _chatService.GetHiddenChatList(currentUser));
+            return JsonResult(await _chatService.GetUserChatsAsync(currentUser, input));
         }
 
         [HttpPost("AddToHiddenList")]

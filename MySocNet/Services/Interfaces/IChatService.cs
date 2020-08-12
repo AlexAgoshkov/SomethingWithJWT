@@ -24,8 +24,6 @@ namespace MySocNet.Services.Interfaces
 
         Task<Message> SendMessageAsync(int chatId, User sender, string message);
 
-        Task<IList<LastChatData>> GetChatsAsync(int userId, int skip, int take);
-
         Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int userId, int skip, int take);
 
         Task<IList<MessageResponse>> GetChatHistoryAsync(int chatId, int skip, int take);
@@ -38,10 +36,10 @@ namespace MySocNet.Services.Interfaces
 
         Task<Chat> JoinToChannel(int channelId, User user);
 
-        Task<List<Chat>> GetUserChatsAsync(User user);
+        Task<List<Chat>> GetUserChatsAsync(User user, UserChatsInput input);
 
         Task<UserChat> AddToHiddenListAsync(User user, int chatId);
 
-        Task<List<Chat>> GetHiddenChatList(User user);
+        Task<Message> ForwardMessageAsync(User user, int messageId, int chatId);
     }
 }

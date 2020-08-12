@@ -26,7 +26,7 @@ namespace MySocNet.Services
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<Message> _messageRepository;
         private readonly IRepository<UserChatRead> _userMessageRepository;
-        private readonly IRepository<ChatMessage> _chatMessageRepository;
+        private readonly IRepository<ChatMembers> _chatMemberRepository;
         private readonly IImageService _imageService;
         private readonly ILastDataService _lastDataService;
         private readonly IMapper _mapper;
@@ -37,7 +37,7 @@ namespace MySocNet.Services
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
             IRepository<UserChatRead> userMessageRepository,
-            IRepository<ChatMessage> chatMessageRepository,
+            IRepository<ChatMembers> chatMemberRepository,
             IImageService imageService,
             ILastDataService lastDataService,
             IMapper mapper)
@@ -47,7 +47,7 @@ namespace MySocNet.Services
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
             _userMessageRepository = userMessageRepository;
-            _chatMessageRepository = chatMessageRepository;
+            _chatMemberRepository = chatMemberRepository;
             _imageService = imageService;
             _lastDataService = lastDataService;
             _mapper = mapper;
@@ -57,26 +57,19 @@ namespace MySocNet.Services
         {
             if (string.IsNullOrWhiteSpace(input.Search))
                 throw new EntityNotFoundException("Search was empty");
-            IQueryable<Chat> query = _chatRepository
+            var query = _chatRepository
                .GetWhere(x => !x.IsPrivate && x.ChatName.ToUpper().Contains(input.Search));
             query = input.IsAscending ? query.OrderBy(x => x.ChatName) : query.OrderByDescending(x => x.ChatName);
             var chats = await query.Skip(input.Skip).Take(input.Take).ToListAsync();
             return chats;
         }
 
-        public async Task<List<Chat>> GetHiddenChatList(User user)
+        public async Task<List<Chat>> GetUserChatsAsync(User user, UserChatsInput input)
         {
             var userChat = _userChatRepository
-                .GetWhere(x => x.User.Id == user.Id && x.IsPrivateMask)
+                .GetWhere(x => x.User.Id == user.Id && x.IsPrivateMask == input.IsPrivateMask)
                 .Select(x => x.ChatId);
-            return await _chatRepository.GetWhere(x => userChat.Contains(x.Id)).ToListAsync();
-        }
-
-        public async Task<List<Chat>> GetUserChatsAsync(User user)
-        {
-            var userChat = _userChatRepository
-                .GetWhere(x => x.User.Id == user.Id && !x.IsPrivateMask)
-                .Select(x => x.ChatId);
+            userChat = userChat.Skip(input.Skip).Take(input.Take);
             return await _chatRepository.GetWhere(x => userChat.Contains(x.Id)).ToListAsync();
         }
 
@@ -91,14 +84,15 @@ namespace MySocNet.Services
 
         public async Task<Chat> JoinToChannel(int channelId, User user)
         {
-            var userChats = await _userChatRepository
-                .GetWhere(x => x.ChatId == channelId).Include(x => x.Chat).FirstOrDefaultAsync();
+            var userChats = await _chatMemberRepository
+                .GetWhere(x => x.ChatId == channelId || x.UserId == user.Id)
+                .Include(x => x.Chat).FirstOrDefaultAsync();
 
             if (userChats == null || userChats.Chat.ChatType == ChatType.Chat || userChats.Chat.IsPrivate)
                 throw new EntityNotFoundException("Chat not found");
 
             userChats.IsUserJoined = true;
-            await _userChatRepository.UpdateAsync(userChats);
+            await _chatMemberRepository.UpdateAsync(userChats);
 
             return userChats.Chat;
         }
@@ -181,11 +175,6 @@ namespace MySocNet.Services
                 await _chatRepository.UpdateAsync(chat);
             }
             return chat;
-        }
-
-        public async Task<IList<LastChatData>> GetChatsAsync(int userId, int skip, int take)
-        {
-            return await _lastDataService.GetLastData(userId);
         }
 
         public async Task<ChatDetailsResponse> GetChatDetailsAsync(int chatId)
@@ -272,13 +261,24 @@ namespace MySocNet.Services
             return chat;
         }
 
-        public async Task<Message> ForwardMessageAsync(int messageId, int chatId)
+        public async Task<Message> ForwardMessageAsync(User user, int messageId, int chatId)
         {
-            var message = await _messageRepository.GetWhere(x => x.Id == messageId).FirstOrDefaultAsync();
-            var chat = await _chatRepository.GetWhere(x => x.Id == chatId).FirstOrDefaultAsync();
-            var fm = new ChatMessage { Message = message, Chat = chat };
-            await _chatMessageRepository.AddAsync(fm);
-            return message;
+            var chat = await _chatRepository.GetWhere(x => x.Id == chatId).FirstOrDefaultAsync()
+                ?? throw new EntityNotFoundException("Chat not found");
+            var message = await _messageRepository.GetWhere(x => x.Id == messageId).FirstOrDefaultAsync()
+                ?? throw new EntityNotFoundException("Message not found");
+
+            var newMessage = new Message
+            {
+                Chat = chat,
+                Sender = user,
+                Time = DateTime.Now,
+                OriginalMessage = message
+            };
+
+            await _messageRepository.AddAsync(newMessage);
+
+            return newMessage;
         }
 
         public async Task<Message> SendMessageAsync(int chatId, User sender, string message)
@@ -290,9 +290,6 @@ namespace MySocNet.Services
 
             var userChats = await _userChatRepository
                 .GetWhere(x => x.ChatId == chatId && sender.Id == x.UserId).FirstOrDefaultAsync();
-
-            if (userChats == null || chat.IsOnlyJoin && !userChats.IsUserJoined)
-                throw new EntityNotFoundException("You can't send messages to the Chat");
 
             var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
                 .Select(x => x.UserId).ToListAsync();

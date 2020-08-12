@@ -15,8 +15,6 @@ namespace MySocNet.Models
 
         public bool IsPrivate { get; set; }
 
-        public bool IsOnlyJoin { get; set; }
-
         public bool IsReadOnly { get; set; }
 
         public ChatType ChatType { get; set; }
@@ -28,7 +26,8 @@ namespace MySocNet.Models
         public virtual ICollection<Message> Messages { get; set; }
         [JsonIgnore]
         public virtual ICollection<UserChat> UserChats { get; set; }
-
+        [JsonIgnore]
+        public virtual ICollection<ChatMembers> ChatMembers { get; set; }
         public string ChatName { get; set; }
 
         public int? ChatOwnerId { get; set; }

@@ -29,26 +29,22 @@ namespace MySocNet.Logger
 
                     context.Response.ContentType = "application/json";
 
-                    GetExceptions(context, exception);
+                    context.Response.StatusCode = GetResponseStatusCode(exception);
 
                     await context.Response.WriteAsync(new ErrorDetails(exception.Message).ToString());
                 });
             });
         }
-
-        private static void GetExceptions(HttpContext context, Exception exception)
+        
+        private static int GetResponseStatusCode(Exception exception)
         {
             if (exception is EntityNotFoundException)
-                context.Response.StatusCode = 404;
-            return;
+                return 404;
 
             if (exception is Exceptions.UnauthorizedAccessException)
-                context.Response.StatusCode = 401;
-            return;
+                return 401;
 
-            if (exception is Exception)
-                context.Response.StatusCode = 400;
-            return;
+            return 500;
         }
     }
 }

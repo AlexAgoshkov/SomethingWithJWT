@@ -9,15 +9,13 @@ namespace MySocNet.Models
 {
     public class LastChatData
     {
-
         [Key]
         public int Id { get; set; }
-        // DONE: save only message text and user's name + date
+        
         public string UserName { get; set; }
 
         public string Text { get; set; }
 
-        // DONE: make not nullable
         public int ChatId { get; set; }
 
         public virtual Chat Chat { get; set; }

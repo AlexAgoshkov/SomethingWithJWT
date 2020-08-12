@@ -10,14 +10,14 @@ using MySocNet.Models;
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20200723134705_Added_Msg_4")]
-    partial class Added_Msg_4
+    [Migration("20200812134823_Chat_Members")]
+    partial class Chat_Members
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
+                .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -31,8 +31,20 @@ namespace MySocNet.Migrations
                     b.Property<string>("Category")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Chat")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("User")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -98,8 +110,17 @@ namespace MySocNet.Migrations
                     b.Property<int?>("ChatOwnerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ChatType")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsReadOnly")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -108,6 +129,21 @@ namespace MySocNet.Migrations
                     b.HasIndex("ImageId");
 
                     b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("MySocNet.Models.ChatMembers", b =>
+                {
+                    b.Property<int>("ChatId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ChatId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatMembers");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -136,6 +172,9 @@ namespace MySocNet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CroppedImagePath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
@@ -175,13 +214,16 @@ namespace MySocNet.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ChatId")
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SenderId")
+                    b.Property<int?>("OriginalMessageId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderId")
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
@@ -195,6 +237,8 @@ namespace MySocNet.Migrations
                     b.HasIndex("ChatId");
 
                     b.HasIndex("ImageId");
+
+                    b.HasIndex("OriginalMessageId");
 
                     b.HasIndex("SenderId");
 
@@ -255,22 +299,28 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.UserChat", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ChatId")
                         .HasColumnType("int");
 
-                    b.HasKey("UserId", "ChatId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ChatId");
+                    b.Property<bool>("IsPrivateMask")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUserJoined")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ChatId", "UserId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserChats");
                 });
 
-            modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
+            modelBuilder.Entity("MySocNet.Models.UserChatRead", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -279,11 +329,11 @@ namespace MySocNet.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
-                    b.HasKey("MessageId", "UserId");
+                    b.HasKey("ChatId", "UserId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserMessages");
+                    b.ToTable("UserChatReads");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Chat", b =>
@@ -295,6 +345,21 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Image", "ChatImage")
                         .WithMany()
                         .HasForeignKey("ImageId");
+                });
+
+            modelBuilder.Entity("MySocNet.Models.ChatMembers", b =>
+                {
+                    b.HasOne("MySocNet.Models.Chat", "Chat")
+                        .WithMany("ChatMembers")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MySocNet.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
@@ -319,15 +384,23 @@ namespace MySocNet.Migrations
                 {
                     b.HasOne("MySocNet.Models.Chat", "Chat")
                         .WithMany("Messages")
-                        .HasForeignKey("ChatId");
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MySocNet.Models.Image", "MessageImage")
                         .WithMany()
                         .HasForeignKey("ImageId");
 
+                    b.HasOne("MySocNet.Models.Message", "OriginalMessage")
+                        .WithMany()
+                        .HasForeignKey("OriginalMessageId");
+
                     b.HasOne("MySocNet.Models.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("SenderId");
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MySocNet.Models.User", b =>
@@ -360,11 +433,11 @@ namespace MySocNet.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MySocNet.Models.UserMessage", b =>
+            modelBuilder.Entity("MySocNet.Models.UserChatRead", b =>
                 {
-                    b.HasOne("MySocNet.Models.Message", "Message")
+                    b.HasOne("MySocNet.Models.Chat", "Chat")
                         .WithMany()
-                        .HasForeignKey("MessageId")
+                        .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

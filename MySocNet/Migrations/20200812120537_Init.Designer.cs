@@ -10,8 +10,8 @@ using MySocNet.Models;
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20200810150134_Privacy_for_Chats_3")]
-    partial class Privacy_for_Chats_3
+    [Migration("20200812120537_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -122,6 +122,9 @@ namespace MySocNet.Migrations
                     b.Property<bool>("IsPrivate")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsReadOnly")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChatOwnerId");
@@ -205,6 +208,9 @@ namespace MySocNet.Migrations
                     b.Property<int?>("ImageId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OriginalMessageId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
 
@@ -219,6 +225,8 @@ namespace MySocNet.Migrations
                     b.HasIndex("ChatId");
 
                     b.HasIndex("ImageId");
+
+                    b.HasIndex("OriginalMessageId");
 
                     b.HasIndex("SenderId");
 
@@ -279,10 +287,10 @@ namespace MySocNet.Migrations
 
             modelBuilder.Entity("MySocNet.Models.UserChat", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<int>("ChatId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ChatId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsPrivateMask")
@@ -291,9 +299,9 @@ namespace MySocNet.Migrations
                     b.Property<bool>("IsUserJoined")
                         .HasColumnType("bit");
 
-                    b.HasKey("UserId", "ChatId");
+                    b.HasKey("ChatId", "UserId");
 
-                    b.HasIndex("ChatId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserChats");
                 });
@@ -313,7 +321,7 @@ namespace MySocNet.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserMessages");
+                    b.ToTable("UserChatReads");
                 });
 
             modelBuilder.Entity("MySocNet.Models.Chat", b =>
@@ -356,6 +364,10 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Image", "MessageImage")
                         .WithMany()
                         .HasForeignKey("ImageId");
+
+                    b.HasOne("MySocNet.Models.Message", "OriginalMessage")
+                        .WithMany()
+                        .HasForeignKey("OriginalMessageId");
 
                     b.HasOne("MySocNet.Models.User", "Sender")
                         .WithMany()

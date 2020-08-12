@@ -17,7 +17,5 @@ namespace MySocNet.Models
         public virtual User User { get; set; }
 
         public bool IsPrivateMask { get; set; }
-
-        public bool IsUserJoined { get; set; }
     }
 }

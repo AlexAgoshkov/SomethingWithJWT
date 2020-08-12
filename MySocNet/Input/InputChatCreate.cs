@@ -15,8 +15,6 @@ namespace MySocNet.Input
 
         public bool IsPrivate { get; set; }
 
-        public bool IsOnlyJoin { get; set; }
-
         public bool IsReadOnly { get; set; }
 
         public ChatType ChatType { get; set; }
