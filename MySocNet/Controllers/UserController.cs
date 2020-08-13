@@ -52,7 +52,6 @@ namespace MySocNet.Controllers
         private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Message> _messageRepository;
         private readonly IMyLogger _logger;
-        private readonly IImageService _imageService;
         private readonly ILog _log;
         
         public UserController(
@@ -62,14 +61,12 @@ namespace MySocNet.Controllers
             IRepository<UserChat> userChatRepository,
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
-            IImageService imageService,
             IEmailService emailSender,
             IMyLogger logger,
             ILog log) : base(userRepository)
         {
             _userService = userService;
             _friendService = friendService;
-            _imageService = imageService;
             _userRepository = userRepository;
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
@@ -115,12 +112,12 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = Policies.User)]
         [Route("GetUserData")]
+        [Authorize(Roles = Policies.Admin + "," + Policies.User)]
         public async Task<IActionResult> GetUserData()
         {
             var user = await CurrentUser();
-            await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
+           // await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
             return JsonResult(user);
         }
 
@@ -147,7 +144,6 @@ namespace MySocNet.Controllers
         }
         
         [HttpGet("GetUserById")]
-        
         public async Task<User> GetUserByIdAsync(int userId)
         {
             return await _userRepository.GetByIdAsync(userId) ??

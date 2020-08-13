@@ -20,7 +20,7 @@ namespace MySocNet.Services.Interfaces
 
         Task<Chat> EditChatAsync(int chatId, string chatName);
 
-        Task<Chat> CreateChatAsync(InputChatCreate input, User chatOwner);
+        Task<Chat> CreateChatAsync(CreateChatInput input, User chatOwner);
         Task<Message> SendMessageAsync(User user, SendMessageInput input);
         Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int userId, int skip, int take);
 

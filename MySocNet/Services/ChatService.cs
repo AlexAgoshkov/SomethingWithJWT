@@ -246,7 +246,7 @@ namespace MySocNet.Services
             }
         }
 
-        public async Task<Chat> CreateChatAsync(InputChatCreate input, User owner)
+        public async Task<Chat> CreateChatAsync(CreateChatInput input, User owner)
         {
             if (input.ChatType == ChatType.Channel)
                 input.IsReadOnly = true;

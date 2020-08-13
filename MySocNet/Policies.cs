@@ -13,7 +13,7 @@ namespace MySocNet
 
         public static AuthorizationPolicy AdminPolicy()
         {
-            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireRole(Admin, User).Build();
+            return new AuthorizationPolicyBuilder().RequireAuthenticatedUser().RequireRole(Admin).Build();
         }
 
         public static AuthorizationPolicy UserPolicy()

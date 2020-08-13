@@ -33,20 +33,17 @@ namespace MySocNet.Controllers
     public class ChatController : ApiControllerBase
     {
         private readonly IChatService _chatService;
-        private readonly IImageService _imageService;
         private readonly IMapper _mapper;
         private readonly IMyLogger _myLogger;
        
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
-            IImageService imageService,
             IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
             _chatService = chatService;
-            _imageService = imageService;
             _mapper = mapper;
         }
 
@@ -127,7 +124,7 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("CreateChat")]
-        public async Task<IActionResult> CreateChat(InputChatCreate input)
+        public async Task<IActionResult> CreateChat(CreateChatInput input)
         {
             var chatOwner = await CurrentUser();
             var chat = await _chatService.CreateChatAsync(input, chatOwner);

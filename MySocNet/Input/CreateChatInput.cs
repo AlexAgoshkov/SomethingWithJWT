@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Input
 {
-    public class InputChatCreate
+    public class CreateChatInput
     {
         public string ChatName { get; set; } 
 
