@@ -28,7 +28,7 @@ namespace MySocNet.Controllers
         private readonly IImageService _imageService;
         private readonly IRepository<MySocNet.Models.Image> _imageRepository;
         private readonly IUserService _userService;
-        
+
         public ImageController(
             IRepository<User> userRepository,
             IRepository<MySocNet.Models.Image> imageRepository,
@@ -44,16 +44,16 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("AddImageToChat")]
-        
+
         public async Task<IActionResult> AddImageToChat(IFormFile image, Filters filters, int chatId)
         {
             if (!_imageService.IsImage(image))
                 throw new EntityNotFoundException("Image must be .jpg .png. .jpeg");
 
-                var chatFileName = $"Chat_{chatId}";
-                var pic = await _imageService.UploadAsync(image, filters, chatFileName);
-                var chat = await _chatService.AddImageToChatAsync(pic, chatId);
-                return JsonResult(chat);
+            var chatFileName = Guid.NewGuid().ToString();
+            var pic = await _imageService.UploadAsync(image, filters, chatFileName);
+            var chat = await _chatService.AddImageToChatAsync(pic, chatId);
+            return JsonResult(chat);
         }
 
         [HttpGet("GetImageById")]
@@ -64,7 +64,7 @@ namespace MySocNet.Controllers
                 throw new EntityNotFoundException("Image not found");
 
             var imageBase64 = await _imageService.DownloadAsync(image.CroppedImagePath);
-            return JsonResult(imageBase64);   
+            return JsonResult(imageBase64);
         }
 
         [HttpPost("AddImageToUser")]
@@ -76,7 +76,7 @@ namespace MySocNet.Controllers
             if (!_imageService.IsImage(image))
                 throw new EntityNotFoundException("Image must be .jpg .png. .jpeg");
 
-            var userFileName = $"User_{currentUser.Id}";
+            var userFileName = Guid.NewGuid().ToString();
             var pic = await _imageService.UploadAsync(image, filters, userFileName);
             var user = await _userService.AddImageToUser(pic, currentUser.Id);
             return JsonResult(user);

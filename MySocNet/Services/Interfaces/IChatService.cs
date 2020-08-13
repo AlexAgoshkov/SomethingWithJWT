@@ -12,7 +12,7 @@ namespace MySocNet.Services.Interfaces
     {
         Task<Chat> InviteUserToChatAsync(int chatId, int userId);
 
-        Task<List<Chat>> GetFiltredChatAsync(SearchChatsInput input);
+        Task<PaginatedResponse<Chat>> GetFiltredChatAsync(SearchChatsInput input);
 
         Task<Chat> RemoveUserFromChatAsync(int chatId, int userId);
 
@@ -21,9 +21,7 @@ namespace MySocNet.Services.Interfaces
         Task<Chat> EditChatAsync(int chatId, string chatName);
 
         Task<Chat> CreateChatAsync(InputChatCreate input, User chatOwner);
-
-        Task<Message> SendMessageAsync(int chatId, User sender, string message);
-
+        Task<Message> SendMessageAsync(User user, SendMessageInput input);
         Task<GetNewMessageResponse> GetNewMessagesAsync(int chatId, int userId, int skip, int take);
 
         Task<IList<MessageResponse>> GetChatHistoryAsync(int chatId, int skip, int take);

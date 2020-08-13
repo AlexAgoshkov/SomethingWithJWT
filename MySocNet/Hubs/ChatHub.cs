@@ -34,7 +34,7 @@ namespace MySocNet.Hubs
             var token = await context.GetAccessToken();
             var user = await _userRepository.GetWhere(x => x.Authentication.AccessToken == token)
                 .Include(x => x.Authentication).FirstOrDefaultAsync();
-            await _chatService.SendMessageAsync(chatId, user, message);
+            //await _chatService.SendMessageAsync(chatId, user, message);
             var userName = $"{user.FirstName} {user.SurName}";
             await Clients.All.SendAsync("ReceiveMessage",chatId, userName, message);
         }

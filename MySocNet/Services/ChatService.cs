@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using MySocNet.Enums;
@@ -53,15 +54,16 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
-        public async Task<List<Chat>> GetFiltredChatAsync(SearchChatsInput input)
+        public async Task<PaginatedResponse<Chat>> GetFiltredChatAsync(SearchChatsInput input)
         {
             if (string.IsNullOrWhiteSpace(input.Search))
                 throw new EntityNotFoundException("Search was empty");
             var query = _chatRepository
                .GetWhere(x => !x.IsPrivate && x.ChatName.ToUpper().Contains(input.Search));
             query = input.IsAscending ? query.OrderBy(x => x.ChatName) : query.OrderByDescending(x => x.ChatName);
+            int totalCount = await query.CountAsync();
             var chats = await query.Skip(input.Skip).Take(input.Take).ToListAsync();
-            return chats;
+            return new PaginatedResponse<Chat>(totalCount, chats);
         }
 
         public async Task<List<Chat>> GetUserChatsAsync(User user, UserChatsInput input)
@@ -281,29 +283,37 @@ namespace MySocNet.Services
             return newMessage;
         }
 
-        public async Task<Message> SendMessageAsync(int chatId, User sender, string message)
+        public async Task<Message> SendMessageAsync(User user, SendMessageInput input)
         {
-            var chat = await _chatRepository.GetByIdAsync(chatId);
+            var chat = await _chatRepository.GetByIdAsync(input.ChatId);
            
             if (chat == null)
                 throw new EntityNotFoundException("Chat not found");
 
             var userChats = await _userChatRepository
-                .GetWhere(x => x.ChatId == chatId && sender.Id == x.UserId).FirstOrDefaultAsync();
+                .GetWhere(x => x.ChatId == input.ChatId && user.Id == x.UserId).FirstOrDefaultAsync();
 
-            var users = await _userChatRepository.GetWhere(x => x.ChatId == chatId)
+            var users = await _userChatRepository.GetWhere(x => x.ChatId == input.ChatId)
                 .Select(x => x.UserId).ToListAsync();
 
-            if (chat.IsReadOnly && sender.Id != chat.ChatOwnerId)
+            if (chat.IsReadOnly && user.Id != chat.ChatOwnerId)
                 throw new EntityNotFoundException("You can't send messages to the Chat");
 
             var responseMessage = new Message
             {
-                ChatId = chatId,
-                Text = message,
-                Sender = sender,
+                ChatId = input.ChatId,
+                Text = input.Message,
+                Sender = user,
                 Time = DateTime.Now
             };
+
+            if (input.Image != null)
+            {
+                string fileName = Guid.NewGuid().ToString();
+                var image = await _imageService.UploadAsync(input.Image, input.Filters, fileName);
+                responseMessage.MessageImage = image;
+            }
+            
             chat.Messages.Add(responseMessage);
 
             await _lastDataService.AddLastChatData(_mapper.Map<LastChatData>(responseMessage));

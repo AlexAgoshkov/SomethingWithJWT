@@ -24,6 +24,7 @@ namespace MySocNet.Mapper
             CreateMap<Chat, ChatResponse>();
             CreateMap<Authentication, UpdateTokenInput>();
             CreateMap<UpdateTokenInput, Authentication>();
+            CreateMap<PaginatedResponse<Chat>, PaginatedResponse<ChatResponse>>();
             CreateMap<InputChatCreate, Chat>();
             CreateMap<Message, MessageResponse>()
                 .ForMember(x => x.SenderId, y => y.MapFrom(x => x.SenderId));

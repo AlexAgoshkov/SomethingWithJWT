@@ -33,17 +33,20 @@ namespace MySocNet.Controllers
     public class ChatController : ApiControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IImageService _imageService;
         private readonly IMapper _mapper;
         private readonly IMyLogger _myLogger;
        
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
+            IImageService imageService,
             IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {
             _chatService = chatService;
+            _imageService = imageService;
             _mapper = mapper;
         }
 
@@ -58,7 +61,6 @@ namespace MySocNet.Controllers
         [HttpPost("InviteUserToChat")]
         public async Task<IActionResult> InviteUserToChat(UserToChatInput input)
         {
-            var user = await CurrentUser();
             var response = await _chatService.InviteUserToChatAsync(input.ChatId, input.UserId);
             return JsonResult(_mapper.Map<ChatResponse>(response));
         }
@@ -105,8 +107,9 @@ namespace MySocNet.Controllers
         [HttpGet("SearchChats")]
         public async Task<IActionResult> SearchChats([FromQuery]SearchChatsInput input)
         {
-            var mappedChat = _mapper.Map<List<ChatResponse>>(await _chatService.GetFiltredChatAsync(input));
-            return JsonResult(new PaginatedResponse<ChatResponse>(mappedChat.Count, mappedChat));
+            var chats = await _chatService.GetFiltredChatAsync(input);
+            var chatResponse = _mapper.Map<PaginatedResponse<ChatResponse>>(chats);
+            return JsonResult(chatResponse);
         }
 
         [HttpGet("GetUserChats")]
@@ -147,10 +150,10 @@ namespace MySocNet.Controllers
         }
 
         [HttpPost("SendMessageToChat")]
-        public async Task<IActionResult> SendMessage(SendMessageInput input)
+        public async Task<IActionResult> SendMessage([FromQuery]SendMessageInput input)
         {
             var messageSender = await CurrentUser();
-            var message = await _chatService.SendMessageAsync(input.ChatId, messageSender, input.Message);
+            var message = await _chatService.SendMessageAsync(messageSender, input);
             return JsonResult(message);
         }
     }
