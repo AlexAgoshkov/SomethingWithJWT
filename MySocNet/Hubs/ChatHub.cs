@@ -16,16 +16,13 @@ namespace MySocNet.Hubs
     public class ChatHub : Hub
     {
         private readonly IRepository<User> _userRepository;
-        private readonly IRepository<Chat> _chatRepository;
         private readonly IChatService _chatService;  
 
         public ChatHub(IRepository<User> userReposity, 
-             IRepository<Chat> chatRepository,
              IChatService chatService
             )
         {
             _userRepository = userReposity;
-            _chatRepository = chatRepository;
             _chatService = chatService;
         }
 

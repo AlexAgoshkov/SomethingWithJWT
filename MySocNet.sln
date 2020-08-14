@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MySocNet", "MySocNet\MySocNet.csproj", "{1EFCA2E6-2279-44C0-9F1D-9A2607AEEE2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DapperSqlite", "DapperSqlite\DapperSqlite.csproj", "{9F5FC7B3-9724-42A9-BE7A-0941DDA8789F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1EFCA2E6-2279-44C0-9F1D-9A2607AEEE2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EFCA2E6-2279-44C0-9F1D-9A2607AEEE2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1EFCA2E6-2279-44C0-9F1D-9A2607AEEE2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F5FC7B3-9724-42A9-BE7A-0941DDA8789F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F5FC7B3-9724-42A9-BE7A-0941DDA8789F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F5FC7B3-9724-42A9-BE7A-0941DDA8789F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F5FC7B3-9724-42A9-BE7A-0941DDA8789F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

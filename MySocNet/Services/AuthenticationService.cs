@@ -48,7 +48,8 @@ namespace MySocNet.Services
 
         public async Task CreateAuthTokenAsync(string userName)
         {
-            var user = await _userRepository.FirstOrDefaultAsync(x => x.UserName == userName);
+            var user = await _userRepository.GetWhere(x => x.UserName == userName)
+                .Include(x => x.Authentication).FirstOrDefaultAsync();
 
             var input = new UpdateTokenInput();
             input.Created = DateTime.Now;
@@ -89,7 +90,11 @@ namespace MySocNet.Services
 
         private async Task UpdateTokens(User user, UpdateTokenInput input)
         {
-            user.Authentication = _mapper.Map<Authentication>(input);
+            // user.Authentication = _mapper.Map<Authentication>(input);
+            user.Authentication.AccessToken = input.AccessToken;
+            user.Authentication.RefreshToken = input.RefreshToken;
+            user.Authentication.Created = input.Created;
+            user.Authentication.Expires = input.Expires;
             await _userRepository.UpdateAsync(user);
         }
 

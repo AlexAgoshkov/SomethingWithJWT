@@ -25,6 +25,7 @@ using MySocNet.Response;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Bcpg.OpenPgp;
+using DapperSqlite.Services;
 
 namespace MySocNet.Controllers
 {
@@ -151,6 +152,8 @@ namespace MySocNet.Controllers
         {
             var messageSender = await CurrentUser();
             var message = await _chatService.SendMessageAsync(messageSender, input);
+            StatisticsSentMessageService messageService = new StatisticsSentMessageService();
+            messageService.AddNewMessage(message.Id);
             return JsonResult(message);
         }
     }

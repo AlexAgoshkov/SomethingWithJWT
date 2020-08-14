@@ -26,6 +26,8 @@ using MySocNet.Services;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 using NLog.Fluent;
+using DapperSqlite.Models;
+using DapperSqlite.Services;
 
 namespace MySocNet.Controllers
 {
@@ -89,23 +91,27 @@ namespace MySocNet.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegistrationAsync(UserRegistration input)
         {
-                var user = await _accountActiveService.UserRegistration(input);
-                var key = await _accountActiveService.CreateActiveKeyAsync();
-                await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
-                var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                                     "Login",
-                                     new { user.ActiveKey.Key },
-                                     Request.Scheme);
-                await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
-                _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
-                return JsonResult(confirmationLink);
+            var user = await _accountActiveService.UserRegistration(input);
+            var key = await _accountActiveService.CreateActiveKeyAsync();
+            await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
+            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
+                                    "Login",
+                                    new { user.ActiveKey.Key },
+                                    Request.Scheme);
+            await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
+            _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
+            StatisticsNewUserService statisticsNewUser = new StatisticsNewUserService();
+            statisticsNewUser.AddNewUser(input.UserName);
+            return JsonResult(confirmationLink);
         }
 
         [HttpGet("ConfirmEmail")]
-        public async Task ConfirmEmail(string Key)
+        public async Task ConfirmEmail(string key)
         {
-            await _accountActiveService.ConfirmEmailAsync(Key);
-            _logger.LogInformation($"Email with {Key} was Confirmed");
+            await _accountActiveService.ConfirmEmailAsync(key);
+            _logger.LogInformation($"Email with {key} was Confirmed");
+            StatisticsActivedUserService statisticsActived = new StatisticsActivedUserService();
+            statisticsActived.AddActivedUser(key);
         }
     }
 }
