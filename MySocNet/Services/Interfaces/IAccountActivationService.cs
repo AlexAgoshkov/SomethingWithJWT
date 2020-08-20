@@ -11,7 +11,7 @@ namespace MySocNet.Services.Interfaces
     {
         Task<ActiveKey> CreateActiveKeyAsync();
 
-        Task<User> UserRegistration(UserRegistration userRegistration);
+        Task<User> UserRegistration(UserRegistration userRegistration, Detect detect);
 
         Task AddActiveKeyToUserAsync(int userId, int keyId);
 

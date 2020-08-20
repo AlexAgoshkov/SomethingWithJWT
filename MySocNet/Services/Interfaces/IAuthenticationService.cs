@@ -1,4 +1,5 @@
-﻿using MySocNet.InputData;
+﻿using Microsoft.AspNetCore.Http;
+using MySocNet.InputData;
 using MySocNet.Models;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,6 @@ namespace MySocNet.Services.Interfaces
     {
         Task CreateAuthTokenAsync(string userName);
 
-        Task<User> AuthenticateUserAsync(UserLogin loginCredentials);
+        Task<User> AuthenticateUserAsync(UserLogin loginCredentials, Detect detect, HttpContext httpContext);
     }
 }

@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 
 namespace MySocNet.Exceptions
 {
-    public class UnauthorizedAccessException : Exception
+    public class ForbiddenException : Exception
     {
-        public UnauthorizedAccessException(string message) : base(message)
+        public ForbiddenException(string message) : base(message)
         {
-            //401 
-            
+            //403
         }
     }
 }

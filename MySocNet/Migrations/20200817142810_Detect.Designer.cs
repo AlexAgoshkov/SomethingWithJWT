@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MySocNet.Models;
 
 namespace MySocNet.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200817142810_Detect")]
+    partial class Detect
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -163,12 +165,7 @@ namespace MySocNet.Migrations
                     b.Property<string>("Os")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Detects");
                 });
@@ -285,6 +282,9 @@ namespace MySocNet.Migrations
                     b.Property<int?>("AuthenticationId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("DetectId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .HasColumnType("varchar(50)")
                         .HasMaxLength(50);
@@ -318,6 +318,8 @@ namespace MySocNet.Migrations
                     b.HasIndex("ActiveKeyId");
 
                     b.HasIndex("AuthenticationId");
+
+                    b.HasIndex("DetectId");
 
                     b.HasIndex("ImageId");
 
@@ -386,13 +388,6 @@ namespace MySocNet.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MySocNet.Models.Detect", b =>
-                {
-                    b.HasOne("MySocNet.Models.User", null)
-                        .WithMany("Detects")
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("MySocNet.Models.Friend", b =>
                 {
                     b.HasOne("MySocNet.Models.User", null)
@@ -443,6 +438,10 @@ namespace MySocNet.Migrations
                     b.HasOne("MySocNet.Models.Authentication", "Authentication")
                         .WithMany()
                         .HasForeignKey("AuthenticationId");
+
+                    b.HasOne("MySocNet.Models.Detect", "Detect")
+                        .WithMany()
+                        .HasForeignKey("DetectId");
 
                     b.HasOne("MySocNet.Models.Image", "ProfileImage")
                         .WithMany()

@@ -32,6 +32,8 @@ using System.IO;
 using MySocNet.Logger;
 using NLog;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace MySocNet
 {
@@ -47,6 +49,8 @@ namespace MySocNet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+            services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddHttpClient();
             services.AddCors();
             services.AddControllersWithViews();
@@ -66,7 +70,8 @@ namespace MySocNet
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddScoped<ILog, LogNLog>();
             services.AddScoped<IMyLogger, MyLogger>();
-          
+            services.AddScoped<IDetectedService, DetectedService>();
+
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<FileOperationFilter>();

@@ -28,6 +28,8 @@ using Newtonsoft.Json;
 using NLog.Fluent;
 using DapperSqlite.Models;
 using DapperSqlite.Services;
+using DeviceDetectorNET;
+using MySocNet.Exceptions;
 
 namespace MySocNet.Controllers
 {
@@ -41,6 +43,7 @@ namespace MySocNet.Controllers
         private readonly IEmailService _emailSender;
         private readonly IAuthenticationService _authenticationService;
         private readonly IAccountActivationService _accountActiveService;
+        private readonly IRepository<Detect> _detectRepository; 
         private readonly ILogger<LoginController> _logger;
         private readonly IMapper _mapper;
 
@@ -51,6 +54,7 @@ namespace MySocNet.Controllers
             IAuthenticationService authenticationService,
             IAccountActivationService accountActiveService,
             IRepository<User> userRepository,
+            IRepository<Detect> detectRepository,
             ILogger<LoginController> logger,
             IMapper mapper) : base(userRepository)
         {
@@ -60,6 +64,7 @@ namespace MySocNet.Controllers
             _emailSender = emailSender;
             _authenticationService = authenticationService;
             _accountActiveService = accountActiveService;
+            _detectRepository = detectRepository;
             _logger = logger;
             _mapper = mapper;
         }
@@ -80,10 +85,14 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> Login([FromBody] UserLogin login)
         {
             var response = new LoginResponse();
-            response.User = await _authenticationService.AuthenticateUserAsync(login);
+
+            var detect = await GetUserHardwareInfo();
+
+            response.User = await _authenticationService.AuthenticateUserAsync(login, detect, HttpContext);
             await _authenticationService.CreateAuthTokenAsync(login.UserName);
             response.AccessToken = response.User.Authentication.AccessToken;
             response.RefreshToken = response.User.Authentication.RefreshToken;
+
             return JsonResult(response);
         }
 
@@ -91,18 +100,17 @@ namespace MySocNet.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegistrationAsync(UserRegistration input)
         {
-            var user = await _accountActiveService.UserRegistration(input);
-            var key = await _accountActiveService.CreateActiveKeyAsync();
-            await _accountActiveService.AddActiveKeyToUserAsync(user.Id, key.Id);
-            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                                    "Login",
-                                    new { user.ActiveKey.Key },
-                                    Request.Scheme);
-            await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
+            var detect = await GetUserHardwareInfo();
+            var user = await _accountActiveService.UserRegistration(input, detect);
+
+            await SendConfirmEmail(user);
+
             _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
+
             StatisticsNewUserService statisticsNewUser = new StatisticsNewUserService();
             statisticsNewUser.AddNewUser(input.UserName);
-            return JsonResult(confirmationLink);
+
+            return JsonResult(_mapper.Map<UserResponse>(user));
         }
 
         [HttpGet("ConfirmEmail")]
@@ -112,6 +120,22 @@ namespace MySocNet.Controllers
             _logger.LogInformation($"Email with {key} was Confirmed");
             StatisticsActivedUserService statisticsActived = new StatisticsActivedUserService();
             statisticsActived.AddActivedUser(key);
+        }
+
+        [HttpGet("ConfirmIdentity")]
+        public async Task ConfirmIdentity(string key)
+        {
+            await _accountActiveService.ConfirmEmailAsync(key);
+        }
+
+        private async Task SendConfirmEmail(User user)
+        {
+            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
+                                    "Login",
+                                    new { user.ActiveKey.Key },
+                                    Request.Scheme);
+
+            await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
         }
     }
 }

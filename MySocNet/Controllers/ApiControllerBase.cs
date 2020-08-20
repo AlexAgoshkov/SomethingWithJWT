@@ -38,5 +38,20 @@ namespace MySocNet.Controllers
                    ?? throw new UnauthorizedAccessException();
             return user;
         }
+
+        protected async Task<Detect> GetUserHardwareInfo()
+        {
+            var userAgent = HttpContext.Request.Headers["User-Agent"];
+            var result = DeviceDetectorNET.DeviceDetector.GetInfoFromUserAgent(userAgent);
+
+            var detect = new Detect
+            {
+                DeviceType = result.Match.DeviceType,
+                Browser = result.Match.BrowserFamily,
+                Os = result.Match.OsFamily
+            };
+
+            return detect;
+        }
     }
 }

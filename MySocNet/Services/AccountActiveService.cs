@@ -8,6 +8,7 @@ using MySocNet.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Threading.Tasks;
 
 namespace MySocNet.Services
@@ -17,16 +18,16 @@ namespace MySocNet.Services
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<ActiveKey> _activeKeyRepository;
         private readonly IMapper _mapper;
-
+        
         public AccountActiveService(
             IRepository<User> userRepository,
             IRepository<ActiveKey> activeKeyRepository,
             IMapper mapper)
-        {
-            _userRepository = userRepository;
-            _activeKeyRepository = activeKeyRepository;
-            _mapper = mapper;
-        }
+            {
+                _userRepository = userRepository;
+                _activeKeyRepository = activeKeyRepository;
+                _mapper = mapper;
+            }
 
         public async Task<ActiveKey> CreateActiveKeyAsync()
         {
@@ -43,19 +44,25 @@ namespace MySocNet.Services
 
             var time = DateTime.Now - activeKey.Created;
 
-            if (!activeKey.IsActive && time.Hours < 1)
+            if (!activeKey.IsActive)
             {
                 activeKey.IsActive = true;
                 await _activeKeyRepository.UpdateAsync(activeKey);
             }
         }
 
-        public async Task<User> UserRegistration(UserRegistration userRegistration)
+        public async Task<User> UserRegistration(UserRegistration userRegistration, Detect detect)
         {
             var newUser = _mapper.Map<User>(userRegistration);
             newUser.Password = HashService.Hash(newUser.Password);
             newUser.UserRole = "User";
+            newUser.Detects.Add(detect);
             await _userRepository.AddAsync(newUser);
+
+            var key = await CreateActiveKeyAsync();
+
+            await AddActiveKeyToUserAsync(newUser.Id, key.Id);
+
             return newUser;
         }
 

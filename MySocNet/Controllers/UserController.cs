@@ -37,6 +37,8 @@ using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using MySocNet.Logger;
 using MySocNet.Exceptions;
+using DapperSqlite.Services;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace MySocNet.Controllers
 {
@@ -51,6 +53,7 @@ namespace MySocNet.Controllers
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Message> _messageRepository;
+        private readonly IHttpContextAccessor _accessor;
         private readonly IMyLogger _logger;
         private readonly ILog _log;
         
@@ -61,6 +64,7 @@ namespace MySocNet.Controllers
             IRepository<UserChat> userChatRepository,
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
+            IHttpContextAccessor accessor,
             IEmailService emailSender,
             IMyLogger logger,
             ILog log) : base(userRepository)
@@ -71,6 +75,7 @@ namespace MySocNet.Controllers
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
+            _accessor = accessor;
             _emailSender = emailSender;
             _log = log;
             _logger = logger;
@@ -103,6 +108,22 @@ namespace MySocNet.Controllers
             return Ok(new PaginatedResponse<User>(totalCount, result));
         }
 
+        [HttpGet("AdminDashBoard")]
+        [Authorize(Roles = Policies.Admin)]
+        public IActionResult Dashboard()
+        {
+            var activedUser = new StatisticsActivedUserService();
+            var newUser = new StatisticsNewUserService();
+            var sentMessage = new StatisticsSentMessageService();
+
+            return JsonResult(new 
+            { 
+                ActivedUser = activedUser.GetActivedUsersCount(),
+                NewUser = newUser.GetNewUsersCount(), 
+                SentMessages = sentMessage.GetNewMessageCount() 
+            });
+        }
+
         [HttpGet]
         [Route("GetCurrentUser(TEST)")]
         [Authorize]
@@ -117,8 +138,27 @@ namespace MySocNet.Controllers
         public async Task<IActionResult> GetUserData()
         {
             var user = await CurrentUser();
-           // await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
+            var remoteIpAddress = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress;
+            var ip = HttpContext.Connection.RemoteIpAddress;
+           // var ip = _accessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            // await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
             return JsonResult(user);
+        }
+
+        [HttpGet]
+        [Route("GetUserDataS")]
+        [Authorize(Roles = Policies.User)]
+        public IActionResult Index()
+        {        
+            var userAgent = Request.Headers["User-Agent"];
+            var result = DeviceDetectorNET.DeviceDetector.GetInfoFromUserAgent(userAgent);
+
+            return JsonResult(new
+            {
+                result.Match.DeviceType,
+                result.Match.OsFamily,
+                result.Match.BrowserFamily
+            });
         }
 
         [HttpGet]

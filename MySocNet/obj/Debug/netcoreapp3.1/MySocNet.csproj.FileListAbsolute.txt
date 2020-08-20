@@ -687,3 +687,5 @@ D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-arm\nat
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-arm64\native\e_sqlite3.dll
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-x64\native\e_sqlite3.dll
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\e_sqlite3.dll
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\DeviceDetector.NET.NetCore.dll
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\YamlDotNet.NetCore.dll

@@ -10,7 +10,7 @@
       "NETCOREAPP",
       "NETCOREAPP3_1"
     ],
-    "languageVersion": "",
+    "languageVersion": "8.0",
     "platform": "",
     "allowUnsafe": false,
     "warningsAsErrors": false,
@@ -370,6 +370,20 @@
         },
         "compile": {
           "lib/netstandard2.0/Dapper.dll": {}
+        }
+      },
+      "DeviceDetector.NET.NetCore/3.9.2.2": {
+        "dependencies": {
+          "YamlDotNet.NetCore": "1.0.0"
+        },
+        "runtime": {
+          "lib/netcoreapp2.0/DeviceDetector.NET.NetCore.dll": {
+            "assemblyVersion": "3.9.2.1",
+            "fileVersion": "3.9.2.1"
+          }
+        },
+        "compile": {
+          "lib/netcoreapp2.0/DeviceDetector.NET.NetCore.dll": {}
         }
       },
       "EO.WebBrowser/20.2.34": {
@@ -2991,9 +3005,35 @@
           "System.Xml.XmlDocument": "4.3.0"
         }
       },
+      "YamlDotNet.NetCore/1.0.0": {
+        "dependencies": {
+          "System.Collections": "4.3.0",
+          "System.Diagnostics.Debug": "4.3.0",
+          "System.Diagnostics.Tools": "4.3.0",
+          "System.Globalization": "4.3.0",
+          "System.Linq": "4.3.0",
+          "System.Linq.Expressions": "4.3.0",
+          "System.ObjectModel": "4.3.0",
+          "System.Reflection.Extensions": "4.3.0",
+          "System.Runtime.Extensions": "4.3.0",
+          "System.Runtime.Serialization.Primitives": "4.3.0",
+          "System.Text.Encoding.Extensions": "4.3.0",
+          "System.Text.RegularExpressions": "4.3.0"
+        },
+        "runtime": {
+          "lib/netstandard1.0/YamlDotNet.NetCore.dll": {
+            "assemblyVersion": "0.0.1.0",
+            "fileVersion": "0.0.0.0"
+          }
+        },
+        "compile": {
+          "lib/netstandard1.0/YamlDotNet.NetCore.dll": {}
+        }
+      },
       "DapperSqlite/1.0.0": {
         "dependencies": {
           "Dapper": "2.0.35",
+          "DeviceDetector.NET.NetCore": "3.9.2.2",
           "Microsoft.Data.Sqlite": "3.1.7",
           "Microsoft.Data.Sqlite.Core": "3.1.7"
         },
@@ -4593,6 +4633,13 @@
       "path": "dapper/2.0.35",
       "hashPath": "dapper.2.0.35.nupkg.sha512"
     },
+    "DeviceDetector.NET.NetCore/3.9.2.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-maXrB20dH5Om+K1f9ZAmuDDniUD42E3zAlm+Wm+/W82iZV5crQR7nELJHchtAbIqXgIl+kdA98tizkhjCIwtEQ==",
+      "path": "devicedetector.net.netcore/3.9.2.2",
+      "hashPath": "devicedetector.net.netcore.3.9.2.2.nupkg.sha512"
+    },
     "EO.WebBrowser/20.2.34": {
       "type": "package",
       "serviceable": true,
@@ -6069,6 +6116,13 @@
       "sha512": "sha512-MYoTCP7EZ98RrANESW05J5ZwskKDoN0AuZ06ZflnowE50LTpbR5yRg3tHckTVm5j/m47stuGgCrCHWePyHS70Q==",
       "path": "system.xml.xmlserializer/4.3.0",
       "hashPath": "system.xml.xmlserializer.4.3.0.nupkg.sha512"
+    },
+    "YamlDotNet.NetCore/1.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vPiKF4Yf02MS96Nzwcr8+WrvlhTx+camOgUzxhazU0hCzs2ESetWDCxaIT/MYdAw2oONYem1ow9PXWJjHkRUDw==",
+      "path": "yamldotnet.netcore/1.0.0",
+      "hashPath": "yamldotnet.netcore.1.0.0.nupkg.sha512"
     },
     "DapperSqlite/1.0.0": {
       "type": "project",

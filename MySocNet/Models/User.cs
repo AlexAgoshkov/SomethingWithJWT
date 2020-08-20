@@ -41,6 +41,8 @@ namespace MySocNet.Models
 
         public string UserRole { get; set; }
 
+        public virtual ICollection<Detect> Detects { get; set; }
+
         public int? ImageId { get; set; }
 
         public virtual Image ProfileImage { get; set; }

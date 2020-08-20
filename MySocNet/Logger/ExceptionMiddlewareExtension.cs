@@ -44,6 +44,9 @@ namespace MySocNet.Logger
             if (exception is Exceptions.UnauthorizedAccessException)
                 return 401;
 
+            if (exception is ForbiddenException)
+                return 403;
+
             return 500;
         }
     }

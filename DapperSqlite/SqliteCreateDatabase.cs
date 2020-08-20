@@ -12,7 +12,7 @@ namespace DapperSqlite
     {
         public void CreateDatabase()
         {
-            using (var cnn = SimpleDbConnection())
+            using (var cnn = SimpleDbConnection())//split
             {
                 cnn.Open();
                 cnn.Execute(
@@ -22,7 +22,6 @@ namespace DapperSqlite
                          UserName varchar(100) not null
                     );
                     
-
                     create table ActivedUsers 
                     (
                          Id integer primary key AUTOINCREMENT,

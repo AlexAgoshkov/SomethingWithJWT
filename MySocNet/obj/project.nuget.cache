@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "c25L3poJoWpt16aCL7j3ekq2lVzksL9f2zSrA5yocN3aOfTTG1oCMoHUYmIxx1yVAyzsaVCHpE68+mzCy3YAXA==",
+  "dgSpecHash": "FR9zR2L5xz+O2bZxWzpc2hJcWs1C+AmQkD2s5rdabrmBNOniogBwRPRluTDdACHU7dU9MivRtGTB7kALnLZEvA==",
   "success": true,
   "projectFilePath": "D:\\Source\\SomethingWithJWT\\MySocNet\\MySocNet.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Alex\\.nuget\\packages\\automapper\\10.0.0\\automapper.10.0.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\8.0.1\\automapper.extensions.microsoft.dependencyinjection.8.0.1.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\dapper\\2.0.35\\dapper.2.0.35.nupkg.sha512",
+    "C:\\Users\\Alex\\.nuget\\packages\\devicedetector.net.netcore\\3.9.2.2\\devicedetector.net.netcore.3.9.2.2.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\eo.webbrowser\\20.2.34\\eo.webbrowser.20.2.34.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\mailkit\\2.8.0\\mailkit.2.8.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\microsoft.aspnet.identity.core\\2.2.3\\microsoft.aspnet.identity.core.2.2.3.nupkg.sha512",
@@ -217,7 +218,8 @@
     "C:\\Users\\Alex\\.nuget\\packages\\system.xml.readerwriter\\4.3.0\\system.xml.readerwriter.4.3.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\system.xml.xmldocument\\4.3.0\\system.xml.xmldocument.4.3.0.nupkg.sha512",
-    "C:\\Users\\Alex\\.nuget\\packages\\system.xml.xmlserializer\\4.3.0\\system.xml.xmlserializer.4.3.0.nupkg.sha512"
+    "C:\\Users\\Alex\\.nuget\\packages\\system.xml.xmlserializer\\4.3.0\\system.xml.xmlserializer.4.3.0.nupkg.sha512",
+    "C:\\Users\\Alex\\.nuget\\packages\\yamldotnet.netcore\\1.0.0\\yamldotnet.netcore.1.0.0.nupkg.sha512"
   ],
   "logs": [
     {

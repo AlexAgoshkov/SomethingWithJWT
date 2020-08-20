@@ -47,7 +47,7 @@ namespace DapperSqlite.Services
                 cnn.Open();
                 int result = cnn.Query<SentMessage>(
                     @"SELECT Id, MessageId
-                      FROM MessageId").Count();
+                      FROM SentMessages").Count();
                 return result;
             }
         }

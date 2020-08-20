@@ -36,6 +36,8 @@ namespace MySocNet.Models
 
         public DbSet<ChatMembers> ChatMembers { get; set; }
 
+        public DbSet<Detect> Detects { get; set; }
+
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
             Database.Migrate();
@@ -61,6 +63,9 @@ namespace MySocNet.Models
             .HasKey(uc => new { uc.ChatId, uc.UserId });
 
             modelBuilder.Entity<LogData>();
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Detect>();
             base.OnModelCreating(modelBuilder);
         }
     }

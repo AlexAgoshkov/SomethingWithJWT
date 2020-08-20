@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -30,19 +32,24 @@ namespace MySocNet.Services
     {
         private readonly IConfiguration _config;
         private readonly IRepository<User> _userRepository;
-        private readonly IRepository<Authentication> _authRepository;
+        private readonly IRepository<Detect> _detectRepository;
         private readonly IMapper _mapper;
-        private const int TokenMinutes = 360; 
-        
+        private readonly IEmailService _emailService;
+        private const int TokenMinutes = 360;
+        private const string LocalAddress = "http://localhost:";
+
+
         public AuthenticationService(
             IConfiguration config, 
             IRepository<User> userRepository,
-            IRepository<Authentication> authRepository,
+            IRepository<Detect> detectRepository,
+            IEmailService emailService,
             IMapper mapper)
         {
             _config = config;
-            _authRepository = authRepository;
             _userRepository = userRepository;
+            _detectRepository = detectRepository;
+            _emailService = emailService;
             _mapper = mapper;
         }
 
@@ -67,10 +74,13 @@ namespace MySocNet.Services
             }
         }
 
-        public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
+        public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials, Detect detect, HttpContext httpContext)
         {
-            var userByLogin = await _userRepository.GetWhere(x => x.UserName == loginCredentials.UserName)
-                .Include(x => x.Authentication).Include(x => x.ActiveKey).FirstOrDefaultAsync();
+            var userByLogin = await _userRepository
+                .GetWhere(x => x.UserName == loginCredentials.UserName && x.ActiveKey.IsActive)
+                .Include(x => x.Authentication).Include(x => x.ActiveKey).Include(x => x.Detects)
+                
+                .FirstOrDefaultAsync();
 
             if (userByLogin == null)
                 throw new EntityNotFoundException("User not found");
@@ -78,7 +88,35 @@ namespace MySocNet.Services
             if (!HashService.Verify(loginCredentials.Password, userByLogin.Password))
                 throw new EntityNotFoundException("Login or Password Was Wrong");
 
-                return _mapper.Map<User>(userByLogin);
+            await DetectUser(detect, userByLogin, httpContext);
+            
+            return _mapper.Map<User>(userByLogin);
+        }
+
+
+        private async Task DetectUser(Detect detect, User user, HttpContext httpContext)
+        {
+            if (IsReal(detect, user))
+                return;
+
+            user.ActiveKey.IsActive = false;
+            user.Detects.Add(detect);
+            await _userRepository.UpdateAsync(user);
+            var local = $"{LocalAddress}{httpContext.Connection.LocalPort}/Login/ConfirmIdentity/?Key={user.ActiveKey.Key}";
+            await _emailService.SendEmailAsync(user.Email, "Identity", local);
+            throw new ForbiddenException("Verify your identity. Check your Email ");
+        }
+
+        public bool IsReal(Detect detect, User user)
+        {
+            foreach (var item in user.Detects)
+            {
+                if (detect.Equals(item))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private async Task CreateNewTokens(User user, UpdateTokenInput input)
