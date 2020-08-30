@@ -689,3 +689,7 @@ D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-x64\nat
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\e_sqlite3.dll
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\DeviceDetector.NET.NetCore.dll
 D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\YamlDotNet.NetCore.dll
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\Properties\serviceDependencies.json
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\Properties\ServiceDependencies\TheDeepestNetwork - Web Deploy\profile.arm.json
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\Properties\serviceDependencies.TheDeepestNetwork - Web Deploy.json
+D:\Source\SomethingWithJWT\MySocNet\bin\Debug\netcoreapp3.1\Properties\ServiceDependencies\TheDeepestNetwork - Web Deploy\mssql1.arm.json

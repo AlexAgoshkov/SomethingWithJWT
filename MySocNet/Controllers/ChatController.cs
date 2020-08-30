@@ -35,12 +35,10 @@ namespace MySocNet.Controllers
     {
         private readonly IChatService _chatService;
         private readonly IMapper _mapper;
-        private readonly IMyLogger _myLogger;
-       
+        
         public ChatController(
             IRepository<User> userRepository,
             IChatService chatService,
-            IMyLogger myLogger,
             IMapper mapper
             ) : base(userRepository)
         {

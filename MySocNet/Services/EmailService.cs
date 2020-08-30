@@ -13,15 +13,20 @@ namespace MySocNet.Services
     {
         public async Task SendEmailAsync(string email, string subject, string message)//Exc with Email
         {
-            MailAddress from = new MailAddress("owneremailov2002@gmail.com", "ME");
-            MailAddress to = new MailAddress(email);
-            MailMessage m = new MailMessage(from, to);
-            m.Subject = subject;
-            m.Body = message;
-            SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587);
-            smtp.Credentials = new NetworkCredential("owneremailov2002@gmail.com", "565666aqa");
-            smtp.EnableSsl = true;
-            await smtp.SendMailAsync(m);
+            using (var smtp = new SmtpClient("smtp.gmail.com", 587))
+            {
+                smtp.UseDefaultCredentials = false;
+                smtp.EnableSsl = true;
+                smtp.Credentials = new NetworkCredential("owneremailov2003@gmail.com", "323233aq");
+
+                MailAddress from = new MailAddress("owneremailov2003@gmail.com", "ME");
+                MailAddress to = new MailAddress(email);
+                MailMessage mailMessage = new MailMessage(from, to);
+                mailMessage.Subject = subject;
+                mailMessage.Body = message;
+
+                await smtp.SendMailAsync(mailMessage);
+            }  
         }
 
         public bool IsValidEmail(string email)

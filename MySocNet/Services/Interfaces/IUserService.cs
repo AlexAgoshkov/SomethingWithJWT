@@ -11,8 +11,12 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IUserService
     {
-        IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query);
+        Task<PaginatedResponse<User>> GetPaginatedUsers(SearchUserInput userInput);
+
         Task<User> GetUserByRefreshTokenAsync(string refreshToken);
+
         Task<UserResponse> AddImageToUser(Image image, int userId);
+
+        Task<User> ChangeRole(int userId, string role);
     }
 }

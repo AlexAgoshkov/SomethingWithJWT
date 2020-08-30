@@ -1293,7 +1293,7 @@
           "lib/netstandard2.0/Ninject.dll": {}
         }
       },
-      "NLog/4.7.3": {
+      "NLog/4.7.4": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/NLog.dll": {}
@@ -1302,11 +1302,11 @@
           "lib/netstandard2.0/NLog.dll": {}
         }
       },
-      "NLog.Config/4.7.3": {
+      "NLog.Config/4.7.4": {
         "type": "package",
         "dependencies": {
-          "NLog": "4.7.3",
-          "NLog.Schema": "4.7.3"
+          "NLog": "4.7.4",
+          "NLog.Schema": "4.7.4"
         },
         "contentFiles": {
           "contentFiles/any/any/NLog.config": {
@@ -1330,7 +1330,7 @@
           "lib/netcoreapp3.0/NLog.Extensions.Logging.dll": {}
         }
       },
-      "NLog.Schema/4.7.3": {
+      "NLog.Schema/4.7.4": {
         "type": "package",
         "contentFiles": {
           "contentFiles/any/any/NLog.xsd": {
@@ -1604,7 +1604,7 @@
           }
         }
       },
-      "SixLabors.ImageSharp/1.0.0": {
+      "SixLabors.ImageSharp/1.0.1": {
         "type": "package",
         "compile": {
           "lib/netcoreapp3.1/SixLabors.ImageSharp.dll": {}
@@ -5354,10 +5354,10 @@
         "ninject.nuspec"
       ]
     },
-    "NLog/4.7.3": {
-      "sha512": "3pAikzwpKWki/ARyxp5tIKsSMgioyuDHuopPWorHBDUBt1vodh4zOOh5G7A3W09M3lC7TgiopjZZ18KePgIpMA==",
+    "NLog/4.7.4": {
+      "sha512": "gSGX/ur0P3jp17H37HW7ycXR6L1578tQbilf4HLX1t2viCDFgtwEsfHMPf0/jcuf7/qqGgoU/vKgyQ9hzxuOEQ==",
       "type": "package",
-      "path": "nlog/4.7.3",
+      "path": "nlog/4.7.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -5383,21 +5383,21 @@
         "lib/wp8/NLog.xml",
         "lib/xamarinios10/NLog.dll",
         "lib/xamarinios10/NLog.xml",
-        "nlog.4.7.3.nupkg.sha512",
+        "nlog.4.7.4.nupkg.sha512",
         "nlog.nuspec"
       ]
     },
-    "NLog.Config/4.7.3": {
-      "sha512": "rLwlHmonuMwC+2XpiuB3PFA2Sxcl059w/BHlctDJu270pDNaR5sEO3b5aOlbYea6hckT/AyWsMAFXrUclfv7ng==",
+    "NLog.Config/4.7.4": {
+      "sha512": "6S4bdzv7gjGvdXxPFaPSvehIH2/c5dsjHXRfyTZUZ1FSxDzYXW5eWLuyCvNTYOef842uPgQBS8Ahi0JgZtWRLA==",
       "type": "package",
-      "path": "nlog.config/4.7.3",
+      "path": "nlog.config/4.7.4",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "content/NLog.config",
         "contentFiles/any/any/NLog.config",
-        "nlog.config.4.7.3.nupkg.sha512",
+        "nlog.config.4.7.4.nupkg.sha512",
         "nlog.config.nuspec",
         "tools/Install.ps1"
       ]
@@ -5425,16 +5425,16 @@
         "nlog.extensions.logging.nuspec"
       ]
     },
-    "NLog.Schema/4.7.3": {
-      "sha512": "LXMEuQBhhoMf8WAGI66Fe8mKmO5BGd76lW8roML9Pt3QVheBTyWCOW/ZFChsqGW70CkTeU86EWvCaFKAPLIDVQ==",
+    "NLog.Schema/4.7.4": {
+      "sha512": "HikJv+HJHbpjWHSykV5rd6QEIAnC4gZEoHTkJjeyxICTyzW6BDZWv4tosdvdHZ+CJAphiAcWE9d6Mszx3mwO6Q==",
       "type": "package",
-      "path": "nlog.schema/4.7.3",
+      "path": "nlog.schema/4.7.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "content/NLog.xsd",
         "contentFiles/any/any/NLog.xsd",
-        "nlog.schema.4.7.3.nupkg.sha512",
+        "nlog.schema.4.7.4.nupkg.sha512",
         "nlog.schema.nuspec"
       ]
     },
@@ -5812,10 +5812,10 @@
         "version.txt"
       ]
     },
-    "SixLabors.ImageSharp/1.0.0": {
-      "sha512": "8amvsk8NXnCxZV0lvJppAZJknViWgBOO/2V59IGR6DVoD13mSmG+/Z9eg5IwrHQuRHp5RD9lfXBXDZyk8rTKDg==",
+    "SixLabors.ImageSharp/1.0.1": {
+      "sha512": "DjLoFNdUfsDP7RhPpr5hcUhl1XiejqBML9uDWuOUwCkc0Y+sG9IJLLbqSOi9XeoWqPviwdcDm1F8nKdF0qTYIQ==",
       "type": "package",
-      "path": "sixlabors.imagesharp/1.0.0",
+      "path": "sixlabors.imagesharp/1.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -5831,7 +5831,7 @@
         "lib/netstandard2.0/SixLabors.ImageSharp.xml",
         "lib/netstandard2.1/SixLabors.ImageSharp.dll",
         "lib/netstandard2.1/SixLabors.ImageSharp.xml",
-        "sixlabors.imagesharp.1.0.0.nupkg.sha512",
+        "sixlabors.imagesharp.1.0.1.nupkg.sha512",
         "sixlabors.imagesharp.128.png",
         "sixlabors.imagesharp.nuspec"
       ]
@@ -10440,15 +10440,15 @@
       "Microsoft.Extensions.Logging >= 3.1.7",
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 3.1.4",
       "NETCore.MailKit >= 2.0.3",
-      "NLog >= 4.7.3",
-      "NLog.Config >= 4.7.3",
+      "NLog >= 4.7.4",
+      "NLog.Config >= 4.7.4",
       "NLog.Extensions.Logging >= 1.6.4",
-      "NLog.Schema >= 4.7.3",
+      "NLog.Schema >= 4.7.4",
       "NLog.Web.AspNetCore >= 4.9.3",
       "Newtonsoft.Json >= 12.0.3",
       "Ninject >= 3.3.4",
       "RestSharp >= 106.11.4",
-      "SixLabors.ImageSharp >= 1.0.0",
+      "SixLabors.ImageSharp >= 1.0.1",
       "Swashbuckle.AspNetCore.Swagger >= 5.5.1",
       "Swashbuckle.AspNetCore.SwaggerGen >= 5.5.1",
       "Swashbuckle.AspNetCore.SwaggerUi >= 5.5.1",
@@ -10586,11 +10586,11 @@
           },
           "NLog": {
             "target": "Package",
-            "version": "[4.7.3, )"
+            "version": "[4.7.4, )"
           },
           "NLog.Config": {
             "target": "Package",
-            "version": "[4.7.3, )"
+            "version": "[4.7.4, )"
           },
           "NLog.Extensions.Logging": {
             "target": "Package",
@@ -10598,7 +10598,7 @@
           },
           "NLog.Schema": {
             "target": "Package",
-            "version": "[4.7.3, )"
+            "version": "[4.7.4, )"
           },
           "NLog.Web.AspNetCore": {
             "target": "Package",
@@ -10618,7 +10618,7 @@
           },
           "SixLabors.ImageSharp": {
             "target": "Package",
-            "version": "[1.0.0, )"
+            "version": "[1.0.1, )"
           },
           "Swashbuckle.AspNetCore.Swagger": {
             "target": "Package",

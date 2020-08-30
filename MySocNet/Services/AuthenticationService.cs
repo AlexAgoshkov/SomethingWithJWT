@@ -32,28 +32,23 @@ namespace MySocNet.Services
     {
         private readonly IConfiguration _config;
         private readonly IRepository<User> _userRepository;
-        private readonly IRepository<Detect> _detectRepository;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private const int TokenMinutes = 360;
-        private const string LocalAddress = "http://localhost:";
-
-
+       
         public AuthenticationService(
             IConfiguration config, 
             IRepository<User> userRepository,
-            IRepository<Detect> detectRepository,
             IEmailService emailService,
             IMapper mapper)
         {
             _config = config;
             _userRepository = userRepository;
-            _detectRepository = detectRepository;
             _emailService = emailService;
             _mapper = mapper;
         }
 
-        public async Task CreateAuthTokenAsync(string userName)
+        public async Task<Authentication> CreateAuthTokenAsync(string userName)
         {
             var user = await _userRepository.GetWhere(x => x.UserName == userName)
                 .Include(x => x.Authentication).FirstOrDefaultAsync();
@@ -66,20 +61,19 @@ namespace MySocNet.Services
             
             if (!user.AuthenticationId.HasValue)
             {
-                await CreateNewTokens(user, input);
+               return await CreateNewTokens(user, input);
             }
             else
             {
-                await UpdateTokens(user,input);
+               return await UpdateTokens(user,input);
             }
         }
 
-        public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials, Detect detect, HttpContext httpContext)
+        public async Task<User> AuthenticateUserAsync(UserLogin loginCredentials)
         {
             var userByLogin = await _userRepository
                 .GetWhere(x => x.UserName == loginCredentials.UserName && x.ActiveKey.IsActive)
                 .Include(x => x.Authentication).Include(x => x.ActiveKey).Include(x => x.Detects)
-                
                 .FirstOrDefaultAsync();
 
             if (userByLogin == null)
@@ -88,13 +82,10 @@ namespace MySocNet.Services
             if (!HashService.Verify(loginCredentials.Password, userByLogin.Password))
                 throw new EntityNotFoundException("Login or Password Was Wrong");
 
-            await DetectUser(detect, userByLogin, httpContext);
-            
-            return _mapper.Map<User>(userByLogin);
+                return _mapper.Map<User>(userByLogin);
         }
 
-
-        private async Task DetectUser(Detect detect, User user, HttpContext httpContext)
+        public async Task DetectUserAsync(Detect detect, User user, string confirmlink)
         {
             if (IsReal(detect, user))
                 return;
@@ -102,8 +93,8 @@ namespace MySocNet.Services
             user.ActiveKey.IsActive = false;
             user.Detects.Add(detect);
             await _userRepository.UpdateAsync(user);
-            var local = $"{LocalAddress}{httpContext.Connection.LocalPort}/Login/ConfirmIdentity/?Key={user.ActiveKey.Key}";
-            await _emailService.SendEmailAsync(user.Email, "Identity", local);
+          
+            await _emailService.SendEmailAsync(user.Email, "Identity", confirmlink);
             throw new ForbiddenException("Verify your identity. Check your Email ");
         }
 
@@ -119,14 +110,15 @@ namespace MySocNet.Services
             return false;
         }
 
-        private async Task CreateNewTokens(User user, UpdateTokenInput input)
+        private async Task<Authentication> CreateNewTokens(User user, UpdateTokenInput input)
         {
            var auth = _mapper.Map<Authentication>(input);
            user.Authentication = auth;
            await _userRepository.UpdateAsync(user);
+           return auth; 
         }
 
-        private async Task UpdateTokens(User user, UpdateTokenInput input)
+        private async Task<Authentication> UpdateTokens(User user, UpdateTokenInput input)
         {
             // user.Authentication = _mapper.Map<Authentication>(input);
             user.Authentication.AccessToken = input.AccessToken;
@@ -134,6 +126,7 @@ namespace MySocNet.Services
             user.Authentication.Created = input.Created;
             user.Authentication.Expires = input.Expires;
             await _userRepository.UpdateAsync(user);
+            return user.Authentication;
         }
 
         private string GenerateJWTToken(User user, string secretWord, DateTime expire)

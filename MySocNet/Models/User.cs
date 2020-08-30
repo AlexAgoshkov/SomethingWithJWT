@@ -66,6 +66,7 @@ namespace MySocNet.Models
         public User()
         {
             Friends = new List<Friend>();
+            Detects = new List<Detect>();
         }
     }
 }

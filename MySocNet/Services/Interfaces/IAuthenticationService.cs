@@ -10,8 +10,10 @@ namespace MySocNet.Services.Interfaces
 {
     public interface IAuthenticationService
     {
-        Task CreateAuthTokenAsync(string userName);
+        Task<Authentication> CreateAuthTokenAsync(string userName);
 
-        Task<User> AuthenticateUserAsync(UserLogin loginCredentials, Detect detect, HttpContext httpContext);
+        Task<User> AuthenticateUserAsync(UserLogin loginCredentials);
+
+        Task DetectUserAsync(Detect detect, User user, string confirmlink);
     }
 }

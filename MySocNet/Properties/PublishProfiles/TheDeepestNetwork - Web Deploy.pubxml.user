@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAB92gisQmEk+lXTbVYcf6JQAAAAACAAAAAAAQZgAAAAEAACAAAAB0Osd5hPoJ8tXU8eyKSvR8TVOQp2r81f2Wbye/z43c6gAAAAAOgAAAAAIAACAAAABda4N6w/1idTozNxO1Vl0JzMzollXjvvkedDqHc/gk64AAAABH49Yat0OGucuksvryfNCy5u/74Xu4P9pGiYP/Ycy2HyQyXIBEqTicP4qF7aGPNLlO/r336ieqdEK1KsKJwzNbL6Q6WDDkO7mLCAIm8AtB0ecKenrAEaW7eo8HMrHLp+TWMl6IT0NW+mA9lsUExRZhzh2jBUw1/l65ATvYw/zvdUAAAACtYnJ2KpRM4kA2jQZhbD2FV8AeV6WnkTqAjKm4cDw3wPCjqIxBqYPAgbcsmvpA+zU1GvLiIXg0E59mByexOS4/</EncryptedPassword>
+  </PropertyGroup>
+  <ItemGroup>
+    <EFMigrations Include="MySocNet.Models.MyDbContext">
+      <Value>Data Source=tcp:socnet-mydbdbserver.database.windows.net,1433%3bInitial Catalog=SocNet_mydb%3bUser Id=alex%40socnet-mydbdbserver%3bPassword=323233aQ</Value>
+    </EFMigrations>
+  </ItemGroup>
+</Project>

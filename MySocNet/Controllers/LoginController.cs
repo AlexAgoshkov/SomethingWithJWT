@@ -37,13 +37,10 @@ namespace MySocNet.Controllers
     [ApiController]
     public class LoginController : ApiControllerBase
     {
-        private readonly IConfiguration _config;
-        private readonly IUserService _userService;
-        private readonly IRepository<User> _userRepository;
+        private readonly IUserService _userService;   
         private readonly IEmailService _emailSender;
         private readonly IAuthenticationService _authenticationService;
         private readonly IAccountActivationService _accountActiveService;
-        private readonly IRepository<Detect> _detectRepository; 
         private readonly ILogger<LoginController> _logger;
         private readonly IMapper _mapper;
 
@@ -54,17 +51,13 @@ namespace MySocNet.Controllers
             IAuthenticationService authenticationService,
             IAccountActivationService accountActiveService,
             IRepository<User> userRepository,
-            IRepository<Detect> detectRepository,
             ILogger<LoginController> logger,
             IMapper mapper) : base(userRepository)
         {
-            _config = config;
             _userService = userService;
-            _userRepository = userRepository;
             _emailSender = emailSender;
             _authenticationService = authenticationService;
             _accountActiveService = accountActiveService;
-            _detectRepository = detectRepository;
             _logger = logger;
             _mapper = mapper;
         }
@@ -72,28 +65,24 @@ namespace MySocNet.Controllers
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> UpdateAccess(UpdateAccessTokenInput input)
         {
-            var response = new RefreshTokenResponse();
             var user = await _userService.GetUserByRefreshTokenAsync(input.RefreshToken);
-            await _authenticationService.CreateAuthTokenAsync(user.UserName);
-            response.AccessToken = user.Authentication.AccessToken;
-            response.RefreshToken = user.Authentication.RefreshToken;
-            return JsonResult(response);
+            var token = await _authenticationService.CreateAuthTokenAsync(user.UserName);   
+            return JsonResult(token);
         }
 
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] UserLogin login)
         {
-            var response = new LoginResponse();
-
             var detect = await GetUserHardwareInfo();
 
-            response.User = await _authenticationService.AuthenticateUserAsync(login, detect, HttpContext);
-            await _authenticationService.CreateAuthTokenAsync(login.UserName);
-            response.AccessToken = response.User.Authentication.AccessToken;
-            response.RefreshToken = response.User.Authentication.RefreshToken;
+            var user = await _authenticationService.AuthenticateUserAsync(login);
 
-            return JsonResult(response);
+            await _authenticationService.DetectUserAsync(detect, user, GetConfirmIdentity(user));
+
+            var token = await _authenticationService.CreateAuthTokenAsync(login.UserName);
+            
+            return JsonResult(token);
         }
 
         [HttpPost("Registration")]
@@ -105,8 +94,6 @@ namespace MySocNet.Controllers
 
             await SendConfirmEmail(user);
 
-            _logger.LogInformation($"User Id: {user.Id} Got Confirmation Link to his/her Email {user.Email}");
-
             StatisticsNewUserService statisticsNewUser = new StatisticsNewUserService();
             statisticsNewUser.AddNewUser(input.UserName);
 
@@ -117,7 +104,6 @@ namespace MySocNet.Controllers
         public async Task ConfirmEmail(string key)
         {
             await _accountActiveService.ConfirmEmailAsync(key);
-            _logger.LogInformation($"Email with {key} was Confirmed");
             StatisticsActivedUserService statisticsActived = new StatisticsActivedUserService();
             statisticsActived.AddActivedUser(key);
         }
@@ -130,10 +116,7 @@ namespace MySocNet.Controllers
 
         private async Task SendConfirmEmail(User user)
         {
-            var confirmationLink = Url.ActionLink(nameof(ConfirmEmail),
-                                    "Login",
-                                    new { user.ActiveKey.Key },
-                                    Request.Scheme);
+            string confirmationLink = GetConfirmLink(user);
 
             await _emailSender.SendEmailAsync(user.Email, "Confirmation email link", confirmationLink);
         }

@@ -34,6 +34,7 @@ using NLog;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace MySocNet
 {
@@ -70,7 +71,12 @@ namespace MySocNet
             services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
             services.AddScoped<ILog, LogNLog>();
             services.AddScoped<IMyLogger, MyLogger>();
-            services.AddScoped<IDetectedService, DetectedService>();
+            services.AddScoped<ISpotifyService, SpotifyService>();
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
             services.AddSwaggerGen(c =>
             {
@@ -159,9 +165,10 @@ namespace MySocNet
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDefaultFiles();
+                app.UseForwardedHeaders();
                 app.UseStaticFiles();
             }
-           
+             app.UseForwardedHeaders();
             app.ConfigureExceptionHandler(logger);
 
             app.UseSwagger();

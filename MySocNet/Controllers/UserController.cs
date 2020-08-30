@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -39,6 +39,9 @@ using MySocNet.Logger;
 using MySocNet.Exceptions;
 using DapperSqlite.Services;
 using Microsoft.AspNetCore.Http.Features;
+using System.Net;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace MySocNet.Controllers
 {
@@ -46,6 +49,7 @@ namespace MySocNet.Controllers
     [ApiController]
     public class UserController : ApiControllerBase
     {
+        private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IFriendService _friendService;
         private readonly IEmailService _emailSender;
@@ -53,32 +57,29 @@ namespace MySocNet.Controllers
         private readonly IRepository<UserChat> _userChatRepository;
         private readonly IRepository<Chat> _chatRepository;
         private readonly IRepository<Message> _messageRepository;
-        private readonly IHttpContextAccessor _accessor;
-        private readonly IMyLogger _logger;
         private readonly ILog _log;
         
         public UserController(
+            IConfiguration config,
             IUserService userService,
             IFriendService friendService,
             IRepository<User> userRepository,
             IRepository<UserChat> userChatRepository,
             IRepository<Chat> chatRepository,
             IRepository<Message> messageRepository,
-            IHttpContextAccessor accessor,
             IEmailService emailSender,
             IMyLogger logger,
             ILog log) : base(userRepository)
         {
+            _config = config;
             _userService = userService;
             _friendService = friendService;
             _userRepository = userRepository;
             _userChatRepository = userChatRepository;
             _chatRepository = chatRepository;
             _messageRepository = messageRepository;
-            _accessor = accessor;
             _emailSender = emailSender;
             _log = log;
-            _logger = logger;
         }
 
         [HttpGet("GetAll")]
@@ -90,22 +91,7 @@ namespace MySocNet.Controllers
         [HttpPost("GetSortedUserList")]
         public async Task<IActionResult> GetUsers(SearchUserInput userInput)
         {
-            IQueryable<User> query = null;
-
-            if (!string.IsNullOrWhiteSpace(userInput.Search))
-            {
-                query = _userRepository.GetWhere(x =>
-                    x.FirstName.ToUpper().Contains(userInput.Search) ||
-                    x.SurName.ToUpper().Contains(userInput.Search));
-            }
-
-            query = _userService.GetSortedQuery(userInput, query);
-
-            int totalCount = await query.CountAsync();
-
-            var result = await query.Skip(userInput.Skip).Take(userInput.Take).ToListAsync();
-
-            return Ok(new PaginatedResponse<User>(totalCount, result));
+            return JsonResult(await _userService.GetPaginatedUsers(userInput));
         }
 
         [HttpGet("AdminDashBoard")]
@@ -133,23 +119,57 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet]
+        [Route("GetUserIp")]
+        public async Task<IActionResult> GetUserIp()
+        {
+            string url5 = "https://accounts.spotify.com/api/token";
+            var clientid = _config["Spotify:ClientId"];
+            var clientsecret = _config["Spotify:ClientSecret"];
+
+            var encode_clientid_clientsecret = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", clientid, clientsecret)));
+
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url5);
+
+            webRequest.Method = "POST";
+            webRequest.ContentType = "application/x-www-form-urlencoded";
+            webRequest.Accept = "application/json";
+            webRequest.Headers.Add("Authorization: Basic " + encode_clientid_clientsecret);
+
+            var request = ("grant_type=client_credentials");
+            byte[] req_bytes = Encoding.ASCII.GetBytes(request);
+            webRequest.ContentLength = req_bytes.Length;
+
+            Stream strm = webRequest.GetRequestStream();
+            strm.Write(req_bytes, 0, req_bytes.Length);
+            strm.Close();
+
+            HttpWebResponse resp = (HttpWebResponse)webRequest.GetResponse();
+            string json = "";
+            using (Stream respStr = resp.GetResponseStream())
+            {
+                using (StreamReader rdr = new StreamReader(respStr, Encoding.UTF8))
+                {
+                    json = rdr.ReadToEnd();
+                    rdr.Close();
+                }
+            }
+            return JsonResult(json);
+        }
+
+        [HttpGet]
         [Route("GetUserData")]
         [Authorize(Roles = Policies.Admin + "," + Policies.User)]
         public async Task<IActionResult> GetUserData()
         {
             var user = await CurrentUser();
-            var remoteIpAddress = HttpContext.Features.Get<IHttpConnectionFeature>()?.RemoteIpAddress;
-            var ip = HttpContext.Connection.RemoteIpAddress;
-           // var ip = _accessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            // await _logger.AddLog(new LogData { Category = "Alert", Message = "User Got Data about himhelf", UserId = user.Id, User = user.UserName });
             return JsonResult(user);
         }
 
         [HttpGet]
-        [Route("GetUserDataS")]
+        [Route("GetUserTest")]
         [Authorize(Roles = Policies.User)]
-        public IActionResult Index()
-        {        
+        public IActionResult GetUserTest()
+        {
             var userAgent = Request.Headers["User-Agent"];
             var result = DeviceDetectorNET.DeviceDetector.GetInfoFromUserAgent(userAgent);
 
@@ -170,6 +190,14 @@ namespace MySocNet.Controllers
             _log.Information($"User Id {user.Id} Login {user.UserName} checked information about himself");
             return JsonResult(user);
         }
+         
+        [HttpGet]
+        [Route("ChangeUserRole")]
+        [Authorize(Policy = Policies.Admin)]
+        public async Task<IActionResult> SetRole(int userId, string role)
+        {
+            return JsonResult(await _userService.ChangeRole(userId, role));
+        }
 
         [HttpPost]
         [Route("UpdateUser")]
@@ -179,7 +207,6 @@ namespace MySocNet.Controllers
             var user = await CurrentUser();
             user.FirstName = input.FirstName;
             user.SurName = input.SurName;
-            _log.Information($"User Id {user.Id} Login {user.UserName} Added First Name {user.FirstName} and Sur Name {user.SurName}");
             await _userRepository.UpdateAsync(user);
         }
         

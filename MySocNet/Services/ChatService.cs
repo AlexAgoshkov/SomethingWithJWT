@@ -58,11 +58,16 @@ namespace MySocNet.Services
         {
             if (string.IsNullOrWhiteSpace(input.Search))
                 throw new EntityNotFoundException("Search was empty");
+
             var query = _chatRepository
                .GetWhere(x => !x.IsPrivate && x.ChatName.ToUpper().Contains(input.Search));
+
             query = input.IsAscending ? query.OrderBy(x => x.ChatName) : query.OrderByDescending(x => x.ChatName);
+
             int totalCount = await query.CountAsync();
+
             var chats = await query.Skip(input.Skip).Take(input.Take).ToListAsync();
+
             return new PaginatedResponse<Chat>(totalCount, chats);
         }
 
@@ -71,7 +76,9 @@ namespace MySocNet.Services
             var userChat = _userChatRepository
                 .GetWhere(x => x.User.Id == user.Id && x.IsPrivateMask == input.IsPrivateMask)
                 .Select(x => x.ChatId);
+
             userChat = userChat.Skip(input.Skip).Take(input.Take);
+
             return await _chatRepository.GetWhere(x => userChat.Contains(x.Id)).ToListAsync();
         }
 
@@ -79,8 +86,11 @@ namespace MySocNet.Services
         {
             var userChat = await _userChatRepository
                 .GetWhere(x => x.UserId == user.Id && x.ChatId == chatId).FirstOrDefaultAsync();
+
             userChat.IsPrivateMask = true;
+
             await _userChatRepository.UpdateAsync(userChat);
+
             return userChat;
         }
 
@@ -94,6 +104,7 @@ namespace MySocNet.Services
                 throw new EntityNotFoundException("Chat not found");
 
             userChats.IsUserJoined = true;
+
             await _chatMemberRepository.UpdateAsync(userChats);
 
             return userChats.Chat;
@@ -106,6 +117,7 @@ namespace MySocNet.Services
             
             var chat = await _chatRepository.GetWhere(x => x.Id == chatId)
                   .Include(x => x.ChatImage).FirstOrDefaultAsync();
+
             if (chat == null)
                 throw new EntityNotFoundException("Chat not found");
 
@@ -145,6 +157,7 @@ namespace MySocNet.Services
                 throw new EntityNotFoundException("UserChat not found");
 
             await _userChatRepository.RemoveAsync(userChat);
+
             return userChat.Chat;
         }
 
@@ -236,13 +249,14 @@ namespace MySocNet.Services
             var messages = await _userMessageRepository
                 .GetWhere(x => x.UserId == userId && x.ChatId == chatId && !x.IsRead)
                 .ToListAsync();
+
             if (messages == null)
                 throw new EntityNotFoundException("Messages not found");
 
             foreach (var item in messages)
             {
-            item.IsRead = true;
-            await _userMessageRepository.UpdateAsync(item);
+               item.IsRead = true;
+               await _userMessageRepository.UpdateAsync(item);
             }
         }
 

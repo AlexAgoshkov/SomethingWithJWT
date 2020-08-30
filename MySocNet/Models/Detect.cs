@@ -17,8 +17,10 @@ namespace MySocNet.Models
         public string Os { get; set; }
 
         public int? UserId { get; set; }
-        
+
         public string Browser { get; set; }
+
+        public string UserIp { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -29,7 +31,11 @@ namespace MySocNet.Models
             else
             {
                 Detect p = (Detect)obj;
-                return (DeviceType == p.DeviceType) && (Os == p.Os) && (Browser == p.Browser);
+
+                return (DeviceType == p.DeviceType)
+                    && (Os == p.Os) 
+                    && (Browser == p.Browser)
+                    && (UserIp == p.UserIp);
             }   
         }
     }

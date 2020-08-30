@@ -36,6 +36,36 @@ namespace MySocNet.Services
             _mapper = mapper;
         }
 
+        public async Task<PaginatedResponse<User>> GetPaginatedUsers(SearchUserInput userInput)
+        {
+            IQueryable<User> query = null;
+
+            if (!string.IsNullOrWhiteSpace(userInput.Search))
+            {
+                query = _userRepository.GetWhere(x =>
+                    x.FirstName.ToUpper().Contains(userInput.Search) ||
+                    x.SurName.ToUpper().Contains(userInput.Search));
+            }
+
+            query = GetSortedQuery(userInput, query);
+
+            int totalCount = await query.CountAsync();
+
+            var result = await query.Skip(userInput.Skip).Take(userInput.Take).ToListAsync();
+
+            return new PaginatedResponse<User>(totalCount, result);
+        }
+
+        public async Task<User> ChangeRole(int userId, string role)
+        {
+            var user = await _userRepository.GetWhere(x => x.Id == userId).FirstOrDefaultAsync() ??
+                 throw new EntityNotFoundException("User not found");
+
+            user.UserRole = role;
+            await _userRepository.UpdateAsync(user);
+            return user;
+        }
+
         public async Task<UserResponse> AddImageToUser(Image image, int userId)
         {
             var user = await _userRepository.GetWhere(x => x.Id == userId)
@@ -52,7 +82,7 @@ namespace MySocNet.Services
             return _mapper.Map<UserResponse>(user);
         }
 
-        public IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query)
+        private IQueryable<User> GetSortedQuery(SearchUserInput userInput, IQueryable<User> query)
         {
             switch (userInput.OrderKey)
             {

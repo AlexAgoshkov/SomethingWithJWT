@@ -17,15 +17,18 @@ namespace MySocNet.Services
     {
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<ActiveKey> _activeKeyRepository;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         
         public AccountActiveService(
             IRepository<User> userRepository,
             IRepository<ActiveKey> activeKeyRepository,
+            IEmailService emailService,
             IMapper mapper)
             {
                 _userRepository = userRepository;
                 _activeKeyRepository = activeKeyRepository;
+                _emailService = emailService;
                 _mapper = mapper;
             }
 

@@ -48,10 +48,29 @@ namespace MySocNet.Controllers
             {
                 DeviceType = result.Match.DeviceType,
                 Browser = result.Match.BrowserFamily,
-                Os = result.Match.OsFamily
+                Os = result.Match.OsFamily,
+                UserIp = HttpContext.Connection.RemoteIpAddress.ToString()
             };
 
             return detect;
+        }
+
+        protected string GetConfirmLink(User user)
+        {
+            return Url.ActionLink
+              (action: "ConfirmEmail",
+               controller: "Login",
+              new { user.ActiveKey.Key },
+              Request.Scheme);
+        }
+
+        protected string GetConfirmIdentity(User user)
+        {
+            return Url.ActionLink
+              (action: "ConfirmIdentity",
+               controller: "Login",
+              new { user.ActiveKey.Key },
+              Request.Scheme);
         }
     }
 }

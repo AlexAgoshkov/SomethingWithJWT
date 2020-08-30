@@ -1,9 +1,9 @@
 D:\Source\SomethingWithJWT\DapperSqlite\bin\Debug\netcoreapp3.1\DapperSqlite.deps.json
 D:\Source\SomethingWithJWT\DapperSqlite\bin\Debug\netcoreapp3.1\DapperSqlite.dll
-D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.csprojAssemblyReference.cache
 D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.AssemblyInfoInputs.cache
 D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.AssemblyInfo.cs
 D:\Source\SomethingWithJWT\DapperSqlite\bin\Debug\netcoreapp3.1\DapperSqlite.pdb
 D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.dll
 D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.pdb
 D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.csproj.CoreCompileInputs.cache
+D:\Source\SomethingWithJWT\DapperSqlite\obj\Debug\netcoreapp3.1\DapperSqlite.csprojAssemblyReference.cache

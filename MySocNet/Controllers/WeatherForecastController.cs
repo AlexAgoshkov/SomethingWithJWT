@@ -4,11 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MySocNet.Models;
+using MySocNet.Models.Spotify;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 
@@ -27,19 +29,28 @@ namespace MySocNet.Controllers
         }
 
         [HttpGet("GetWeather")]
-        public async Task<IActionResult> GetWeather()
+        public async Task<IActionResult> GetWeather(string token)
         {
-            HttpClient client = _clientFactory.CreateClient();
+            Uri url = new Uri("https://api.spotify.com/v1/users/93gnv3cvg6lfn5ofpnwpe1wpo");
+            var authHeader = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync("http://api.openweathermap.org/data/2.5/weather?q=Kyiv&appid=dc8dc3940b7e3cae682cec03ffb80bcf");
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = authHeader;
 
-            if (response.IsSuccessStatusCode)
+            var response = await client.GetAsync(url);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                var responseStream = await response.Content.ReadAsStringAsync();
-                Root root = JsonConvert.DeserializeObject<Root>(responseStream);
-                return JsonResult(root);
+                var finalRequestUri = response.RequestMessage.RequestUri;
+
+                if (finalRequestUri != url)
+                {
+                    response = await client.GetAsync(finalRequestUri);
+                }
             }
-            return BadRequest();
+ 
+            var spotifyUser = await response.Content.ReadAsStringAsync();
+            return JsonResult(JsonConvert.DeserializeObject<SpotifyUser>(spotifyUser));
         }
 
         [HttpGet("GetUsers")]
@@ -62,6 +73,7 @@ namespace MySocNet.Controllers
         private static HttpRequestMessage GetRequest(string url)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");
             return request;
         }
     }

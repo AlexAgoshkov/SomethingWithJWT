@@ -202,11 +202,11 @@
             },
             "NLog": {
               "target": "Package",
-              "version": "[4.7.3, )"
+              "version": "[4.7.4, )"
             },
             "NLog.Config": {
               "target": "Package",
-              "version": "[4.7.3, )"
+              "version": "[4.7.4, )"
             },
             "NLog.Extensions.Logging": {
               "target": "Package",
@@ -214,7 +214,7 @@
             },
             "NLog.Schema": {
               "target": "Package",
-              "version": "[4.7.3, )"
+              "version": "[4.7.4, )"
             },
             "NLog.Web.AspNetCore": {
               "target": "Package",
@@ -234,7 +234,7 @@
             },
             "SixLabors.ImageSharp": {
               "target": "Package",
-              "version": "[1.0.0, )"
+              "version": "[1.0.1, )"
             },
             "Swashbuckle.AspNetCore.Swagger": {
               "target": "Package",

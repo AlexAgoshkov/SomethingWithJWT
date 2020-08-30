@@ -46,15 +46,15 @@
           "Microsoft.Extensions.Logging": "3.1.7",
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": "3.1.4",
           "NETCore.MailKit": "2.0.3",
-          "NLog": "4.7.3",
-          "NLog.Config": "4.7.3",
+          "NLog": "4.7.4",
+          "NLog.Config": "4.7.4",
           "NLog.Extensions.Logging": "1.6.4",
-          "NLog.Schema": "4.7.3",
+          "NLog.Schema": "4.7.4",
           "NLog.Web.AspNetCore": "4.9.3",
           "Newtonsoft.Json": "12.0.3",
           "Ninject": "3.3.4",
           "RestSharp": "106.11.4",
-          "SixLabors.ImageSharp": "1.0.0",
+          "SixLabors.ImageSharp": "1.0.1",
           "Swashbuckle.AspNetCore.Swagger": "5.5.1",
           "Swashbuckle.AspNetCore.SwaggerGen": "5.5.1",
           "Swashbuckle.AspNetCore.SwaggerUI": "5.5.1",
@@ -1654,27 +1654,27 @@
           "lib/netstandard2.0/Ninject.dll": {}
         }
       },
-      "NLog/4.7.3": {
+      "NLog/4.7.4": {
         "runtime": {
           "lib/netstandard2.0/NLog.dll": {
             "assemblyVersion": "4.0.0.0",
-            "fileVersion": "4.7.3.11982"
+            "fileVersion": "4.7.4.12037"
           }
         },
         "compile": {
           "lib/netstandard2.0/NLog.dll": {}
         }
       },
-      "NLog.Config/4.7.3": {
+      "NLog.Config/4.7.4": {
         "dependencies": {
-          "NLog": "4.7.3",
-          "NLog.Schema": "4.7.3"
+          "NLog": "4.7.4",
+          "NLog.Schema": "4.7.4"
         }
       },
       "NLog.Extensions.Logging/1.6.4": {
         "dependencies": {
           "Microsoft.Extensions.Logging": "3.1.7",
-          "NLog": "4.7.3"
+          "NLog": "4.7.4"
         },
         "runtime": {
           "lib/netcoreapp3.0/NLog.Extensions.Logging.dll": {
@@ -1686,7 +1686,7 @@
           "lib/netcoreapp3.0/NLog.Extensions.Logging.dll": {}
         }
       },
-      "NLog.Schema/4.7.3": {},
+      "NLog.Schema/4.7.4": {},
       "NLog.Web.AspNetCore/4.9.3": {
         "dependencies": {
           "NLog.Extensions.Logging": "1.6.4"
@@ -1825,11 +1825,11 @@
           }
         }
       },
-      "SixLabors.ImageSharp/1.0.0": {
+      "SixLabors.ImageSharp/1.0.1": {
         "runtime": {
           "lib/netcoreapp3.1/SixLabors.ImageSharp.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
+            "fileVersion": "1.0.1.0"
           }
         },
         "compile": {
@@ -5207,19 +5207,19 @@
       "path": "ninject/3.3.4",
       "hashPath": "ninject.3.3.4.nupkg.sha512"
     },
-    "NLog/4.7.3": {
+    "NLog/4.7.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-3pAikzwpKWki/ARyxp5tIKsSMgioyuDHuopPWorHBDUBt1vodh4zOOh5G7A3W09M3lC7TgiopjZZ18KePgIpMA==",
-      "path": "nlog/4.7.3",
-      "hashPath": "nlog.4.7.3.nupkg.sha512"
+      "sha512": "sha512-gSGX/ur0P3jp17H37HW7ycXR6L1578tQbilf4HLX1t2viCDFgtwEsfHMPf0/jcuf7/qqGgoU/vKgyQ9hzxuOEQ==",
+      "path": "nlog/4.7.4",
+      "hashPath": "nlog.4.7.4.nupkg.sha512"
     },
-    "NLog.Config/4.7.3": {
+    "NLog.Config/4.7.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-rLwlHmonuMwC+2XpiuB3PFA2Sxcl059w/BHlctDJu270pDNaR5sEO3b5aOlbYea6hckT/AyWsMAFXrUclfv7ng==",
-      "path": "nlog.config/4.7.3",
-      "hashPath": "nlog.config.4.7.3.nupkg.sha512"
+      "sha512": "sha512-6S4bdzv7gjGvdXxPFaPSvehIH2/c5dsjHXRfyTZUZ1FSxDzYXW5eWLuyCvNTYOef842uPgQBS8Ahi0JgZtWRLA==",
+      "path": "nlog.config/4.7.4",
+      "hashPath": "nlog.config.4.7.4.nupkg.sha512"
     },
     "NLog.Extensions.Logging/1.6.4": {
       "type": "package",
@@ -5228,12 +5228,12 @@
       "path": "nlog.extensions.logging/1.6.4",
       "hashPath": "nlog.extensions.logging.1.6.4.nupkg.sha512"
     },
-    "NLog.Schema/4.7.3": {
+    "NLog.Schema/4.7.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-LXMEuQBhhoMf8WAGI66Fe8mKmO5BGd76lW8roML9Pt3QVheBTyWCOW/ZFChsqGW70CkTeU86EWvCaFKAPLIDVQ==",
-      "path": "nlog.schema/4.7.3",
-      "hashPath": "nlog.schema.4.7.3.nupkg.sha512"
+      "sha512": "sha512-HikJv+HJHbpjWHSykV5rd6QEIAnC4gZEoHTkJjeyxICTyzW6BDZWv4tosdvdHZ+CJAphiAcWE9d6Mszx3mwO6Q==",
+      "path": "nlog.schema/4.7.4",
+      "hashPath": "nlog.schema.4.7.4.nupkg.sha512"
     },
     "NLog.Web.AspNetCore/4.9.3": {
       "type": "package",
@@ -5410,12 +5410,12 @@
       "path": "runtime.win-x86.runtime.native.system.data.sqlclient.sni/4.4.0",
       "hashPath": "runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512"
     },
-    "SixLabors.ImageSharp/1.0.0": {
+    "SixLabors.ImageSharp/1.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-8amvsk8NXnCxZV0lvJppAZJknViWgBOO/2V59IGR6DVoD13mSmG+/Z9eg5IwrHQuRHp5RD9lfXBXDZyk8rTKDg==",
-      "path": "sixlabors.imagesharp/1.0.0",
-      "hashPath": "sixlabors.imagesharp.1.0.0.nupkg.sha512"
+      "sha512": "sha512-DjLoFNdUfsDP7RhPpr5hcUhl1XiejqBML9uDWuOUwCkc0Y+sG9IJLLbqSOi9XeoWqPviwdcDm1F8nKdF0qTYIQ==",
+      "path": "sixlabors.imagesharp/1.0.1",
+      "hashPath": "sixlabors.imagesharp.1.0.1.nupkg.sha512"
     },
     "SQLitePCLRaw.bundle_e_sqlite3/2.0.2": {
       "type": "package",
