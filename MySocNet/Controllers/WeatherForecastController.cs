@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MySocNet.Models;
 using MySocNet.Models.Spotify;
+using MySocNet.Models.Spotify.User;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 

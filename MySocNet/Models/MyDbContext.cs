@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using MimeKit;
 using MySocNet.Logger;
+using MySocNet.Models.Spotify;
+using MySocNet.Models.Spotify.User;
 using Org.BouncyCastle.Math.EC.Rfc7748;
 using System;
 using System.Collections.Generic;
@@ -37,6 +39,8 @@ namespace MySocNet.Models
         public DbSet<ChatMembers> ChatMembers { get; set; }
 
         public DbSet<Detect> Detects { get; set; }
+
+        public DbSet<SpotifyUser> SpotifyUsers { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {

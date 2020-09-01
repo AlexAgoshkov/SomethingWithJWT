@@ -1,4 +1,6 @@
-﻿using MySocNet.Models.Spotify;
+﻿using MySocNet.Models;
+using MySocNet.Models.Spotify;
+using MySocNet.Models.Spotify.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +10,14 @@ namespace MySocNet.Services.Interfaces
 {
     public interface ISpotifyService
     {
-        Task<string> GetSpotifyTokenAsync();
+        Task<TokenResponse> GetSpotifyTokenAsync();
 
-        Task<List<string>> GetRecentlyList(string token);
+        Task<IEnumerable<string>> GetRecentlyList(string token);
 
-        Task CreatePlaylist(string token);
+        Task<SpotifyPlaylistResponse> CreatePlaylist(string token);
+
+        Task<SpotifyUser> GetSpotifyUser(string spotifyLogin, User user);
+
+        Task<string> AddToPlaylist(string token, string playlistId, IEnumerable<string> tracks);
     }
 }

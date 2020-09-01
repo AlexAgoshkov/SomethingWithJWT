@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Identity;
+using MySocNet.Models.Spotify;
+using MySocNet.Models.Spotify.User;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -38,6 +40,10 @@ namespace MySocNet.Models
         [Column(TypeName = "nvarchar(max)")]
         [JsonIgnore]
         public string Password { get; set; }
+
+        public int? SpotifyProfileId { get; set; }
+
+        public SpotifyUser SpotifyProfile { get; set; }
 
         public string UserRole { get; set; }
 

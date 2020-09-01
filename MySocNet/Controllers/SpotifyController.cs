@@ -22,6 +22,14 @@ namespace MySocNet.Controllers
             _spotifyService = spotifyService;
         }
 
+        [HttpGet]
+        [Route("AddSpotifyToUser")]
+        public async Task<IActionResult> GetSpotifyUser(string login)
+        {
+            var user = await CurrentUser();
+            var result = await _spotifyService.GetSpotifyUser(login, user);
+            return JsonResult(result);        
+        }
 
         [HttpGet]
         [Route("GetSpotifyToken")]
@@ -43,8 +51,17 @@ namespace MySocNet.Controllers
         [Route("CreatePlaylist")]
         public async Task<IActionResult> CreatePlaylist(string token)
         {
-             await _spotifyService.CreatePlaylist(token);
-            return Ok();
+            var playlist = await _spotifyService.CreatePlaylist(token);
+            return JsonResult(playlist);
+        }
+
+        [HttpPost]
+        [Route("MakePlaylistFromRecently")]
+        public async Task<IActionResult> MakePlaylistFromRecently(string token)
+        {
+            var tracks = await _spotifyService.GetRecentlyList(token);
+            var playlist = await _spotifyService.CreatePlaylist(token);
+            return JsonResult(await _spotifyService.AddToPlaylist(token, playlist.Id, tracks));
         }
     }
 }

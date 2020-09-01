@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MySocNet.Migrations;
+using MySocNet.Models;
 using MySocNet.Models.Spotify;
+using MySocNet.Models.Spotify.User;
 using MySocNet.Services.Interfaces;
 using Newtonsoft.Json;
 using System;
@@ -19,54 +21,108 @@ namespace MySocNet.Services
     public class SpotifyService : ISpotifyService
     {
         private readonly IConfiguration _config;
-
-        public SpotifyService(IConfiguration config)
+        private readonly IRepository<User> _userRepository; 
+ 
+        public SpotifyService(IConfiguration config, 
+            IRepository<User> userRepository)
         {
             _config = config;
+            _userRepository = userRepository;
         }
 
-        public async Task<string> GetSpotifyTokenAsync() //TODO: Refactoring 
+        public async Task<string> AddToPlaylist(string token, string playlistId, IEnumerable<string> tracks)
         {
-            string url = "https://accounts.spotify.com/api/token";
+            Uri url = new Uri("https://api.spotify.com/v1/playlists/" + playlistId + "/tracks");
+            var authHeader = new AuthenticationHeaderValue("Bearer", token);
+           
+            var content = new TrackInput
+            {
+                Uris = tracks
+            };
+
+            string json = JsonConvert.SerializeObject(content);
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = authHeader;
+                var response = await client.PostAsync(url, new StringContent(json, Encoding.UTF8, "application/json"));
+                var playlistResponse = await response.Content.ReadAsStringAsync();
+                return playlistResponse;
+            }
+        }
+
+        public async Task<SpotifyPlaylistResponse> CreatePlaylist(string token)
+        {
+
+            Uri url = new Uri("https://api.spotify.com/v1/users/93gnv3cvg6lfn5ofpnwpe1wpo/playlists");
+            var authHeader = new AuthenticationHeaderValue("Bearer", token);
+
+            var playlist = new SpotifyPlaylistInput
+            {
+                Name = DateTime.Now.ToShortDateString(),
+                Description = "Your Recently Tracks",
+                Public = true
+            };
+
+            string json = JsonConvert.SerializeObject(playlist);
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = authHeader;
+
+                var response = await client.PostAsync(
+                    url,
+                     new StringContent(json, Encoding.UTF8, "application/json"));
+
+                var playlistResponse = await response.Content.ReadAsStringAsync();
+                var playlistInfo = JsonConvert.DeserializeObject<SpotifyPlaylistResponse>(playlistResponse);
+                return playlistInfo;
+            }
+        }
+            
+        public async Task<SpotifyUser> GetSpotifyUser(string spotifyLogin, User user)
+        {
+            Uri url = new Uri("https://api.spotify.com/v1/users/" + spotifyLogin);
+            var token = await GetSpotifyTokenAsync();
+            var authHeader = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = authHeader;
+
+                var response = await client.GetAsync(url);
+                var json = await response.Content.ReadAsStringAsync();
+                var spotifyUser = JsonConvert.DeserializeObject<SpotifyUser>(json);
+                user.SpotifyProfile = spotifyUser;
+                await _userRepository.UpdateAsync(user);
+                return spotifyUser;
+            }
+        }
+
+        public async Task<TokenResponse> GetSpotifyTokenAsync()
+        {
+            Uri url = new Uri("https://accounts.spotify.com/api/token");
             var clientid = _config["Spotify:ClientId"];
             var clientsecret = _config["Spotify:ClientSecret"];
 
             var encodeClientsecret = Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", clientid, clientsecret)));
 
-            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
-
-            webRequest.Method = "POST";
-            webRequest.ContentType = "application/x-www-form-urlencoded";
-            webRequest.Accept = "application/json";
-            webRequest.Headers.Add("Authorization: Basic " + encodeClientsecret);
+            var authHeader = new AuthenticationHeaderValue("Basic", encodeClientsecret);
             
-          
-            var request = ("grant_type=client_credentials");
-            byte[] req_bytes = Encoding.ASCII.GetBytes(request);
-            webRequest.ContentLength = req_bytes.Length;
-
-            using (Stream strm = webRequest.GetRequestStream())
+            using (var client = new HttpClient())
             {
-                await strm.WriteAsync(req_bytes, 0, req_bytes.Length);
-                      strm.Close();
-            }
+                client.DefaultRequestHeaders.Authorization = authHeader;
 
-            HttpWebResponse resp = (HttpWebResponse)await webRequest.GetResponseAsync();
-            string json = "";
-            using (Stream respStr = resp.GetResponseStream())
-            {
-                using (StreamReader rdr = new StreamReader(respStr, Encoding.UTF8))
-                {
-                    json = await rdr.ReadToEndAsync();
-                    rdr.Close();
-                }
+                var response = await client.PostAsync(url, 
+                    new StringContent("grant_type=client_credentials", Encoding.UTF8, "application/x-www-form-urlencoded"));
+                var token = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<TokenResponse>(token);
             }
-            return json;
         }
 
-        public async Task<List<string>> GetRecentlyList(string token)
+        public async Task<IEnumerable<string>> GetRecentlyList(string token)
         {
-            Uri url = new Uri("https://api.spotify.com/v1/me/player/recently-played?type=track&limit=10");
+            Uri url = new Uri("https://api.spotify.com/v1/me/player/recently-played?type=track&limit=50");
             var authHeader = new AuthenticationHeaderValue("Bearer", token);
 
             var client = new HttpClient();
@@ -83,41 +139,11 @@ namespace MySocNet.Services
                     response = await client.GetAsync(finalRequestUri);
                 }
             }
-
+           
             var spotifyTrack = await response.Content.ReadAsStringAsync();
             var traks = JsonConvert.DeserializeObject<SpotifyRecently>(spotifyTrack);
 
-            return traks.Items.Select(x => x.Track.Uri).ToList();
-        }
-
-        public async Task CreatePlaylist(string token)
-        {
-            Uri url = new Uri("https://api.spotify.com/v1/users/93gnv3cvg6lfn5ofpnwpe1wpo/playlists");
-            var authHeader = new AuthenticationHeaderValue("Bearer", token);
-            var postData = "name:" + Uri.EscapeDataString("New Playlist");
-            postData += ",description:" + Uri.EscapeDataString("New playlist description");
-            postData += ",public:" + Uri.EscapeDataString("true");
-            var data = Encoding.ASCII.GetBytes(postData);
-            //HttpContent content = new HttpContent();
-
-            string json = JsonConvert.SerializeObject(postData);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = authHeader;
-            
-            var response = await client.PostAsync(url, content);
-           
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                var finalRequestUri = response.RequestMessage.RequestUri;
-
-                if (finalRequestUri != url)
-                {
-                    response = await client.PostAsync(finalRequestUri, content);
-                }
-            }
-            var responseString = await response.Content.ReadAsStringAsync();
+            return traks.Items.Select(x => x.Track.Uri);
         }
     }
 }
